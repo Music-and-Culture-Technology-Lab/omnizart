@@ -24,7 +24,7 @@ omnizart music transcribe --audio-path <i>path/to/audio</i> --model-path <i>path
 Describes the neccessary background of how to develop this project.
 
 ## Package management
-Uses [poetry](https://python-poetry.org/) for package management, instead of write `requirements.txt` and `setup.py` manually.
+Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
 
 ## Documentation
 Automatically generate documents from inline docstrings of module, class, and function.
@@ -46,5 +46,5 @@ Uses `pytest` for unittesting. Under construction...
 ## CI/CD
 Uses github actions for automatic linting, unittesting, document building, and package release. Under construction...
 
-## TCommand Test
+## Command Test
 To actually install and test the `omnizart` command, execute `make install`. This will automatically creates a virtual environment and installs everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 
