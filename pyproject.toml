@@ -16,12 +16,13 @@ pretty_midi = "^0.2.9"
 soundfile = "^0.10.3"
 librosa = "^0.8.0"
 keras = "^2.4.3"
+tensorflow-gpu = "^2.2.0"
 tensor2tensor = "^1.15.7"
-tensorflow = "^2.3.0"
 llvmlite = "^0.34.0"
 atari-py = "^0.2.6"
 madmom = "^0.16.1"
 opencv-python = "^4.4.0"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -29,6 +30,19 @@ flake8 = "^3.8.3"
 pylint = "^2.5.3"
 black = "^19.10b0"
 numpydoc = "^1.1.0"
+
+[tool.poetry2conda]
+name = "omnizart"
+
+[tool.poetry2conda.dependencies]
+tensor2tensor = { channel = "pip" }
+soundfile = { channel = "pip" }
+llvmlite = { channel = "numba" }
+atari-py = { channel = "pip"}
+madmom = { channel = "pip"}
+librosa = { channel = "pip"}
+pretty_midi = { channel = "pip"}
+opencv-python = { channel = "pip"}
 
 [tool.poetry.scripts]
 omnizart = 'omnizart.cli.cli:entry'
