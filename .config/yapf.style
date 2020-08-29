@@ -1,0 +1,11 @@
+[style]
+column_limit = 120
+arithmetic_precedence_indication = True
+dedent_closing_brackets = True
+continuation_align_style = VALIGN-RIGHT
+
+[style.description]
+description = "To see a full list of configurable options, execute `yapf --style-help`"
+why-to-use-1 = "More readable for formatting math, compared to black."
+why-to-use-2 = "Also because that black doen't support to format to fit flake8-style, but yapf does."
+

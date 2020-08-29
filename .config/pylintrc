@@ -7,12 +7,13 @@ ignore=bootstrap_data
 disable=C0114,C0116,C0330
 
 [BASIC]
-good-names=i,j,k,it,_,e,t,r,c,db,h
+good-names=i,j,k,it,_,e,t,r,c,db,h,ii
 
 [DESIGN]
 min-public-methods=1
-max-attributes=20
-max-args=20
+max-attributes=30
+max-args=25
+max-locals=25
 
 [FORMAT]
 max-line-length=120

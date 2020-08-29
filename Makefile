@@ -9,7 +9,7 @@ all: check test
 # --------------------------------------------------------------
 
 .PHONY: check
-check: check-flake check-pylint check-black
+check: check-flake check-pylint
 
 .PHONY: check-flake
 check-flake:
@@ -30,6 +30,8 @@ check-black:
 format:
 	@echo "Format code with black"
 	@black $(CHECK_SRC)
+	@echo "Format code with yapf"
+	@yapf $(CHECK_SRC) --in-place --recursive --style .config/yapf.style
 
 # --------------------------------------------------------------
 # Unittest
@@ -56,5 +58,6 @@ install:
 
 .PHONY: clean
 clean:
-	@rm -rf .venv
+	@rm -rf .venv/
+	@rm -rf ~/.cache/pypoetry/
 
