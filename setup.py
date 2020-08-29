@@ -7,6 +7,7 @@ packages = \
  'omnizart.cli.drum',
  'omnizart.cli.music',
  'omnizart.constants',
+ 'omnizart.drum',
  'omnizart.feature',
  'omnizart.models',
  'omnizart.music']
@@ -20,7 +21,8 @@ install_requires = \
  'keras>=2.4.3,<3.0.0',
  'librosa>=0.8.0,<0.9.0',
  'llvmlite>=0.34.0,<0.35.0',
- 'pip>=20.2.2,<21.0.0',
+ 'madmom>=0.16.1,<0.17.0',
+ 'opencv-python>=4.4.0,<5.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
  'setuptools>=49.6.0,<50.0.0',
  'soundfile>=0.10.3,<0.11.0',
