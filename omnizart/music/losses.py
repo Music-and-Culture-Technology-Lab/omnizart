@@ -39,8 +39,9 @@ def focal_loss(prediction_tensor, target_tensor, weights=None, alpha=0.25, gamma
     zeros = array_ops.zeros_like(sigmoid_p, dtype=sigmoid_p.dtype)
     pos_p_sub = array_ops.where(target_tensor >= sigmoid_p, target_tensor - sigmoid_p, zeros)
     neg_p_sub = array_ops.where(target_tensor > zeros, zeros, sigmoid_p)
-    per_entry_cross_ent = - alpha * (pos_p_sub ** gamma) * tf.log(tf.clip_by_value(sigmoid_p, 1e-8, 1.0)) \
-                          - (1 - alpha) * (neg_p_sub ** gamma) * tf.log(tf.clip_by_value(1.0 - sigmoid_p, 1e-8, 1.0))
+    per_entry_cross_ent = -alpha * (pos_p_sub ** gamma) * tf.log(tf.clip_by_value(sigmoid_p, 1e-8, 1.0)) - (
+        1 - alpha
+    ) * (neg_p_sub ** gamma) * tf.log(tf.clip_by_value(1.0 - sigmoid_p, 1e-8, 1.0))
     return tf.reduce_mean(per_entry_cross_ent)
 
 
@@ -51,7 +52,7 @@ def sparse_loss(yTrue, yPred, weight=None):
 
 
 def q_func(y_true, gamma=0.1, total_chs=22):
-    return (1-gamma)*y_true + gamma/total_chs
+    return (1 - gamma) * y_true + gamma / total_chs
 
 
 def smooth_loss(y_true, y_pred, alpha=0.25, beta=2, gamma=0.1, total_chs=22, weight=None):
@@ -60,9 +61,9 @@ def smooth_loss(y_true, y_pred, alpha=0.25, beta=2, gamma=0.1, total_chs=22, wei
     total_chs = min(25, max(total_chs, 5))
     clip_value = lambda v_in: tf.clip_by_value(v_in, 1e-8, 1.0)
     target = clip_value(q_func(y_true, gamma=gamma, total_chs=total_chs))
-    neg_target = clip_value(q_func(1-y_true, gamma=gamma, total_chs=total_chs))
+    neg_target = clip_value(q_func(1 - y_true, gamma=gamma, total_chs=total_chs))
     sigmoid_p = clip_value(tf.nn.sigmoid(y_pred))
-    neg_sigmoid_p = clip_value(tf.nn.sigmoid(1-y_pred))
+    neg_sigmoid_p = clip_value(tf.nn.sigmoid(1 - y_pred))
 
-    cross_entropy = -target*tf.log(sigmoid_p) - neg_target*tf.log(neg_sigmoid_p)
+    cross_entropy = -target * tf.log(sigmoid_p) - neg_target * tf.log(neg_sigmoid_p)
     return tf.reduce_mean(cross_entropy)

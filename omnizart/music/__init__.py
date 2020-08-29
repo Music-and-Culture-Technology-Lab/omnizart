@@ -26,7 +26,7 @@ from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
 
 
 def transcribe(input_audio, model_path, output="./"):
-    """ Transcribe notes and instruments of the given audio.
+    """Transcribe notes and instruments of the given audio.
 
     This function transcribes notes (onset, duration) of each instruments in the audio.
     The results will be written out as a MIDI file.
