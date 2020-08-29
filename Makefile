@@ -46,8 +46,9 @@ test:
 
 .PHONY: export
 export:
-	@echo "Exporting requirements.txt"
+	@echo "Exporting requirements.txt and setup.py"
 	@poetry export -f requirements.txt -o requirements.txt
+	@./scripts/create_setup.sh
 
 .PHONY: install
 install:

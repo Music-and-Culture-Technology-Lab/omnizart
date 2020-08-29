@@ -5,7 +5,7 @@ import click
 @click.option(
     "-d", "--dataset-path", help="Path to the downloaded dataset", type=click.Path(exists=True), required=True
 )
-@click.option("-h", "--harmonic", help="Wether to use harmonic version of the feature", is_flag=True)
+@click.option("-h", "--harmonic", help="Whether to use harmonic version of the feature", is_flag=True)
 def generate_feature(dataset, harmonic):
     """Extract the feature of the whole dataset for future use.
 

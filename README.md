@@ -1,4 +1,7 @@
 # omnizart
+
+![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)
+
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
@@ -47,4 +50,4 @@ Uses `pytest` for unittesting. Under construction...
 Uses github actions for automatic linting, unittesting, document building, and package release. Under construction...
 
 ## Command Test
-To actually install and test the `omnizart` command, execute `make install`. This will automatically creates a virtual environment and installs everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 
+To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 

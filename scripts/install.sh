@@ -21,13 +21,13 @@ echo "Using $VENV_APPROACH to create virtual environment"
 activate_venv_with_poetry() {
     if ! hash poetry 2>/dev/null; then
         # Poetry haven't been installed, install it first.
-        echo "Install poetry..."
+        echo "Installing poetry..."
         python3 -m pip install poetry
     fi
 
     # Create virtual environment.
-    poetry shell > /dev/null
-    
+    poetry shell
+
     # Hacky way to activate the virtualenv due to some 
     # problem that exists in poetry.
     source $(dirname $(poetry run which python))/activate

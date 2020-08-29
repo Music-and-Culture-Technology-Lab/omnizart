@@ -12,6 +12,3 @@ checkpoints/
 docs/build/
 build/
 
-
-# Special files to be excluded
-create_setup.py
