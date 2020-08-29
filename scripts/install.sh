@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Script for installing the 'omnizart' command and the required packages.
 #
 # The script will first create the virtual environment, separating the system's environment.
