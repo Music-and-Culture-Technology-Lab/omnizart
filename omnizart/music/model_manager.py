@@ -4,6 +4,8 @@ Records the relative settings while training the model, and keep it for future i
 Also use the `ModelInfo` class for creating the new model for training.
 """
 
+# pylint: disable=R1705,E0611
+
 import os
 import json
 
@@ -13,14 +15,18 @@ from scipy.special import expit
 from tensorflow.keras.models import model_from_yaml
 from tensorflow.keras.utils import multi_gpu_model
 from tensorflow.keras.layers import Conv2D
-from tensor2tensor.layers.common_attention import local_attention_2d, split_heads_2d, combine_heads_2d
 
-from .utils import create_batches, cut_batch_pred, cut_frame
+from omnizart.models.t2t import local_attention_2d, split_heads_2d, combine_heads_2d
+from omnizart.music.utils import create_batches, cut_batch_pred, cut_frame
 from omnizart.models.u_net import semantic_segmentation, semantic_segmentation_attn, multihead_attention
 from omnizart.constants.feature import HARMONIC_NUM
 
 
 class ModelManager:
+    """Manages model-relevant utilities.
+
+    Create and load model, save and load model configurations.
+    """
     def __init__(self, model_name="MyModel"):
         self.name = model_name
         self.output_classes = None
@@ -90,8 +96,8 @@ class ModelManager:
 
         # Load weights of the model
         weight_path = os.path.join(model_path, "weights.h5")
-        with h5py.File(weight_path, "r") as w:
-            keys = list(w.keys())
+        with h5py.File(weight_path, "r") as weight:
+            keys = list(weight.keys())
             is_para = any(["model" in k for k in keys])
 
         if is_para:
@@ -174,7 +180,7 @@ class ModelManager:
             Padding along the feature dimension to the size `feature_num`
         batch_size : int
             Batch size for each step of prediction. The size is depending on the available GPU memory.
-        
+
         Returns
         -------
         pred : numpy.ndarray
@@ -205,12 +211,12 @@ class ModelManager:
             features[i] = np.insert(features[i], 0, features[i - 1][-1], axis=0)
             features[i] = np.insert(features[i], len(features[i]), features[i + 1][0], axis=0)
             for ii in range(1, b_size + 1):
-                ctx = np.concatenate(features[i][ii - 1 : ii + 2], axis=0)
+                ctx = np.concatenate(features[i][ii - 1:ii + 2], axis=0)
 
-                first_half = ctx[first_split_start : first_split_start + t_len]
+                first_half = ctx[first_split_start:first_split_start + t_len]
                 first_half_batch.append(first_half)
 
-                second_half = ctx[second_split_start : second_split_start + t_len]
+                second_half = ctx[second_split_start:second_split_start + t_len]
                 second_half_batch.append(second_half)
 
             p_one = model.predict(np.array(first_half_batch), batch_size=b_size)
@@ -279,9 +285,10 @@ class ModelManager:
             if not all(v in [0, 1, 2, 3] for v in value):
                 raise ValueError(f"Invalid channel numbers: {value}. Available: [0, 1, 2, 3].")
         else:
-            if len(value) % (HARMONIC_NUM + 1) != 0:
+            if len(value) % (HARMONIC_NUM+1) != 0:  # noqa: E226
                 raise ValueError(
-                    f"Invalid channel number of harmonic feature: {value}. Length should be multiple of {HARMONIC_NUM+1}."
+                    f"Invalid channel number of harmonic feature: {value}. Length should be multiple of \
+                      {HARMONIC_NUM+1}."
                 )
 
         self._input_channels = value
