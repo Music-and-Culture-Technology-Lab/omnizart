@@ -9,12 +9,11 @@ class BaseStructure(metaclass=ABCMeta):
     All sub-dataset structure class should inherit this meta class to ensure
     the necessary attributes, methods are overriden.
     """
-
     @property
     @abstractmethod
     def label_ext(self):
         """The extension of ground-truth files.
-        
+
         Examples
         --------
         Defines a sub-dataset structure class:
@@ -52,7 +51,7 @@ class BaseStructure(metaclass=ABCMeta):
     @abstractmethod
     def test_wavs(self):
         """Records folders that contains testing wav files.
-        
+
         Same as what `train_wavs` does, but for testing wav files.
         """
 
@@ -61,7 +60,7 @@ class BaseStructure(metaclass=ABCMeta):
     def train_labels(self):
         """Records folders that contains training labels.
 
-        Similar to the `train_wavs` function, records information of where the corresponding 
+        Similar to the `train_wavs` function, records information of where the corresponding
         ground-truth files are stored.
         """
 
@@ -70,14 +69,13 @@ class BaseStructure(metaclass=ABCMeta):
     def test_labels(self):
         """Records folders that contains testing labels.
 
-        Similar to the `train_labels` function, records information of where the corresponding 
+        Similar to the `train_labels` function, records information of where the corresponding
         ground-truth files are stored.
         """
 
 
 class MapsStructure(BaseStructure):
     """Structure of MAPS dataset"""
-
     @property
     def label_ext(self):
         return ".txt"
@@ -108,7 +106,6 @@ class MapsStructure(BaseStructure):
 
 class MusicNetStructure(BaseStructure):
     """Structure of MusicNet dataset"""
-
     @property
     def label_ext(self):
         return ".csv"
@@ -132,7 +129,6 @@ class MusicNetStructure(BaseStructure):
 
 class MaestroStructure(BaseStructure):
     """Structure of Maestro dataset"""
-
     @property
     def label_ext(self):
         return ".midi"
@@ -156,7 +152,6 @@ class MaestroStructure(BaseStructure):
 
 class RhythmStructure(BaseStructure):
     """Structure of Rhythm dataset"""
-
     @property
     def label_ext(self):
         return ".mid"
@@ -194,7 +189,6 @@ class RhythmStructure(BaseStructure):
 
 class ExtSuStructure(BaseStructure):
     """Structure of Extended-Su dataset"""
-
     @property
     def label_ext(self):
         return ".mid"

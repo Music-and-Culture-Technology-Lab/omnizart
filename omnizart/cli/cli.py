@@ -25,6 +25,5 @@ def entry():
 
 entry.add_command(music)
 
-
 if __name__ == "__main__":
     entry()

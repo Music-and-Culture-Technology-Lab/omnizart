@@ -1,3 +1,5 @@
+# pylint: disable=W0102,R0914
+
 import math
 
 import pretty_midi
@@ -14,7 +16,7 @@ def infer_pitch(pitch, shortest=5, offset_interval=6):
     w_on = pitch[:, 2]
     w_dura = pitch[:, 1]
 
-    peaks, properties = find_peaks(w_on, distance=shortest, width=5)
+    peaks, _ = find_peaks(w_on, distance=shortest, width=5)
     if len(peaks) == 0:
         return []
 
@@ -25,10 +27,10 @@ def infer_pitch(pitch, shortest=5, offset_interval=6):
     notes.append({"start": peaks[-1] - adjust, "end": len(w_on), "stren": pitch[peaks[-1], 2]})
 
     del_idx = []
-    for idx, p in enumerate(peaks):
+    for idx, peak in enumerate(peaks):
         upper = int(peaks[idx + 1]) if idx < len(peaks) - 2 else len(w_dura)
-        for i in range(p, upper):
-            if np.sum(w_dura[i : i + offset_interval]) == 0:
+        for i in range(peak, upper):
+            if np.sum(w_dura[i:i + offset_interval]) == 0:
                 if i - notes[idx]["start"] < shortest:
                     del_idx.append(idx)
                 else:
@@ -57,35 +59,35 @@ def infer_piece(piece, shortest_sec=0.1, offset_sec=0.12, t_unit=0.02):
             continue
 
         pns = infer_pitch(pitch, shortest=round(shortest_sec / t_unit), offset_interval=round(offset_sec / t_unit))
-        for ns in pns:
-            ns["pitch"] = i
-            notes.append(ns)
+        for note in pns:
+            note["pitch"] = i
+            notes.append(note)
     print(" " * 80, end="\r")
 
     notes = sorted(notes, key=lambda d: d["start"])
     last_start = 0
-    for i in range(len(notes)):
-        start_diff = notes[i]["start"] - last_start
+    for note in notes:
+        start_diff = note["start"] - last_start
         if start_diff < min_align_diff:
-            notes[i]["start"] -= start_diff
-            notes[i]["end"] -= start_diff
+            note["start"] -= start_diff
+            note["end"] -= start_diff
         else:
-            last_start = notes[i]["start"]
+            last_start = note["start"]
 
     return notes
 
 
 def find_min_max_stren(notes):
-    MIN = 999
-    MAX = 0
-    for nn in notes:
-        nn_s = nn["stren"]
-        if nn_s > MAX:
-            MAX = nn_s
-        if nn_s < MIN:
-            MIN = nn_s
+    min_v = 999
+    max_v = 0
+    for note in notes:
+        nn_s = note["stren"]
+        if nn_s > max_v:
+            max_v = nn_s
+        if nn_s < min_v:
+            min_v = nn_s
 
-    return MIN, MAX
+    return min_v, max_v
 
 
 def find_occur(pitch, t_unit=0.02, min_duration=0.03):
@@ -120,18 +122,20 @@ def to_midi(notes, t_unit=0.02):
     piano = pretty_midi.Instrument(program=0)
 
     # Some tricky steps to determine the velocity of the notes
-    l, u = find_min_max_stren(notes)
+    l_bound, u_bound = find_min_max_stren(notes)
     s_low = 60
     s_up = 127
-    v_map = lambda stren: int(s_low + ((s_up - s_low) * ((stren - l) / (u - l + 0.0001))))
+    v_map = lambda stren: int(
+        s_low + ((s_up-s_low) * ((stren-l_bound) / (u_bound-l_bound+0.0001)))  # noqa: E226
+    )
 
     low_b = note_to_midi("A0")
     coll = set()
-    for nn in notes:
-        pitch = nn["pitch"] + low_b
-        start = nn["start"] * t_unit
-        end = nn["end"] * t_unit
-        volume = v_map(nn["stren"])
+    for note in notes:
+        pitch = note["pitch"] + low_b
+        start = note["start"] * t_unit
+        end = note["end"] * t_unit
+        volume = v_map(note["stren"])
         coll.add(pitch)
         m_note = pretty_midi.Note(velocity=volume, pitch=pitch, start=start, end=end)
         piano.notes.append(m_note)
@@ -163,7 +167,7 @@ def norm_onset_dura(pred, onset_th, dura_th, interpolate=True, normalize=True):
     """Normalizes prediction values of onset and duration channel."""
 
     length = len(pred) * 2 if interpolate else len(pred)
-    norm_pred = np.zeros((length,) + pred.shape[1:])
+    norm_pred = np.zeros((length, ) + pred.shape[1:])
     onset = interpolation(pred[:, :, 2])
     dura = interpolation(pred[:, :, 1])
 
@@ -182,10 +186,10 @@ def norm_onset_dura(pred, onset_th, dura_th, interpolate=True, normalize=True):
 def norm_split_onset_dura(pred, onset_th, lower_onset_th, split_bound, dura_th, interpolate=True, normalize=True):
     """An advanced version of function for normalizing onset and duration channel.
 
-    From the extensive experiments, we observe that the average prediction value for high and low frequency are different.
-    Lower pitches tend to have smaller values, while higher pitches having larger. To acheive better transcription
-    results, the most straight-forward solution is to assign different thresholds for low and high frequency part.
-    And this is what this function provides for the purpose.
+    From the extensive experiments, we observe that the average prediction value for high and low frequency are
+    different. Lower pitches tend to have smaller values, while higher pitches having larger. To acheive better
+    transcription results, the most straight-forward solution is to assign different thresholds for low and
+    high frequency part. And this is what this function provides for the purpose.
 
     Parameters
     ----------
@@ -201,7 +205,7 @@ def norm_split_onset_dura(pred, onset_th, lower_onset_th, split_bound, dura_th, 
         Whether to apply interpolation between each frame to increase time resolution.
     normalize : bool
         Whether to normalize the prediction values.
-    
+
     Returns
     -------
     pred
@@ -219,26 +223,26 @@ def norm_split_onset_dura(pred, onset_th, lower_onset_th, split_bound, dura_th, 
     return np.hstack([lower_pred, upper_pred])
 
 
-def threshold_type_converter(th, length):
+def threshold_type_converter(threshold, length):
     """Convert scalar value to a list with the same value."""
-    if isinstance(th, list):
-        assert len(th) == length
+    if isinstance(threshold, list):
+        assert len(threshold) == length
     else:
-        th = [th for _ in range(length)]
-    return th
+        threshold_list = [threshold for _ in range(length)]
+    return threshold_list
 
 
 def entropy(data, bins=200):
     min_v = -20
     max_v = 30
-    interval = (max_v - min_v) / bins
-    cut_offs = [min_v + i * interval for i in range(bins + 1)]
+    interval = (max_v-min_v) / bins  # noqa: E226
+    cut_offs = [min_v + i*interval for i in range(bins + 1)]  # noqa: E226
     discrete_v = np.digitize(data, cut_offs)
     _, counts = np.unique(discrete_v, return_counts=True)
     probs = counts / np.sum(counts)
     ent = 0
-    for p in probs:
-        ent -= p * math.log(p, math.e)
+    for prob in probs:
+        ent -= prob * math.log(prob, math.e)
 
     return ent
 
@@ -288,14 +292,14 @@ def note_inference(
         notes = []
         for idx in range(prob.shape[1]):
             p_note = find_occur(prob[:, idx], t_unit=t_unit)
-            for nn in p_note:
-                note = {
+            for note in p_note:
+                note_info = {
                     "pitch": idx,
-                    "start": nn["onset"],
-                    "end": nn["offset"],
-                    "stren": mix[int(nn["onset"] * t_unit), idx * 4],
+                    "start": note["onset"],
+                    "end": note["offset"],
+                    "stren": mix[int(note["onset"] * t_unit), idx * 4],
                 }
-                notes.append(note)
+                notes.append(note_info)
         midi = to_midi(notes, t_unit=t_unit)
 
     else:
@@ -320,11 +324,11 @@ def multi_inst_note_inference(
     Parameters
     ----------
     mode : {'note-stream', 'note', 'frame-stream', 'frame'}
-        Inference mode. 
+        Inference mode.
         Difference between 'note' and 'frame' is that the former consists of two note attributes, which are 'onset' and
-        'duration', and the later only contains 'duration', which in most of the cases leads to worse listening 
+        'duration', and the later only contains 'duration', which in most of the cases leads to worse listening
         experience.
-        With postfix 'stream' refers to transcribe instrument at the same time, meaning classifying each notes into 
+        With postfix 'stream' refers to transcribe instrument at the same time, meaning classifying each notes into
         instrument classes, or says different tracks.
     onset_th : float
         Threshold of onset channel. Type of list or float
@@ -333,27 +337,27 @@ def multi_inst_note_inference(
     inst_th : float
         Threshold of deciding a instrument is present or not according to Std. of prediction.
     normalize : bool
-        Whether to normalize the predictions. For more details, please refer to our 
+        Whether to normalize the predictions. For more details, please refer to our
         `paper <https://bit.ly/2QhdWX5>`_
     t_unit : float
-        Time unit for each frame. Should not be modified unless you have different settings during the feature 
+        Time unit for each frame. Should not be modified unless you have different settings during the feature
         extraction
     channel_program_mapping : list[int]
         Mapping prediction channels to MIDI program numbers.
-    
+
     Returns
     -------
     out_midi
         A pretty_midi.PrettyMIDI object.
-    
+
     References
     ----------
     Publications can be found `here <https://bit.ly/2QhdWX5>`_.
     """
 
-    if mode == "note-stream" or mode == "note":
+    if mode in ["note-stream", "note"]:
         ch_per_inst = 2
-    elif mode == "frame-stream" or mode == "frame":
+    elif mode in ["frame-stream", "frame"]:
         ch_per_inst = 2
     elif mode == "true_frame":
         # For older version model compatibility that was trained on pure frame-level.
@@ -368,7 +372,7 @@ def multi_inst_note_inference(
     for i in range(ch_per_inst):
         # First item would be duration channel
         # Second item would be onset channel
-        item = pred[:, :, [it * ch_per_inst + i + 1 for it in range(iters)]]
+        item = pred[:, :, [it*ch_per_inst + i + 1 for it in range(iters)]]  # noqa: E226
         ch_container.append(norm(item) if normalize else item)
 
     if not mode.endswith("-stream") and mode != "true_frame":
@@ -376,9 +380,9 @@ def multi_inst_note_inference(
         # Merge all channels into first channel
         iters = 1
         for i in range(ch_per_inst):
-            pp = ch_container[i]
-            pp[:, :, 0] = np.average(pp, axis=2)
-            ch_container[i] = pp
+            normed_p = ch_container[i]
+            normed_p[:, :, 0] = np.average(normed_p, axis=2)
+            ch_container[i] = normed_p
 
     onset_th = threshold_type_converter(onset_th, iters)
     dura_th = threshold_type_converter(dura_th, iters)
@@ -391,21 +395,21 @@ def multi_inst_note_inference(
         std = 0
         ent = 0
         for ii in range(ch_per_inst):
-            ch = ch_container[ii][:, :, i]
-            std += np.std(ch)
-            ent += entropy(ch)
-            normed_ch.append(ch)
+            cha = ch_container[ii][:, :, i]
+            std += np.std(cha)
+            ent += entropy(cha)
+            normed_ch.append(cha)
         print(
             "std: {:.3f} ent: {:.3f} mult: {:.3f}".format(
-                std / ch_per_inst, ent / ch_per_inst, std * ent / ch_per_inst ** 2
+                std / ch_per_inst, ent / ch_per_inst, std * ent / ch_per_inst**2
             )
         )
         if iters > 1 and (std / ch_per_inst < inst_th):
             continue
 
-        pp = np.dstack([zeros] + normed_ch)
+        normed_p = np.dstack([zeros] + normed_ch)
         midi = note_inference(
-            pp,
+            normed_p,
             mode=mode,
             onset_th=onset_th[i],
             dura_th=dura_th[i],

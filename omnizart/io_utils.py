@@ -3,6 +3,10 @@
 import os
 import pickle
 
+import librosa
+
+from omnizart.constants.feature import DOWN_SAMPLE_TO_SAPMLING_RATE
+
 
 def dump_pickle(data, save_to):
     """Dump data to the given path.
@@ -33,10 +37,15 @@ def load_pickle(pickle_file):
     ----------
     pickle_file: Path
         The full path to the pickle file for read
-    
+
     Returns
     -------
     object
         Python object, could be `dict`, `list`, `str`, etc.
     """
     return pickle.load(open(pickle_file, "rb"))
+
+
+def load_audio_with_librosa(audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE):
+    # Returns: 1D-array, sampling rate (int)
+    return librosa.load(audio_path, mono=True, sr=sampling_rate)

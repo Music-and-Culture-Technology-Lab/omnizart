@@ -9,9 +9,12 @@ Technical details can be found in the publications [1]_ and [2]_.
 .. [1] Wu, Yu-Te, Berlin Chen, and Li Su. "Automatic music transcription leveraging generalized cepstral features and
    deep learning." IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2018.
 
-.. [2] Wu, Yu-Te, Berlin Chen, and Li Su. "Polyphonic music transcription with semantic segmentation." 
+.. [2] Wu, Yu-Te, Berlin Chen, and Li Su. "Polyphonic music transcription with semantic segmentation."
    IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2019.
 """
+
+
+# pylint: disable=C0103,W0612
 
 import os
 
@@ -36,7 +39,8 @@ def transcribe(input_audio, model_path, output="./"):
     input_audio : Path
         Path to the wav audio file.
     model_path : Path
-        Path to the trained model. Should be the folder that contains `arch.yaml`, `weights.h5`, and `configuration.csv`.
+        Path to the trained model. Should be the folder that contains `arch.yaml`, `weights.h5`, and
+        `configuration.csv`.
     output : Path (optional)
         Path for writing out the transcribed MIDI file. Default to current path.
 
@@ -51,7 +55,7 @@ def transcribe(input_audio, model_path, output="./"):
     model = m_manage.load_model(model_path)
     print(m_manage)
 
-    # TODO: Add feature-related settings to the configuration.csv and load it in ModelInfo
+    # TODO: Add feature-related settings to the configuration.json and load it in ModelManager
     print("Extracting feature...")
     if m_manage.feature_type == "HCFP":
         spec, gcos, ceps, cenf = extract_hcfp(input_audio)

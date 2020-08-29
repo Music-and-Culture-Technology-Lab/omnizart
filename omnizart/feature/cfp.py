@@ -74,13 +74,9 @@ def freq_to_log_freq_mapping(tfr, f, fr, fc, tc, NumPerOct):
         else:
             for j in range(left, right):
                 if f[j] > central_freq[i - 1] and f[j] < central_freq[i]:
-                    freq_band_transformation[i, j] = (f[j] - central_freq[i - 1]) / (
-                        central_freq[i] - central_freq[i - 1]
-                    )
-                elif f[j] > central_freq[i] and f[j] < central_freq[i + 1]:
-                    freq_band_transformation[i, j] = (central_freq[i + 1] - f[j]) / (
-                        central_freq[i + 1] - central_freq[i]
-                    )
+                    freq_band_transformation[i, j] = (f[j] - central_freq[i-1]) / (central_freq[i] - central_freq[i-1])
+                elif f[j] > central_freq[i] and f[j] < central_freq[i+1]:
+                    freq_band_transformation[i, j] = (central_freq[i+1] - f[j]) / (central_freq[i+1] - central_freq[i])
     tfrL = np.dot(freq_band_transformation, tfr)
     return tfrL, central_freq
 
@@ -97,7 +93,7 @@ def quef_to_log_freq_mapping(ceps, q, fs, fc, tc, NumPerOct):
             central_freq.append(cen_freq)
         else:
             break
-    f = 1 / (q + 1e-9)
+    f = 1 / (q+1e-9)
     Nest = len(central_freq)
     freq_band_transformation = np.zeros((Nest - 1, len(f)), dtype=np.float)
     for i in range(1, Nest - 1):
@@ -107,7 +103,7 @@ def quef_to_log_freq_mapping(ceps, q, fs, fc, tc, NumPerOct):
             elif f[j] > central_freq[i] and f[j] < central_freq[i + 1]:
                 freq_band_transformation[i, j] = (central_freq[i + 1] - f[j]) / (central_freq[i + 1] - central_freq[i])
 
-    tfrL = np.dot(freq_band_transformation[:, : len(ceps)], ceps)
+    tfrL = np.dot(freq_band_transformation[:, :len(ceps)], ceps)
     return tfrL, central_freq
 
 
@@ -130,11 +126,11 @@ def cfp_filterbank(x, fr, fs, Hop, h, fc, tc, g, bin_per_octave):
                 tfr = np.real(np.fft.fft(ceps, axis=0)) / np.sqrt(N)
                 tfr = nonlinear_func(tfr, g[gc], fc_idx)
 
-    tfr0 = tfr0[: int(round(N / 2)), :]
-    tfr = tfr[: int(round(N / 2)), :]
-    ceps = ceps[: int(round(N / 2)), :]
+    tfr0 = tfr0[:int(round(N / 2)), :]
+    tfr = tfr[:int(round(N / 2)), :]
+    ceps = ceps[:int(round(N / 2)), :]
 
-    HighFreqIdx = int(round((1 / tc) / fr) + 1)
+    HighFreqIdx = int(round((1/tc) / fr) + 1)
     f = f[:HighFreqIdx]
     tfr0 = tfr0[:HighFreqIdx, :]
     tfr = tfr[:HighFreqIdx, :]
@@ -158,7 +154,7 @@ def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_segment = {}
         for i in range(Round):
-            tmpX = x[i * freq_width : (i + 1) * freq_width]
+            tmpX = x[i * freq_width:(i+1) * freq_width]
             future = executor.submit(cfp_filterbank, tmpX, fr, fs, Hop, h, fc, tc, g, bin_per_octave)
             future_to_segment[future] = i
 
@@ -197,7 +193,7 @@ def extract_cfp(
     -------
     Z
         Multiplication of spectrum and cepstrum
-    tfrL0 
+    tfrL0
         Spectrum of the audio.
     tfrLF
         Generalized Cepstrum of Spectrum (GCoS).

@@ -1,10 +1,10 @@
-import os
+# pylint: disable=C0303,W1401
+
 from functools import partial
 
 import click
 
 from omnizart.music import transcribe as transcribe_music
-
 
 click.option = partial(click.option, show_default=True)
 

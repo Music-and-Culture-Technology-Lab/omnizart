@@ -15,11 +15,11 @@ def fetch_harmonic(data, cenf, ith_har, start_freq=27.5, num_per_octave=48, is_r
     bins_per_note = int(num_per_octave / 12)
     total_bins = int(bins_per_note * 88)
 
-    hid = min(range(len(cenf)), key=lambda i: abs(cenf[i] - ith_har * start_freq))
+    hid = min(range(len(cenf)), key=lambda i: abs(cenf[i] - ith_har*start_freq))  # noqa: E226
 
     harmonic = np.zeros((total_bins, data.shape[1]))
     upper_bound = min(len(cenf) - 1, hid + total_bins)
-    harmonic[: (upper_bound - hid)] = data[hid:upper_bound]
+    harmonic[:(upper_bound - hid)] = data[hid:upper_bound]
 
     return harmonic
 
