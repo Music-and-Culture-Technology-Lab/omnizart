@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug 25 21:54:18 2017
+Author: Lisu
 
-@author: lisu
+Mantainer: BreezeWhite
 """
 # pylint: disable=C0103,W0102,R0914
 

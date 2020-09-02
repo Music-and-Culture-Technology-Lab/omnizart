@@ -11,12 +11,12 @@ def post_process_cqt(gram):
 
     Parameters
     ----------
-    gram : np.ndarray
+    gram: np.ndarray
         Constant-Q spectrogram, constructed from ``librosa.cqt``.
 
     Returns
     -------
-    log_normalized_gram : np.ndarray
+    log_normalized_gram: np.ndarray
         Log-magnitude, L2-normalized constant-Q spectrogram.
     """
     # Compute log amplitude
@@ -40,14 +40,14 @@ def extract_cqt(
 
     Parameters
     ----------
-    audio_data : Path
+    audio_data: Path
         Path to the input audio.
-    sampling_rate : int
+    sampling_rate: int
         Sampling rate the audio data is sampled at, should be ``DOWN_SAMPLE_TO_SAPMLING_RATE``.
 
     Returns
     -------
-    midi_gram : np.ndarray
+    midi_gram: np.ndarray
         Log-magnitude, L2-normalized constant-Q spectrogram of synthesized MIDI
         data.
     """

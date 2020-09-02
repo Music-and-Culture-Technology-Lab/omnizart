@@ -1,7 +1,23 @@
+"""Transcription model of drum, which leverages spectral normalization.
+
+The model was originally developed with tensorflow 1.12.
+We rewrite the model with tensorflow 2.3 module and uses keras to implement most of
+the functionalities for better readaility.
+
+Original Author: I-Chieh, Wei
+Rewrite by: BreezeWhite
+"""
+
 import tensorflow as tf
+
+from omnizart.models.utils import shape_list
 
 
 class SpectralNormalization(tf.keras.layers.Wrapper):
+    """Spectral normalization layer.
+
+    Original implementation referes to `here <https://github.com/thisisiron/spectral_normalization-tf2>`_.
+    """
     def __init__(self, layer, iteration=1, eps=1e-12, training=True, **kwargs):
         self.iteration = iteration
         self.eps = eps
@@ -68,7 +84,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
 
 
 class ConvSN2D(tf.keras.layers.Layer):
-    """Just a wrapper layer to use spetral normalization.
+    """Just a wrapper layer for using spectral normalization.
     
     Original implementation referes to `here <https://github.com/thisisiron/spectral_normalization-tf2>`_.
     """
@@ -114,25 +130,6 @@ class ConvSN2D(tf.keras.layers.Layer):
             "training": self.training
         })
         return config
-
-
-def shape_list(x):
-  """Return list of dims, statically where possible."""
-  x = tf.convert_to_tensor(x)
-
-  # If unknown rank, return dynamic shape
-  if x.get_shape().dims is None:
-    return tf.shape(x)
-
-  static = x.get_shape().as_list()
-  shape = tf.shape(x)
-
-  ret = []
-  for i, dim in enumerate(static):
-    if dim is None:
-      dim = shape[i]
-    ret.append(dim)
-  return ret
 
 
 def conv_sa(x, channels, kernel=(4, 4), strides=(2, 2), pad=0, pad_type="zero", use_bias=True, spectral_norm=True, scope="conv_0"):
@@ -283,20 +280,17 @@ def drum_model(out_classes, mini_beat_per_seg, layer_num=3):
                 out_2 = transpose_residual_block(
                     x_att, channels=channels, spectral_norm=spectral_norm, scope=f"md_resbk_{i}"
                 )
-                print(shape_list(out_2))
             elif i != layer_num - 1:
                 # middle res layer
                 out_2 = transpose_residual_block(
                     out_2, channels=channels, spectral_norm=spectral_norm, scope=f"md_resbk_{i}"
                 )
-                print(shape_list(out_2))
             else:
                 # last res layer
                 out_2 = transpose_residual_block(
                     out_2, channels=channels, spectral_norm=spectral_norm, to_down=False, scope=f'md_resbk_{i}'
                 )
 
-        print(shape_list(out_2))
         flat_out = tf.reshape(out_2, shape=[-1, tf.math.reduce_prod(shape_list(out_2)[1:])])
         dense_1 = tf.keras.layers.Dense(2**10, activation='elu', name='mdl_nn_mlp_o1')(flat_out)
         dense_2 = tf.keras.layers.Dense(2**10, activation='elu', name='mdl_nn_mlp_o2')(dense_1)

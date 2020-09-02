@@ -163,15 +163,15 @@ def multihead_attention(x, out_channel=64, d_model=32, n_heads=8, query_shape=(1
     ----------
     x
         Input tensor
-    out_channel : int
+    out_channel: int
         Number of output channels.
     d_model : int
         Dimension of embeddings for each position of input feature.
-    n_heads : int
+    n_heads: int
         Number of heads for multi-head attention computation. Should be division of `d_model`.
-    query_shape : Tuple(int, int)
+    query_shape: Tuple(int, int)
         Size of each partition.
-    memory_flange : Tuple(int, int)
+    memory_flange: Tuple(int, int)
         Additional overlapping size to be extended to each partition, indicating the final size to be
         computed is: (query_shape[0]+memory_flange[0]) x (query_shape[1]+memory_flange[1])
 

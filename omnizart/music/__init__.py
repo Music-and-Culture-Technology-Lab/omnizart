@@ -36,12 +36,12 @@ def transcribe(input_audio, model_path, output="./"):
 
     Parameters
     ----------
-    input_audio : Path
+    input_audio: Path
         Path to the wav audio file.
-    model_path : Path
+    model_path: Path
         Path to the trained model. Should be the folder that contains `arch.yaml`, `weights.h5`, and
         `configuration.csv`.
-    output : Path (optional)
+    output: Path (optional)
         Path for writing out the transcribed MIDI file. Default to current path.
 
     See Also

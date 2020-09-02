@@ -1,0 +1,56 @@
+
+General:
+    Feature:
+        Description: Default settings of feature extraction
+        Settings:
+            HopSize:
+              Value: 0.02
+              Description: Hop size in seconds with respect to sampling rate.
+              Type: Float
+            SamplingRate:
+              Value: 44100
+              Description: Adjust input sampling rate to this value.
+              Type: Integer
+            WindowSize:
+              Value: 7939
+              Type: Integer
+            FrequencyResolution:
+              Value: 2.0
+              Type: Float
+            FrequencyCenter:
+              Value: 27.5
+              Description: Lowest frequency to extract.
+              Type: Float
+            TimeCenter:
+              Value: 0.00022287
+              Description: Highest frequency to extract (1/time_center).
+              Type: Float
+            Gamma:
+              Value: [0.24, 0.6, 1.0]
+              Type: List
+              SubType: Integer
+            BinsPerOctave:
+              Value: 48
+              Description: Number of bins for each octave.
+              Type: Integer
+            HarmonicNumber:
+                Value: 6
+                Description: Number of harmonic bins of HCFP feature.
+                Type: Integer
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            CheckpointPath:
+                Type: Map
+                SubType: [String, String]
+                Description: Path to the pre-trained models
+                Value:
+                    Music: ./checkpoints/music/Maestro-Note
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            MinLength:
+                Description: Minimum length of a note in seconds.
+                Type: Float
+                Value: 0.05
+

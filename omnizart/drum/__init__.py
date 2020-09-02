@@ -1,12 +1,13 @@
 """Drum transcription module.
 
-Contains utilities for transcribe drum information in the music.
+Utilities for transcribing drum percussions in the music.
 """
 import os
 
 from omnizart.feature.cqt import extract_cqt
 from omnizart.feature.beat_for_drum import extract_mini_beat_from_audio_path
 from omnizart.drum.patched_cqt import extract_patch_cqt
+from omnizart.models.spectral_norm_net import drum_model
 
 
 def transcribe(input_audio, model_path, output="./"):
@@ -18,12 +19,16 @@ def transcribe(input_audio, model_path, output="./"):
 
     Parameters
     ----------
-    input_audio : Path
+    input_audio: Path
         Path to the raw audio file (.wav).
-    model_path : Path
+    model_path: Path
         Path to the trained model.
-    output : Path (optional)
+    output: Path (optional)
         Path for writing out the transcribed MIDI file. Default to current path.
+
+    See Also
+    --------
+    omnizart.cli.drum.transcribe: CLI entry point of this function.
     """
     if not os.path.isfile(input_audio):
         raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")

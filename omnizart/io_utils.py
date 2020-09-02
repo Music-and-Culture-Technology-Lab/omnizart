@@ -47,5 +47,21 @@ def load_pickle(pickle_file):
 
 
 def load_audio_with_librosa(audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE):
+    """Load audio from the given path with librosa.load
+    
+    Parameters
+    ----------
+    audio_path: Path
+        Path to the audio.
+    sampling_rate: int
+        Target sampling rate after loaded.
+    
+    Returns
+    -------
+    audio: 1D numpy array
+        Raw data of the audio.
+    tar_sampling_rate: int
+        Sampling rate of the audio. Will be the same as the given ``sampling_rate``.
+    """
     # Returns: 1D-array, sampling rate (int)
     return librosa.load(audio_path, mono=True, sr=sampling_rate)

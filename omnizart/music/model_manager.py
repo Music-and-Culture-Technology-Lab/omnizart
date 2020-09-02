@@ -171,19 +171,19 @@ class ModelManager:
 
         Parameters
         ----------
-        feature : numpy.ndarray
+        feature: numpy.ndarray
             Extracted feature of the audio.
             Dimension:  timesteps x feature_size x channels
-        model : keras.model
+        model: keras.model
             The loaded model instance
-        feature_num : int
+        feature_num: int
             Padding along the feature dimension to the size `feature_num`
-        batch_size : int
+        batch_size: int
             Batch size for each step of prediction. The size is depending on the available GPU memory.
 
         Returns
         -------
-        pred : numpy.ndarray
+        pred: numpy.ndarray
             The predicted results. The values are ranging from 0~1.
         """
 

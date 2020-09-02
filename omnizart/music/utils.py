@@ -59,17 +59,17 @@ def roll_down_sample(data, occur_num=3, base=88):
 
     Parameters
     ----------
-    data : 2D numpy array
+    data: 2D numpy array
         The thresholded 2D prediction..
-    occur_num : int
+    occur_num: int
         For each pitch, the original prediction expands 4 bins wide. This value determines how many positive bins
         should there be to say there is a real activation after down sampling.
-    base : 88
+    base
         Should be constant as there are 88 pitches on the piano.
 
     Returns
     -------
-    return_v : 2D numpy array
+    return_v: 2D numpy array
         Down sampled prediction.
 
     Warnings

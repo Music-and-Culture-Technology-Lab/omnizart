@@ -29,7 +29,7 @@ def focal_loss(prediction_tensor, target_tensor, weights=None, alpha=0.25, gamma
         A float tensor of shape [batch_size, num_anchors].
     alpha
         A scalar tensor for focal loss alpha hyper-parameter.
-    gamma:
+    gamma
         A scalar tensor for focal loss gamma hyper-parameter.
 
     Returns

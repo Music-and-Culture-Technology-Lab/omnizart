@@ -1,16 +1,13 @@
-"""
-The entry point of the `omnizart` command.
+"""The entry point of the ``omnizart`` command.
 
 Sub-commands are also added here.
 
-See Also
---------
-omnizart.cli.music : Entry point of `music` sub-command
-
 Examples
 --------
-omnizart --help
-omnizart music --help
+.. code-block:: bash
+
+    omnizart --help
+    omnizart music --help
 """
 
 import click

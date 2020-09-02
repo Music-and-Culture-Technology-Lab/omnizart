@@ -195,15 +195,15 @@ def norm_split_onset_dura(pred, onset_th, lower_onset_th, split_bound, dura_th, 
     ----------
     pred
         The predictions.
-    onset_th : float
+    onset_th: float
         Threshold for high frequency part.
-    lower_onset_th : float
+    lower_onset_th: float
         Threshold for low frequency part.
-    split_bound : int
+    split_bound: int
         The split point of low and high frequency part. Value should be within 0~87.
-    interpolate : bool
+    interpolate: bool
         Whether to apply interpolation between each frame to increase time resolution.
-    normalize : bool
+    normalize: bool
         Whether to normalize the prediction values.
 
     Returns
@@ -323,26 +323,26 @@ def multi_inst_note_inference(
 
     Parameters
     ----------
-    mode : {'note-stream', 'note', 'frame-stream', 'frame'}
+    mode: {'note-stream', 'note', 'frame-stream', 'frame'}
         Inference mode.
         Difference between 'note' and 'frame' is that the former consists of two note attributes, which are 'onset' and
         'duration', and the later only contains 'duration', which in most of the cases leads to worse listening
         experience.
         With postfix 'stream' refers to transcribe instrument at the same time, meaning classifying each notes into
         instrument classes, or says different tracks.
-    onset_th : float
+    onset_th: float
         Threshold of onset channel. Type of list or float
-    dura_th : float
+    dura_th: float
         Threshold of duration channel. Type of list or float
-    inst_th : float
+    inst_th: float
         Threshold of deciding a instrument is present or not according to Std. of prediction.
-    normalize : bool
+    normalize: bool
         Whether to normalize the predictions. For more details, please refer to our
         `paper <https://bit.ly/2QhdWX5>`_
-    t_unit : float
+    t_unit: float
         Time unit for each frame. Should not be modified unless you have different settings during the feature
         extraction
-    channel_program_mapping : list[int]
+    channel_program_mapping: list[int]
         Mapping prediction channels to MIDI program numbers.
 
     Returns

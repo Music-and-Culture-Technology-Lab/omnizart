@@ -1,6 +1,6 @@
 # pylint: disable=C0303,W1401
 
-from functools import partial
+from functools import partial, wraps
 
 import click
 
@@ -9,6 +9,7 @@ from omnizart.music import transcribe as transcribe_music
 click.option = partial(click.option, show_default=True)
 
 
+#@wraps
 @click.command()
 @click.option(
     "-i",
@@ -39,3 +40,17 @@ def transcribe(input_audio, model_path, output):
         --output example.mid
     """
     transcribe_music(input_audio, model_path, output=output)
+
+
+def process_doc():
+    # Some dirty work for preserving and converting the docstring inside the docorated
+    # function into .rst format.
+    doc = transcribe.__doc__
+    doc = doc.replace("\b", "").replace("    ", "").replace("--", "        --")
+
+    code_block = "\n.. code-block:: python\n\n"
+    doc = doc.replace("$", f"{code_block}    $")
+
+    return doc
+
+__doc__ = process_doc()

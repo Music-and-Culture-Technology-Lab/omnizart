@@ -78,10 +78,12 @@ class MapsStructure(BaseStructure):
     """Structure of MAPS dataset"""
     @property
     def label_ext(self):
+        """"""
         return ".txt"
 
     @property
     def train_wavs(self):
+        """"""
         return [
             "MAPS_AkPnBcht_2/AkPnBcht/MUS",
             "MAPS_AkPnBsdf_2/AkPnBsdf/MUS",
@@ -93,14 +95,17 @@ class MapsStructure(BaseStructure):
 
     @property
     def test_wavs(self):
+        """"""
         return ["MAPS_ENSTDkAm_2/ENSTDkAm/MUS", "MAPS_ENSTDkCl_2/ENSTDkCl/MUS"]
 
     @property
     def train_labels(self):
+        """"""
         return self.train_wavs
 
     @property
     def test_labels(self):
+        """"""
         return self.test_wavs
 
 
@@ -108,22 +113,27 @@ class MusicNetStructure(BaseStructure):
     """Structure of MusicNet dataset"""
     @property
     def label_ext(self):
+        """"""
         return ".csv"
 
     @property
     def train_wavs(self):
+        """"""
         return ["train_data"]
 
     @property
     def test_wavs(self):
+        """"""
         return ["test_data"]
 
     @property
     def train_labels(self):
+        """"""
         return ["train_labels"]
 
     @property
     def test_labels(self):
+        """"""
         return ["tets_labels"]
 
 
@@ -131,22 +141,27 @@ class MaestroStructure(BaseStructure):
     """Structure of Maestro dataset"""
     @property
     def label_ext(self):
+        """"""
         return ".midi"
 
     @property
     def train_wavs(self):
+        """"""
         return ["2004", "2006", "2008", "2009", "2011", "2013", "2014", "2015"]
 
     @property
     def test_wavs(self):
+        """"""
         return ["2017"]
 
     @property
     def train_labels(self):
+        """"""
         return self.train_wavs
 
     @property
     def test_labels(self):
+        """"""
         return self.test_wavs
 
 
@@ -154,10 +169,12 @@ class RhythmStructure(BaseStructure):
     """Structure of Rhythm dataset"""
     @property
     def label_ext(self):
+        """"""
         return ".mid"
 
     @property
     def train_wavs(self):
+        """"""
         return [
             "01_ytd_audio/dist0p00",
             "01_ytd_audio/dist0p10",
@@ -169,10 +186,12 @@ class RhythmStructure(BaseStructure):
 
     @property
     def test_wavs(self):
+        """"""
         return ["01_ytd_audio/dist0p30"]
 
     @property
     def train_labels(self):
+        """"""
         return [
             "05_align_mid/dist0p00",
             "05_align_mid/dist0p10",
@@ -184,6 +203,7 @@ class RhythmStructure(BaseStructure):
 
     @property
     def test_labels(self):
+        """"""
         return ["05_align_mid/dist0p30"]
 
 
@@ -191,14 +211,17 @@ class ExtSuStructure(BaseStructure):
     """Structure of Extended-Su dataset"""
     @property
     def label_ext(self):
+        """"""
         return ".mid"
 
     @property
     def train_wavs(self):
+        """"""
         return []
 
     @property
     def test_wavs(self):
+        """"""
         return [
             "1 Tchaikovsky",
             "2 schumann",
@@ -235,8 +258,10 @@ class ExtSuStructure(BaseStructure):
 
     @property
     def train_labels(self):
+        """"""
         return self.train_wavs
 
     @property
     def test_labels(self):
+        """"""
         return self.test_wavs

@@ -1,4 +1,13 @@
-"""Stores MIDI-related constant variables."""
+"""Stores MIDI-related constant variables.
+
+Attributes
+----------
+MIDI_PROGRAM_NAME_MAPPING: Dict
+    Mapping of program number to name.
+
+"""
+
+
 
 # Mappings of MIDI program number and the corresponding name derived from the
 # Wiki page: https://en.wikipedia.org/wiki/General_MIDI
