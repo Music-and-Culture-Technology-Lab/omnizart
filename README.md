@@ -30,7 +30,8 @@ Describes the neccessary background of how to develop this project.
 Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
 
 ## Documentation
-Automatically generate documents from inline docstrings of module, class, and function.
+Automatically generate documents from inline docstrings of module, class, and function. 
+[Hosted document page](http://140.109.21.96:8000/build/html/index.html)
 
 Documentation style: Follows `numpy` document flavor. Learn more from [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html).
 
