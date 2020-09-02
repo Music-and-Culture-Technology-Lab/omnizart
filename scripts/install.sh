@@ -16,7 +16,7 @@ set -e
 # finished, just activate the environment and enjoy~.
 
 
-VENV_APPROACH="${DEFAULT_VENV_APPROACH:=poetry}"
+VENV_APPROACH="${DEFAULT_VENV_APPROACH:=venv}"
 echo "Using $VENV_APPROACH to create virtual environment"
 
 
