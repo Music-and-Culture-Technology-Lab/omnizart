@@ -1,15 +1,26 @@
+
+# Temporary files of Vim
 *.swp
 *.swo
 *.sh~
-*.mid
 
+# Audio files
+*.mid
+*.wav
+*.mp3
+
+# Development cache / data files
 __pycache__/
 .pytest_cache/
 .venv/
 bootstrap_data/
+.vscode/
+
+# Built files
 dist/
 omnizart.egg-info/
-checkpoints/
 docs/build/
 build/
 
+# Other files
+checkpoints/

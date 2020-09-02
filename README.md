@@ -32,11 +32,13 @@ Uses [poetry](https://python-poetry.org/) for package management, instead of wri
 ## Documentation
 Automatically generate documents from inline docstrings of module, class, and function.
 
-Documentation style: Follows `numpy` document flavor. Learn more from [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html#documenting-constants).
+Documentation style: Follows `numpy` document flavor. Learn more from [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html).
 
 Document builder: [sphinx](https://www.sphinx-doc.org/en/master/)
 
 To generate documents, `cd docs/` and execute `make html`. To see the rendered results, run `make serve` and view from the browser.
+All documents and docstrings use **reStructured Text** format. More informations about this format can be found from 
+[Sphinx's Document](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
 
 ## Linters
 flake8, pylint, black
