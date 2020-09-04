@@ -7,25 +7,23 @@ packages = \
  'omnizart.cli.drum',
  'omnizart.cli.music',
  'omnizart.constants',
+ 'omnizart.constants.schema',
  'omnizart.drum',
  'omnizart.feature',
  'omnizart.models',
  'omnizart.music']
 
 package_data = \
-{'': ['*']}
+{'': ['*'], 'omnizart': ['defaults/music.yaml']}
 
 install_requires = \
-['Cython>=0.29.21,<0.30.0',
- 'atari-py>=0.2.6,<0.3.0',
- 'click>=7.1.2,<8.0.0',
+['click>=7.1.2,<8.0.0',
+ 'jsonschema>=3.2.0,<4.0.0',
  'librosa>=0.8.0,<0.9.0',
- 'llvmlite>=0.34.0,<0.35.0',
  'madmom>=0.16.1,<0.17.0',
  'opencv-python>=4.4.0,<5.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
  'pyyaml>=5.3.1,<6.0.0',
- 'setuptools>=49.6.0,<50.0.0',
  'soundfile>=0.10.3,<0.11.0',
  'tensorflow>=2.3.0,<3.0.0']
 

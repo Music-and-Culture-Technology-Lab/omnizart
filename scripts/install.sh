@@ -24,7 +24,7 @@ activate_venv_with_poetry() {
     if ! hash poetry 2>/dev/null; then
         # Poetry haven't been installed, install it first.
         echo "Installing poetry..."
-        python3 -m pip install poetry
+        pip install poetry
     fi
 
     # Create virtual environment.
@@ -42,23 +42,26 @@ activate_venv_with_venv() {
 
 pre_install() {
     # Need to upgrade pip first, or latter installation may fail.
-    python3 -m pip install --upgrade pip
+    pip install --upgrade pip
 
-    # This package has some problem installing with pip.
-    # Thus use easy_install here instead.
-    python3 -m pip install --upgrade setuptools
-    python3 -m easy_install llvmlite
+    # Some packages have some problem installing with poetry.
+    # Thus manually install them here.
+    pip install setuptools==50.0.3
 }
 
 install_with_poetry() {
     pre_install
-    poetry install
+    poetry install --no-dev
 }
 
 install_with_pip() {
     pre_install
-    python3 -m pip install -r requirements.txt
-    python3 setup.py install
+    
+    # Install some tricky packages that cannot be resolved by setup.py
+    # and requirements.txt.
+    pip install madmom --use-feature=2020-resolver
+
+    python3 setup.py install 
 }
 
 

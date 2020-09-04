@@ -7,7 +7,7 @@ Omniscient Mozart's Document
 ============================
 
 A command line tool for all kinds of transcription tasks, including vocal melody, drum percussion,
-notes of instruments, and beat tracking.
+chord progression, notes of instruments, and beat tracking.
 
 All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
 

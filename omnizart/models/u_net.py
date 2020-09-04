@@ -165,7 +165,7 @@ def multihead_attention(x, out_channel=64, d_model=32, n_heads=8, query_shape=(1
         Input tensor
     out_channel: int
         Number of output channels.
-    d_model : int
+    d_model: int
         Dimension of embeddings for each position of input feature.
     n_heads: int
         Number of heads for multi-head attention computation. Should be division of `d_model`.

@@ -10,16 +10,15 @@ exclude = ["bootstrap_data"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-setuptools = "^49.6.0"
 click = "^7.1.2"
 pretty_midi = "^0.2.9"
 soundfile = "^0.10.3"
 librosa = "^0.8.0"
 tensorflow = "^2.3.0"
-llvmlite = "^0.34.0"
 madmom = "^0.16.1"
 opencv-python = "^4.4.0"
 pyyaml = "^5.3.1"
+jsonschema = "^3.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -28,6 +27,7 @@ pylint = "^2.5.3"
 black = "^19.10b0"
 numpydoc = "^1.1.0"
 yapf = "^0.30.0"
+sphinx-press-theme = "^0.5.1"
 
 [tool.poetry.scripts]
 omnizart = 'omnizart.cli.cli:entry'
