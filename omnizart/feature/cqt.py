@@ -1,8 +1,10 @@
 import librosa
 import numpy as np
 
-from omnizart.io_utils import load_audio_with_librosa
-from omnizart.constants.feature import DOWN_SAMPLE_TO_SAPMLING_RATE, LOWEST_NOTE, NUMBER_OF_NOTES, HOP_SIZE, PAD_LEN_SEC
+from omnizart.utils import load_audio_with_librosa, get_logger
+
+
+logger = get_logger("CQT Feature")
 
 
 def post_process_cqt(gram):
@@ -29,10 +31,11 @@ def post_process_cqt(gram):
 
 def extract_cqt(
     audio_path,
-    sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE,
-    lowest_note=LOWEST_NOTE,
-    note_num=NUMBER_OF_NOTES,
-    a_hop=HOP_SIZE,
+    sampling_rate=44100,
+    lowest_note=16,
+    note_num=120,
+    a_hop=256,
+    pad_sec=1
 ):
     """
     Compute some audio data's constant-Q spectrogram, normalize, and log-scale
@@ -44,6 +47,14 @@ def extract_cqt(
         Path to the input audio.
     sampling_rate: int
         Sampling rate the audio data is sampled at, should be ``DOWN_SAMPLE_TO_SAPMLING_RATE``.
+    lowest_note: int
+        Lowest MIDI note number.
+    note_num: int
+        Number of total notes. The highest note number would thus be `lowest_note` + `note_num`.
+    a_hop: int
+        Hop size for computing CQT.
+    pad_sec: float
+        Length of padding to the begin and the end of the raw audio data in seconds.
 
     Returns
     -------
@@ -51,15 +62,18 @@ def extract_cqt(
         Log-magnitude, L2-normalized constant-Q spectrogram of synthesized MIDI
         data.
     """
+    logger.debug("Loading audio: %s", audio_path)
     audio_data, _ = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
 
-    zeros = np.zeros(PAD_LEN_SEC * sampling_rate)
+    zeros = np.zeros(pad_sec * sampling_rate)
     padded_audio = np.concatenate([zeros, audio_data, zeros])
 
     # Compute CQT of the synthesized audio data
+    logger.info("Extracting CQT feature...")
     audio_gram = librosa.cqt(
         padded_audio, sr=sampling_rate, hop_length=a_hop, fmin=librosa.midi_to_hz(lowest_note), n_bins=note_num
     )
 
     # L2-normalize and log-magnitute it
+    logger.info("Post-processing CQT feature...")
     return post_process_cqt(audio_gram)

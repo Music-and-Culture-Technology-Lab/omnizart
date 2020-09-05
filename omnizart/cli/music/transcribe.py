@@ -38,6 +38,7 @@ def transcribe(input_audio, model_path, output):
         --model-path path/to/model \ 
         --output example.mid
     """
+    print(output)
     app.transcribe(input_audio, model_path, output=output)
 
 

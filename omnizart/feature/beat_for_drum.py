@@ -1,5 +1,8 @@
 # pylint: disable=R0201
 
+import concurrent
+from concurrent.futures import ProcessPoolExecutor
+
 import scipy
 import numpy as np
 from madmom.features import (
@@ -10,8 +13,10 @@ from madmom.features import (
     BeatTrackingProcessor,
 )
 
-from omnizart.io_utils import load_audio_with_librosa
-from omnizart.constants.feature import DOWN_SAMPLE_TO_SAPMLING_RATE, MINI_BEAT_DEVISION_NUMBER
+from omnizart.utils import load_audio_with_librosa, get_logger
+
+
+logger = get_logger("Beat Extraction")
 
 
 class MadmomBeatTracking:
@@ -39,27 +44,52 @@ class MadmomBeatTracking:
 
     def process(self, audio_data):
         """Generate beat tracking results with multiple approaches."""
-        pred_beats1 = self._get_dbn_down_beat(audio_data, min_bpm_in=50, max_bpm_in=230)
+        with ProcessPoolExecutor(max_workers=3) as executor:
+            logger.debug("Submitting and executing parallel beat tracking jobs")
+            future_1 = executor.submit(self._get_dbn_down_beat, audio_data, min_bpm_in=50, max_bpm_in=230)
+            future_2 = executor.submit(self._get_dbn_beat, audio_data)
+            future_3 = executor.submit(self._get_beat, audio_data)
+            
+            queue = {
+                future_1: "dbn_down_beat",
+                future_2: "dbn_beat",
+                future_3: "beat"
+            }
+            
+        results = {}
+        for future in concurrent.futures.as_completed(queue, timeout=120):
+            func_name = queue[future]
+            results[func_name] = future.result()
+            logger.debug("Job %s finished.", func_name)
+
+        pred_beats1 = results["dbn_down_beat"]
+        pred_beats2 = results["dbn_beat"]
+        pred_beats3 = results["beat"]
+
+        #pred_beats1 = self._get_dbn_down_beat(audio_data, min_bpm_in=50, max_bpm_in=230)
         pred_beat_len1 = np.mean(
             np.sort(pred_beats1[1:] - pred_beats1[:-1])[int(len(pred_beats1) * 0.2):int(len(pred_beats1) * 0.8)]
         )
         pred_bpm1 = 60.0 / pred_beat_len1
-        pred_beats2 = self._get_dbn_beat(audio_data)
+
+        #pred_beats2 = self._get_dbn_beat(audio_data)
         pred_beat_len2 = np.mean(
             np.sort(pred_beats2[1:] - pred_beats2[:-1])[int(len(pred_beats2) * 0.2):int(len(pred_beats2) * 0.8)]
         )
         pred_bpm2 = 60.0 / pred_beat_len2
-        pred_beats3 = self._get_beat(audio_data)
+
+        #pred_beats3 = self._get_beat(audio_data)
         pred_beat_len3 = np.mean(
             np.sort(pred_beats3[1:] - pred_beats3[:-1])[int(len(pred_beats3) * 0.2):int(len(pred_beats3) * 0.8)]
         )
         pred_bpm3 = 60.0 / pred_beat_len3
         pred_bpm_avg = np.mean([pred_bpm1, pred_bpm2, pred_bpm3])
 
+        logger.debug("Running last beat tracking step...")
         return self._get_dbn_down_beat(audio_data, min_bpm_in=pred_bpm_avg / 1.38, max_bpm_in=pred_bpm_avg * 1.38)
 
 
-def extract_beat_with_madmom(audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE):
+def extract_beat_with_madmom(audio_path, sampling_rate=44100):
     """Extract beat position (in seconds) of the audio.
 
     Extract beat with mixture of beat tracking techiniques using madmom.
@@ -78,11 +108,13 @@ def extract_beat_with_madmom(audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_R
     audio_len_sec: float
         Total length of the audio in seconds.
     """
+    logger.debug("Loading audio: %s", audio_path)
     audio_data, _ = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
-    return MadmomBeatTracking().process(audio_data), len(audio_path) / sampling_rate
+    logger.debug("Runnig beat tracking...")
+    return MadmomBeatTracking().process(audio_data), len(audio_data) / sampling_rate
 
 
-def extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=MINI_BEAT_DEVISION_NUMBER):
+def extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=32):
     """Extract mini beats from the beat array.
 
     Furhter split beat into shorter beat interval, which we call it *mini beat*, to increase the
@@ -120,9 +152,15 @@ def extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=MIN
     return mini_beat_pos_t
 
 
-def extract_mini_beat_from_audio_path(
-    audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE, mini_beat_div_n=MINI_BEAT_DEVISION_NUMBER
-):
+def extract_mini_beat_from_audio_path(audio_path, sampling_rate=44100, mini_beat_div_n=32):
     """ Wrapper of extracting mini beats from audio path. """
+    logger.debug("Extracting beat with madmom")
     beat_arr, audio_len_sec = extract_beat_with_madmom(audio_path, sampling_rate=sampling_rate)
+    logger.debug("Extracting mini beat")
     return extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=mini_beat_div_n)
+
+
+if __name__ == "__main__":
+    audio_path = "checkpoints/Last Stardust - piano.wav"
+    mini_beat_arr = extract_mini_beat_from_audio_path(audio_path)
+

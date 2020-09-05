@@ -9,9 +9,13 @@ from omnizart.feature.hcfp import extract_hcfp
 from omnizart.music.inference import multi_inst_note_inference
 from omnizart.music.model_manager import ModelManager
 from omnizart.base import BaseTranscription
-from omnizart.io_utils import load_yaml
+from omnizart.utils import load_yaml, get_logger
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
+from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
+
+
+logger = get_logger("Music Transcription")
 
 
 class MusicTranscription(BaseTranscription):
@@ -22,18 +26,21 @@ class MusicTranscription(BaseTranscription):
     """
     def __init__(self, conf_path=None):
         super().__init__()
-        
+ 
         # Load default settings from yaml file.
         default_conf_path = os.path.join(self.conf_dir, "music.yaml")
+        logger.debug("Loading default configurations: %s", default_conf_path)
         json_obj = load_yaml(default_conf_path)
         if conf_path is not None:
             override_json_obj = load_yaml(conf_path)
-        json_obj.update(override_json_obj)
-        self.settings = MusicSettings().from_json(json_obj)
+            json_obj.update(override_json_obj)
+
+        self.settings = MusicSettings()
+        self.settings.from_json(json_obj)
 
         self.m_manage = ModelManager()
 
-    def transcribe(input_audio, model_path=None, output="./"):
+    def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe notes and instruments of the given audio.
 
         This function transcribes notes (onset, duration) of each instruments in the audio.
@@ -57,13 +64,14 @@ class MusicTranscription(BaseTranscription):
             raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
 
         if model_path is None:
-            model_path = self.settings.Model.CheckpointPath[self.settings.TranscriptionMode]
+            model_path = self.settings.model.checkpoint_path[self.settings.transcription_mode]
 
+        logger.info("Loading model %s", model_path)
         model = self.m_manage.load_model(model_path)
-        print(self.m_manage)
+        logger.info("Information of the model: %s", self.m_manage)
 
         # TODO: Add feature-related settings to the configuration.json and load it in ModelManager
-        print("Extracting feature...")
+        logger.info("Extracting feature...")
         if self.m_manage.feature_type == "HCFP":
             spec, gcos, ceps, cenf = extract_hcfp(input_audio)
             feature = np.dstack([spec, gcos, ceps])
@@ -78,22 +86,23 @@ class MusicTranscription(BaseTranscription):
             "multi_instrument_note": "note-stream",
         }
 
-        print("Predicting...")
-        pred = self.m_manage.predict(feature[:, :, self.m_manage.input_channels], model)
+        logger.info("Predicting...")
+        channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in self.settings.training.channels]
+        pred = self.m_manage.predict(feature[:, :, channels], model)
 
-        print("Infering notes....")
+        logger.info("Infering notes....")
         midi = multi_inst_note_inference(
             pred,
-            mode=mode_mapping[m_manage.label_type],
-            onset_th=self.m_manage.onset_th,
-            dura_th=self.m_manage.dura_th,
-            frm_th=self.m_manage.frm_th,
-            inst_th=self.m_manage.inst_th,
-            t_unit=self.settings.Feature.HopSize,
+            mode=mode_mapping[self.m_manage.label_type],
+            onset_th=self.settings.inference.onset_th,
+            dura_th=self.settings.inference.dura_th,
+            frm_th=self.settings.inference.frame_th,
+            inst_th=self.settings.inference.inst_th,
+            t_unit=self.settings.feature.hop_size,
             channel_program_mapping=MUSICNET_INSTRUMENT_PROGRAMS,
         )
 
         save_to = os.path.join(output, os.path.basename(input_audio).replace(".wav", ".mid"))
         midi.write(save_to)
-        print(f"MIDI file has been written to {save_to}")
+        logger.info("MIDI file has been written to %s", save_to)
 

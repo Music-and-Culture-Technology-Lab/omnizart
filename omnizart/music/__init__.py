@@ -13,7 +13,7 @@ Technical details can be found in the publications [1]_ and [2]_.
    IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2019.
 """
 
-from omnizart.music.app import app
+from omnizart.music.app import MusicTranscription
 
 
 app = MusicTranscription()

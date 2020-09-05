@@ -10,11 +10,13 @@ import os
 import concurrent.futures
 from concurrent.futures import ProcessPoolExecutor
 
-import soundfile as sf
 import numpy as np
 import scipy
 
-from omnizart.constants import feature as const_feat
+from omnizart.utils import load_audio_with_librosa, get_logger
+
+
+logger = get_logger("CFP Feature")
 
 
 def STFT(x, fr, fs, Hop, h):
@@ -153,21 +155,25 @@ def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_
     max_workers = min(os.cpu_count(), Round)
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_segment = {}
+        logger.debug("Submitting and executing parallel jobs")
         for i in range(Round):
             tmpX = x[i * freq_width:(i+1) * freq_width]
             future = executor.submit(cfp_filterbank, tmpX, fr, fs, Hop, h, fc, tc, g, bin_per_octave)
             future_to_segment[future] = i
 
+        count = 0
         for future in concurrent.futures.as_completed(future_to_segment):
             seg_id = future_to_segment[future]
             try:
                 tfrL0, tfrLF, tfrLQ, f, q, t, cen_freq = future.result()
+                count += 1
+                logger.debug("Job finished: %d/%d", count, len(future_to_segment))
                 tmpL0[seg_id] = tfrL0
                 tmpLF[seg_id] = tfrLF
                 tmpLQ[seg_id] = tfrLQ
                 tmpZ[seg_id] = tfrLF * tfrLQ
             except Exception as exc:
-                print("Something generated an exception: {}".format(exc))
+                logger.error("Something generated an exception: %s", exc)
                 raise exc
 
     return tmpL0, tmpLF, tmpLQ, tmpZ, f, q, t, cen_freq
@@ -175,14 +181,14 @@ def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_
 
 def extract_cfp(
     filename,
-    hop=const_feat.HOP,  # in seconds
-    win_size=const_feat.WINDOW_SIZE,
-    fr=const_feat.FREQUENCY_RESOLUTION,
-    fc=const_feat.FREQUENCY_CENTER,
-    tc=const_feat.TIME_CENTER,
-    g=const_feat.GAMMA,
-    bin_per_octave=const_feat.BIN_PER_OCTAVE,
-    down_fs=const_feat.DOWN_SAMPLE_TO_SAPMLING_RATE,
+    hop=0.02,  # in seconds
+    win_size=7939,
+    fr=2.0,
+    fc=27.5,
+    tc=1/4487.0,
+    g=[0.24, 0.6, 1],
+    bin_per_octave=48,
+    down_fs=44100,
     max_sample=2000,
 ):
     """CFP feature extraction function.
@@ -210,11 +216,8 @@ def extract_cfp(
        Music," in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2015.
     """
 
-    x, fs = sf.read(filename)
-    if len(x.shape) > 1:
-        x = np.mean(x, axis=1)
-    x = scipy.signal.resample_poly(x, down_fs, fs)
-    fs = down_fs  # sampling frequency
+    logger.debug("Loading audio: %s", filename)
+    x, fs = load_audio_with_librosa(filename, sampling_rate=down_fs)
     Hop = round(down_fs * hop)
     x = x.astype("float32")
     h = scipy.signal.blackmanharris(win_size)  # window size
@@ -222,7 +225,8 @@ def extract_cfp(
 
     max_sample = 2000
     samples = np.floor(len(x) / Hop).astype("int")
-    print("# Sample: ", samples)
+    logger.debug("Sample number: %d", samples)
+    logger.debug("Extracting CFP feature...")
     if samples > max_sample:
         tmpL0, tmpLF, tmpLQ, tmpZ, _, _, _, cen_freq = parallel_extract(
             x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_octave

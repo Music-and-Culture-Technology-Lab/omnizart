@@ -3,7 +3,10 @@
 import numpy as np
 
 from omnizart.feature.cfp import extract_cfp
-from omnizart.constants.feature import HARMONIC_NUM
+from omnizart.utils import get_logger
+
+
+logger = get_logger("HCFP Feature")
 
 
 def fetch_harmonic(data, cenf, ith_har, start_freq=27.5, num_per_octave=48, is_reverse=False):
@@ -33,7 +36,7 @@ def extract_hcfp(
     bin_per_octave=48,
     down_fs=44100,
     max_sample=2000,
-    harmonic_num=HARMONIC_NUM,
+    harmonic_num=6,
 ):
     _, spec, gcos, ceps, cenf = extract_cfp(
         filename,
@@ -49,18 +52,21 @@ def extract_hcfp(
     )
 
     har = []
+    logger.debug("Fetching harmonics of spectrum")
     for i in range(harmonic_num + 1):
         har.append(fetch_harmonic(spec, cenf, i))
     har_s = np.transpose(np.array(har), axes=(2, 1, 0))
 
     # Harmonic GCoS
     har = []
+    logger.debug("Fetching harmonics of GCoS")
     for i in range(harmonic_num + 1):
         har.append(fetch_harmonic(gcos, cenf, i))
     har_g = np.transpose(np.array(har), axes=(2, 1, 0))
 
     # Harmonic cepstrum
     har = []
+    logger.debug("Fetching harmonics of cepstrum")
     for i in range(harmonic_num + 1):
         har.append(fetch_harmonic(ceps, cenf, i, is_reverse=True))
     har_c = np.transpose(np.array(har), axes=(2, 1, 0))
