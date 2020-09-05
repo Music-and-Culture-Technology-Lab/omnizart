@@ -4,11 +4,34 @@ import os
 import re
 import yaml
 import pickle
+import logging
+import uuid
 
 import librosa
 import jsonschema
 
-from omnizart.constants.feature import DOWN_SAMPLE_TO_SAPMLING_RATE
+
+def get_logger(name=None, level="info"):
+    logger_name = str(uuid.uuid4())[:8] if name is None else name
+    logger = logging.getLogger(logger_name)
+
+    msg_format = "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]"
+    date_format = "%Y-%m-%d %H:%M:%S"
+    formatter = logging.Formatter(fmt=msg_format, datefmt=date_format)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    level_mapping = {
+        "info": logging.INFO,
+        "warn": logging.WARN,
+        "warning": logging.WARNING,
+        "debug": logging.DEBUG,
+        "error": logging.ERROR
+    }
+    level = os.environ.get("LOG_LEVEL", level)
+    logger.setLevel(level_mapping[level.lower()])
+    return logger
 
 
 def dump_pickle(data, save_to):
@@ -49,7 +72,7 @@ def load_pickle(pickle_file):
     return pickle.load(open(pickle_file, "rb"))
 
 
-def load_audio_with_librosa(audio_path, sampling_rate=DOWN_SAMPLE_TO_SAPMLING_RATE):
+def load_audio_with_librosa(audio_path, sampling_rate=44100):
     """Load audio from the given path with librosa.load
     
     Parameters

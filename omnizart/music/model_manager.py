@@ -19,7 +19,12 @@ from tensorflow.keras.layers import Conv2D
 from omnizart.models.t2t import local_attention_2d, split_heads_2d, combine_heads_2d
 from omnizart.music.utils import create_batches, cut_batch_pred, cut_frame
 from omnizart.models.u_net import semantic_segmentation, semantic_segmentation_attn, multihead_attention
-from omnizart.constants.feature import HARMONIC_NUM
+from omnizart.utils import get_logger
+
+
+HARMONIC_NUM = 6
+
+logger = get_logger("Music Model Manager")
 
 
 class ModelManager:
@@ -122,7 +127,7 @@ class ModelManager:
         self.input_channels = conf.get("input_channels", self.input_channels)
         self.dataset = conf.get("training_settings").get("dataset", None)
 
-        print(f"Model {model_path} loaded")
+        logger.debug("Model %s loaded", model_path)
         return model
 
     def save_model(self, model, save_path):
@@ -136,7 +141,7 @@ class ModelManager:
 
         # Save related configurations
         self.save_configuration(path)
-        print(f"Model saved to {save_path}/{self.name}.")
+        logger.debug("Model saved to %s/%s.", save_path, self.name)
 
     def save_configuration(self, save_path):
         conf = {
@@ -203,6 +208,7 @@ class ModelManager:
         total_batches = len(features)
         features.insert(0, [np.zeros_like(features[0][0])])
         features.append([np.zeros_like(features[0][0])])
+        logger.debug("Total batches: %d", total_batches)
         for i in range(1, total_batches + 1):
             print("batch: {}/{}".format(i, total_batches), end="\r")
             first_half_batch = []
@@ -232,7 +238,7 @@ class ModelManager:
         return pred
 
     def _construct_description(self):
-        return f"""Information about this model
+        return f"""
             Model name: {self.name}
             Input feature type: {self.feature_type}
             Input channels: {self.input_channels}

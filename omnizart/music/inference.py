@@ -10,6 +10,10 @@ from librosa import note_to_midi
 
 from omnizart.music.utils import roll_down_sample, down_sample
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, MIDI_PROGRAM_NAME_MAPPING
+from omnizart.utils import get_logger
+
+
+logger = get_logger("Music Inference")
 
 
 def infer_pitch(pitch, shortest=5, offset_interval=6):
@@ -399,11 +403,11 @@ def multi_inst_note_inference(
             std += np.std(cha)
             ent += entropy(cha)
             normed_ch.append(cha)
-        print(
-            "std: {:.3f} ent: {:.3f} mult: {:.3f}".format(
-                std / ch_per_inst, ent / ch_per_inst, std * ent / ch_per_inst**2
-            )
+
+        confidence = "std: {:.3f} ent: {:.3f} mult: {:.3f}".format(
+            std / ch_per_inst, ent / ch_per_inst, std * ent / ch_per_inst**2
         )
+        logger.debug("Instrument confidence: %s", confidence)
         if iters > 1 and (std / ch_per_inst < inst_th):
             continue
 
