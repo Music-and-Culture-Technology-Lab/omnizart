@@ -17,10 +17,11 @@ def get_logger(name=None, level="info"):
 
     msg_format = "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]"
     date_format = "%Y-%m-%d %H:%M:%S"
-    formatter = logging.Formatter(fmt=msg_format, datefmt=date_format)
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    if len(logger.handlers) == 0:
+        formatter = logging.Formatter(fmt=msg_format, datefmt=date_format)
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
     level_mapping = {
         "info": logging.INFO,
