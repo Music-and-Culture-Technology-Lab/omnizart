@@ -13,6 +13,7 @@ Examples
 import click
 
 from omnizart.cli.music import music
+from omnizart.cli.drum import drum
 
 
 @click.group()
@@ -21,6 +22,8 @@ def entry():
 
 
 entry.add_command(music)
+entry.add_command(drum)
+
 
 if __name__ == "__main__":
     entry()
