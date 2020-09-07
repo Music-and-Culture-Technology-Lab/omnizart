@@ -3,7 +3,7 @@
 Parse settings into pre-defined classes, similar to the 'view model'
 concept in MVVC, and instead of access values key by key.
 """
-
+# pylint: disable=R0903,C0115
 from omnizart.utils import json_serializable
 from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
@@ -95,10 +95,3 @@ class DrumSettings:
             self.hop_size: int = None
             self.mini_beat_per_bar: int = None
             self.mini_beat_per_segment: int = None
-
-
-from omnizart.utils import load_yaml
-if __name__ == "__main__":
-    obj = load_yaml("omnizart/defaults/music.yaml")
-    inst = MusicSettings()
-    inst.from_json(obj)

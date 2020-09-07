@@ -1,5 +1,5 @@
 """Information about directory structure of each dataset."""
-
+# pylint: disable=C0112
 from abc import abstractmethod, ABCMeta
 
 

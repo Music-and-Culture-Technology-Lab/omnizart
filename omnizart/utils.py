@@ -1,12 +1,12 @@
 """Various utility functions for this project."""
-
+# pylint: disable=W0212,R0915
 import os
 import re
-import yaml
 import pickle
 import logging
 import uuid
 
+import yaml
 import librosa
 import jsonschema
 
@@ -75,14 +75,14 @@ def load_pickle(pickle_file):
 
 def load_audio_with_librosa(audio_path, sampling_rate=44100):
     """Load audio from the given path with librosa.load
-    
+
     Parameters
     ----------
     audio_path: Path
         Path to the audio.
     sampling_rate: int
         Target sampling rate after loaded.
-    
+
     Returns
     -------
     audio: 1D numpy array
@@ -122,13 +122,13 @@ def json_serializable(key_path="./", value_path="./"):
     Parameters
     ----------
     key_path: Path
-        Access sub-object according to the path. E.g. Assume you have a 
+        Access sub-object according to the path. E.g. Assume you have a
         dictionary: d = {"a": {"b": {"c": "d"}}}, and the path: p = "a/b",
         then the sub-object after being propagated would be {"c": "d"}.
     value_path: Path
         The relative path to the key_path. This parameter makes you able
-        to access the value that is not at the same level as the key. 
-        E.g. assume you have a sub-object after the propagation of key_path: 
+        to access the value that is not at the same level as the key.
+        E.g. assume you have a sub-object after the propagation of key_path:
         d = {"a": {"b": {"c": "d"}}}, and the value_path: vp = "a/b/c",
         the corresponding value of the key should be "d".
 
@@ -148,7 +148,7 @@ def json_serializable(key_path="./", value_path="./"):
                 def __init__(self):
                     self.a_instance = A()
                     self.d = "World"
- 
+
         >>> inst = B()
         >>> inst.to_json()
         {
@@ -162,8 +162,8 @@ def json_serializable(key_path="./", value_path="./"):
 
     Notes
     -----
-    The attributes should be defined inside '__init__', or those defined as 
-    class attributes will not be serialized. 
+    The attributes should be defined inside '__init__', or those defined as
+    class attributes will not be serialized.
 
     """
     def from_json(self, json_obj):
@@ -190,7 +190,9 @@ def json_serializable(key_path="./", value_path="./"):
                 # Another json-seriallizable object
                 self.__dict__[key].from_json(k_obj[camel_key])
             elif camel_key not in k_obj:
-                raise AttributeError(f"Attribute '{camel_key}' is not defined in configuration file for class {type(self)}!")
+                raise AttributeError(
+                    f"Attribute '{camel_key}' is not defined in configuration file for class {type(self)}!"
+                )
             else:
                 # Parse the value according to value_path.
                 # The path is relative to key_path.
@@ -244,4 +246,3 @@ def json_serializable(key_path="./", value_path="./"):
         return tar_cls
 
     return wrapper
-

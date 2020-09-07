@@ -49,13 +49,13 @@ class MadmomBeatTracking:
             future_1 = executor.submit(self._get_dbn_down_beat, audio_data, min_bpm_in=50, max_bpm_in=230)
             future_2 = executor.submit(self._get_dbn_beat, audio_data)
             future_3 = executor.submit(self._get_beat, audio_data)
-            
+
             queue = {
                 future_1: "dbn_down_beat",
                 future_2: "dbn_beat",
                 future_3: "beat"
             }
-            
+
         results = {}
         for future in concurrent.futures.as_completed(queue, timeout=120):
             func_name = queue[future]
@@ -66,19 +66,16 @@ class MadmomBeatTracking:
         pred_beats2 = results["dbn_beat"]
         pred_beats3 = results["beat"]
 
-        #pred_beats1 = self._get_dbn_down_beat(audio_data, min_bpm_in=50, max_bpm_in=230)
         pred_beat_len1 = np.mean(
             np.sort(pred_beats1[1:] - pred_beats1[:-1])[int(len(pred_beats1) * 0.2):int(len(pred_beats1) * 0.8)]
         )
         pred_bpm1 = 60.0 / pred_beat_len1
 
-        #pred_beats2 = self._get_dbn_beat(audio_data)
         pred_beat_len2 = np.mean(
             np.sort(pred_beats2[1:] - pred_beats2[:-1])[int(len(pred_beats2) * 0.2):int(len(pred_beats2) * 0.8)]
         )
         pred_bpm2 = 60.0 / pred_beat_len2
 
-        #pred_beats3 = self._get_beat(audio_data)
         pred_beat_len3 = np.mean(
             np.sort(pred_beats3[1:] - pred_beats3[:-1])[int(len(pred_beats3) * 0.2):int(len(pred_beats3) * 0.8)]
         )
@@ -160,8 +157,6 @@ def extract_mini_beat_from_audio_path(audio_path, sampling_rate=44100, mini_beat
     return extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=mini_beat_div_n)
 
 
-
 if __name__ == "__main__":
-    audio_path = "checkpoints/Last Stardust - piano.wav"
-    mini_beat_arr = extract_mini_beat_from_audio_path(audio_path)
-
+    AUDIO_PATH = "checkpoints/Last Stardust - piano.wav"
+    mini_beat_arr = extract_mini_beat_from_audio_path(AUDIO_PATH)

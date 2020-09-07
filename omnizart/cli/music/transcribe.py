@@ -27,7 +27,7 @@ def transcribe(input_audio, model_path, output):
     \b
     Example Usage
     $ omnizart music transcribe \ 
-        --input-audio example.wav \ 
+        example.wav \ 
         --model-path path/to/model \ 
         --output example.mid
     """
@@ -44,5 +44,6 @@ def process_doc():
     doc = doc.replace("$", f"{code_block}    $")
 
     return doc
+
 
 __doc__ = process_doc()

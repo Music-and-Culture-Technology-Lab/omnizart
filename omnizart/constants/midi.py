@@ -8,7 +8,6 @@ MIDI_PROGRAM_NAME_MAPPING: Dict
 """
 
 
-
 # Mappings of MIDI program number and the corresponding name derived from the
 # Wiki page: https://en.wikipedia.org/wiki/General_MIDI
 MIDI_PROGRAM_NAME_MAPPING = {

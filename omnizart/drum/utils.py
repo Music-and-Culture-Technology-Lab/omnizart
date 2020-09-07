@@ -1,3 +1,4 @@
+# pylint: disable=E1101
 import numpy as np
 import cv2
 
@@ -8,22 +9,22 @@ def get_frame_by_time(time_sec, sampling_rate=44100, hop_size=256):
 
 def extract_patch_cqt(cqt_ext, mini_beat_arr, sampling_rate=44100, hop_size=256):
     """Extract patched CQT feature.
-    
+
     Leverages mini-beat information to determine the bound of each
     CQT patch.
-    
+
     Parameters
     ----------
     cqt_ext
         CQT feature of the audio.
     mini_beat_arr: 1D numpy array
         Mini-beat array, containing positions of mini-beats.
-    
+
     Returns
     -------
     patch_cqt
         Extracted patch CQT feature.
-    
+
     See Also
     --------
     omnizart.drum.transcribe: Entry point for transcribing drum.
@@ -63,23 +64,23 @@ def create_batches(feature, mini_beat_per_seg, b_size=6):
         Number of mini beats in one segment (a beat).
     b_size: int
         Output batch size.
-    
+
     Returns
     -------
     batch_feature: 5D numpy array
         Dimensions are [batches x b_size x time x freq x mini_beat_per_seg].
     """
-    assert(len(feature.shape)==3), f"Invalid feature shape: {feature.shape}. Should be three dimensional."
+    assert (len(feature.shape) == 3), f"Invalid feature shape: {feature.shape}. Should be three dimensional."
     hops = len(feature) - mini_beat_per_seg + 1
     hop_list = []
     for idx in range(hops):
-        feat = feature[idx:idx+mini_beat_per_seg]
+        feat = feature[idx:idx + mini_beat_per_seg]
         hop_list.append(np.transpose(feat, axes=[1, 2, 0]))
 
-    total_batches = int(np.ceil(len(hop_list)/b_size))
+    total_batches = int(np.ceil(len(hop_list) / b_size))
     batch_feature = []
     for idx in range(total_batches):
-        batch_feature.append(hop_list[idx*b_size:(idx+1)*b_size])
+        batch_feature.append(hop_list[idx * b_size:(idx+1) * b_size])  # noqa: E226
 
     zero_feat = np.zeros_like(hop_list[0])
     pad_size = b_size - len(batch_feature[-1])
@@ -96,15 +97,15 @@ def merge_batches(batch_pred):
     """
 
     batches, b_size, out_classes, mini_beat_per_seg = batch_pred.shape[:4]
-    pred = np.zeros((batches*b_size + mini_beat_per_seg - 1, out_classes))
+    pred = np.zeros((batches*b_size + mini_beat_per_seg - 1, out_classes))  # noqa: E226
     for b_idx, batch in enumerate(batch_pred):
         for s_idx, step in enumerate(batch):
-            start_idx = b_idx*b_size + s_idx
+            start_idx = b_idx*b_size + s_idx  # noqa: E226
             end_idx = start_idx + mini_beat_per_seg
             pred[start_idx:end_idx] += step.T.squeeze()
-    
-    pred[mini_beat_per_seg-1:1-mini_beat_per_seg] /= mini_beat_per_seg
-    for idx in range(mini_beat_per_seg-1):
-        pred[idx] /= idx+1
-        pred[-1-idx] /= idx+1
+
+    pred[mini_beat_per_seg - 1:1 - mini_beat_per_seg] /= mini_beat_per_seg
+    for idx in range(mini_beat_per_seg - 1):
+        pred[idx] /= idx + 1
+        pred[-1 - idx] /= idx + 1
     return pred

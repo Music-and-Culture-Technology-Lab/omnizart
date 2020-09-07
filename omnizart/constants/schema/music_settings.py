@@ -206,4 +206,3 @@ MUSIC_SETTINGS_SCHEMA = {
     },
     "required": ["General"]
 }
-

@@ -1,16 +1,16 @@
 import tensorflow as tf
 
 
-def shape_list(x):
+def shape_list(input_tensor):
     """Return list of dims, statically where possible."""
-    x = tf.convert_to_tensor(x)
+    tensor = tf.convert_to_tensor(input_tensor)
 
     # If unknown rank, return dynamic shape
-    if x.get_shape().dims is None:
-        return tf.shape(x)
+    if tensor.get_shape().dims is None:
+        return tf.shape(tensor)
 
-    static = x.get_shape().as_list()
-    shape = tf.shape(x)
+    static = tensor.get_shape().as_list()
+    shape = tf.shape(tensor)
 
     ret = []
     for i, dim in enumerate(static):
@@ -18,5 +18,3 @@ def shape_list(x):
             dim = shape[i]
         ret.append(dim)
     return ret
-
-

@@ -4,5 +4,8 @@ exclude = bootstrap_data
 ignore = E731
 per-file-ignores = 
     omnizart/cli/music/transcribe.py: W605,W291 \
+    omnizart/cli/drum/transcribe.py: W605, W291 \
     omnizart/feature/cfp.py: E226 \
-    omnizart/constants/feature.py: E266
+    omnizart/constants/feature.py: E266 \
+    omnizart/music/app.py: E402 \
+    omnizart/drum/app.py: E402

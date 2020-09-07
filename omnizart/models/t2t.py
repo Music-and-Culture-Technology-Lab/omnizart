@@ -44,7 +44,7 @@ def split_last_dimension(x, n):
     """Reshape x so that the last dimension becomes two dimensions.
 
     The first of these two dimensions is n.
-    
+
     Parameters
     ----------
     x
@@ -66,14 +66,14 @@ def split_last_dimension(x, n):
 
 def split_heads_2d(x, num_heads):
     """Split channels (dimension 3) into multiple heads (becomes dimension 1).
-    
+
     Parameters
     ----------
     x
         A tensor with shape [batch, height, width, channels]
     num_heads: int
         Number of heads in attention's computation.
-        
+
     Returns
     -------
     y
@@ -84,14 +84,14 @@ def split_heads_2d(x, num_heads):
 
 def pad_to_multiple_2d(x, block_shape):
     """Making sure x is a multiple of shape.
-    
+
     Parameters
     ----------
     x
         A [batch, heads, h, w, depth] or [batch, h, w, depth] tensor
     block_shape
         A 2D list of integer shapes
-        
+
     Returns
     -------
     padded_x
@@ -150,12 +150,12 @@ def gather_blocks_2d(x, indices):
 
 def combine_last_two_dimensions(x):
     """Reshape x so that the last two dimension become one.
-    
+
     Parameters
     ----------
     x
         A Tensor with shape [..., a, b]
-    
+
     Returns
     -------
     y
@@ -168,12 +168,12 @@ def combine_last_two_dimensions(x):
 
 def combine_heads_2d(x):
     """Inverse of split_heads_2d.
-    
+
     Parameters
     ----------
     x
         A Tensor with shape [batch, num_heads, height, width, channels / num_heads]
-    
+
     Returns
     -------
     y
@@ -184,14 +184,14 @@ def combine_heads_2d(x):
 
 def embedding_to_padding(emb):
     """Calculates the padding mask based on which embeddings are all zero.
-    
+
     We have hacked symbol_modality to return all-zero embeddings for padding.
-    
+
     Parameters
     ----------
     emb:
         A Tensor with shape [..., depth].
-    
+
     Returns
     -------
     y
@@ -232,11 +232,11 @@ def maybe_upcast(logits, activation_dtype=None, weight_dtype=None, hparams=None)
 
 def dropout_with_broadcast_dims(x, keep_prob, broadcast_dims=None, **kwargs):
     """Like tf.nn.dropout but takes broadcast_dims instead of noise_shape.
-    
+
     Instead of specifying noise_shape, this function takes broadcast_dims -
     a list of dimension numbers in which noise_shape should be 1.  The random
     keep/drop tensor has dimensionality 1 along these dimensions.
-    
+
     Parameters
     ----------
     x: float
@@ -249,7 +249,7 @@ def dropout_with_broadcast_dims(x, keep_prob, broadcast_dims=None, **kwargs):
         the dimensions along which to broadcast the keep/drop flags.
     **kwargs
         keyword arguments to tf.nn.dropout other than "noise_shape".
-    
+
     Returns
     -------
     y
@@ -293,7 +293,7 @@ def dot_product_attention(
         Bias Tensor (see attention_bias())
     dropout_rate: float
         Dropout rate of layers.
-    image_shapes: tuple 
+    image_shapes: tuple
         Optional tuple of integer scalars.
     name: str
         An optional string
@@ -307,7 +307,7 @@ def dot_product_attention(
     activation_dtype:
         Used to define function activation dtype when using
         mixed precision.
-    weight_dtype: 
+    weight_dtype:
         The dtype weights are stored in when using mixed precision
     hard_attention_k: int
         If > 0 triggers hard attention (picking top-k)
@@ -337,13 +337,13 @@ def dot_product_attention(
 
 def local_attention_2d(q, k, v, query_shape=(8, 16), memory_flange=(8, 16), name=None):
     """Strided block local self-attention.
-    
+
     The 2-D sequence is divided into 2-D blocks of shape query_shape. Attention
     for a given query position can only see memory positions less than or equal to
     the query position. The memory positions are the corresponding block with
     memory_flange many positions to add to the height and width of the block
     (namely, left, top, and right).
-    
+
     Parameters
     ----------
     q
@@ -360,7 +360,7 @@ def local_attention_2d(q, k, v, query_shape=(8, 16), memory_flange=(8, 16), name
         from each query block.
     name: str
         An optional string
-    
+
     Returns
     -------
     y

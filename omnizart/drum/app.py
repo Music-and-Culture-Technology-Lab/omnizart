@@ -1,3 +1,4 @@
+# pylint: disable=C0103,W0612,C0413,E0611
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -6,7 +7,7 @@ import numpy as np
 from omnizart.feature.cqt import extract_cqt
 from omnizart.feature.beat_for_drum import extract_mini_beat_from_audio_path
 from omnizart.drum.utils import extract_patch_cqt, create_batches, merge_batches
-from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
+from omnizart.models.spectral_norm_net import ConvSN2D
 from omnizart.utils import get_logger
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import DrumSettings
@@ -16,6 +17,7 @@ logger = get_logger("Drum Transcription")
 
 
 class DrumTranscription(BaseTranscription):
+    """Application class for drum transcriptions."""
     def __init__(self):
         super().__init__(DrumSettings)
         self.custom_objects = {"ConvSN2D": ConvSN2D}
@@ -54,14 +56,15 @@ class DrumTranscription(BaseTranscription):
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
-        logger.debug(f"CQT feature shape: {cqt_feature.shape}")
-        logger.debug(f"Mini-beat array shape: {mini_beat_arr.shape}")
+        logger.debug("CQT feature shape: %s", cqt_feature.shape)
+        logger.debug("Mini-beat array shape: %s", mini_beat_arr.shape)
 
         logger.info("Predicting...")
-        pred = self._predict(cqt_feature, mini_beat_arr, model, model_settings.feature.mini_beat_per_segment)
-        pred = pred[:len(mini_beat_arr)]  # Remove padding
+        pred = self._predict(
+            cqt_feature, mini_beat_arr, model, model_settings.feature.mini_beat_per_segment
+        )[:len(mini_beat_arr)]  # Remove padding
 
-        logger.debug(f"Prediction shape: {pred.shape}")
+        logger.debug("Prediction shape: %s", pred.shape)
 
         return pred
 

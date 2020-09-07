@@ -1,5 +1,4 @@
-# pylint: disable=C0103,W0612
-
+# pylint: disable=C0103,W0612,C0413,E0611
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -10,9 +9,8 @@ from omnizart.feature.cfp import extract_cfp
 from omnizart.feature.hcfp import extract_hcfp
 from omnizart.music.inference import multi_inst_note_inference
 from omnizart.music.utils import create_batches, cut_batch_pred, cut_frame
-from omnizart.music.model_manager import ModelManager
 from omnizart.base import BaseTranscription
-from omnizart.utils import load_yaml, get_logger
+from omnizart.utils import get_logger
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
 from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
@@ -52,7 +50,7 @@ class MusicTranscription(BaseTranscription):
         """
         if not os.path.isfile(input_audio):
             raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
-        
+
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path)
 
@@ -70,7 +68,6 @@ class MusicTranscription(BaseTranscription):
             "multi_instrument_frame": "true_frame",
             "multi_instrument_note": "note-stream",
             "note": "note",
-            "frame": "true_frame",
             "note-stream": "note-stream",
             "frame-stream": "true_frame"
         }

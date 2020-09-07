@@ -1,5 +1,4 @@
 import os
-import yaml
 from abc import ABCMeta, abstractmethod
 
 from tensorflow.keras.models import model_from_yaml
@@ -8,18 +7,19 @@ import omnizart
 from omnizart.utils import load_yaml, get_logger
 
 
-MODULE_PATH = os.path.abspath(omnizart.__file__+"/..")
+MODULE_PATH = os.path.abspath(omnizart.__file__ + "/..")
 SETTING_DIR = os.path.join(MODULE_PATH, "defaults")
 
 logger = get_logger("Base Class")
 
 
 class BaseTranscription(metaclass=ABCMeta):
+    """Base class of transcription applications."""
     def __init__(self, setting_class):
         self.setting_class = setting_class
 
         default_conf_path = os.path.join(SETTING_DIR, setting_class.default_setting_file)
-        logger.info("Loading default configurations: %s", default_conf_path)
+        logger.debug("Loading default configurations: %s", default_conf_path)
         self.settings = self._load_settings(default_conf_path)
 
     @abstractmethod
@@ -55,4 +55,3 @@ class BaseTranscription(metaclass=ABCMeta):
 
     def _get_model_from_yaml(self, arch_path, custom_objects=None):
         return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)
-
