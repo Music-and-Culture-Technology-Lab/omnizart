@@ -160,6 +160,7 @@ def extract_mini_beat_from_audio_path(audio_path, sampling_rate=44100, mini_beat
     return extract_mini_beat_from_beat_arr(beat_arr, audio_len_sec, mini_beat_div_n=mini_beat_div_n)
 
 
+
 if __name__ == "__main__":
     audio_path = "checkpoints/Last Stardust - piano.wav"
     mini_beat_arr = extract_mini_beat_from_audio_path(audio_path)

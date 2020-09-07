@@ -99,7 +99,7 @@ class ConvSN2D(tf.keras.layers.Layer):
         scope="conv_0",
         **kwargs
     ):
-        super(ConvSN2D, self).__init__(name=f"{scope}_sn_layer", **kwargs)
+        super(ConvSN2D, self).__init__(**kwargs)
 
         self.filters = filters
         self.kernel_size = kernel_size
@@ -111,7 +111,7 @@ class ConvSN2D(tf.keras.layers.Layer):
         with tf.name_scope(scope):
             conv_2d = tf.keras.layers.Conv2D(filters, kernel_size, strides=strides, name=f"{scope}_conv_in_sn")
             self.conv_sn_2d = SpectralNormalization(
-                conv_2d, iteration=iteration, eps=eps, training=training, name=f"{scope}_sn_layer", **kwargs
+                conv_2d, iteration=iteration, eps=eps, training=training, **kwargs
             )
 
     def call(self, inputs):

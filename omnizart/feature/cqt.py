@@ -69,11 +69,11 @@ def extract_cqt(
     padded_audio = np.concatenate([zeros, audio_data, zeros])
 
     # Compute CQT of the synthesized audio data
-    logger.info("Extracting CQT feature...")
+    logger.debug("Extracting CQT feature with librosa")
     audio_gram = librosa.cqt(
         padded_audio, sr=sampling_rate, hop_length=a_hop, fmin=librosa.midi_to_hz(lowest_note), n_bins=note_num
     )
 
     # L2-normalize and log-magnitute it
-    logger.info("Post-processing CQT feature...")
+    logger.debug("Post-processing CQT feature...")
     return post_process_cqt(audio_gram)
