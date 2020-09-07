@@ -8,6 +8,12 @@ General:
         Description: Mode of transcription by executing the `omnizart music transribe` command.
         Type: String 
         Value: Piano
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            Piano: ./checkpoints/music/Maestro-Note
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -45,6 +51,10 @@ General:
                 Description: Number of harmonic bins of HCFP feature.
                 Type: Integer
                 Value: 6
+            Harmonic:
+                Description: Whether to use harmonic version of the input feature for training.
+                Type: Bool
+                Value: False
     Dataset:
         Description: Settings of datasets.
         Settings:
@@ -58,18 +68,12 @@ General:
                 Value: CFP
                 Choices: ["CFP", "HCFP"]
             FeatureSavePath:
-                Description: Path for storing the extracted feature. Default to the path under the folder the dataset.
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
                 Type: String
                 Value: +
     Model:
         Description: Default settings of training / testing the model.
         Settings:
-            CheckpointPath:
-                Description: Path to the pre-trained models.
-                Type: Map
-                SubType: [String, String]
-                Value:
-                    Piano: ./checkpoints/music/Maestro-Note
             SavePrefix:
                 Description: Prefix of the trained model's name to be saved.
                 Type: String
@@ -144,10 +148,6 @@ General:
                 SubType: String
                 Value: ["Spec", "Ceps"]
                 Choices: ["Spec", "GCoS", "Ceps"]
-            Harmonic:
-                Description: Whether to use harmonic version of the input feature for training.
-                Type: Bool
-                Value: False
             Timesteps:
                 Description: Length of time axis of the input feature.
                 Type: Integer

@@ -10,18 +10,11 @@ click.option = partial(click.option, show_default=True)
 
 
 @click.command()
-@click.option(
-    "-i",
-    "--input-audio",
-    help="Path to the target audio for transcriptioin",
-    required=True,
-    type=click.Path(exists=True),
-)
+@click.argument("input_audio", type=click.Path(exists=True))
 @click.option(
     "-m",
     "--model-path",
     help="Path to the pre-trained model for transcription",
-    required=True,
     type=click.Path(exists=True),
 )
 @click.option("-o", "--output", help="Path to output the MIDI file", default="./", type=click.Path(writable=True))
@@ -38,7 +31,6 @@ def transcribe(input_audio, model_path, output):
         --model-path path/to/model \ 
         --output example.mid
     """
-    print(output)
     app.transcribe(input_audio, model_path, output=output)
 
 

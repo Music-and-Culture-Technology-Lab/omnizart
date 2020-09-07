@@ -10,6 +10,8 @@ from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
 @json_serializable(key_path="./General", value_path="./Value")
 class MusicSettings:
+    default_setting_file: str = "music.yaml"
+
     def __init__(self):
         self.feature = self.MusicFeature()
         self.dataset = self.MusicDataset()
@@ -17,6 +19,7 @@ class MusicSettings:
         self.inference = self.MusicInference()
         self.training = self.MusicTraining()
         self.transcription_mode: str = None
+        self.checkpoint_path: str = None
 
         # As a json-serializable object, if variable 'schema' is set,
         # then the input json object will be validated when parsing
@@ -44,6 +47,7 @@ class MusicSettings:
             self.gamma: list = None
             self.bins_per_octave: int = None
             self.harmonic_number: int = None
+            self.harmonic: bool = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicDataset:
@@ -55,10 +59,9 @@ class MusicSettings:
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicModel:
         def __init__(self):
-            self.checkpoint_path: str = None
             self.save_prefix: str = None
             self.save_path: str = None
-    
+
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicTraining:
         def __init__(self):
@@ -71,8 +74,27 @@ class MusicSettings:
             self.loss_function: str = None
             self.label_type: str = None
             self.channels: list = None
-            self.harmonic: bool = None
             self.timesteps: int = None
+
+
+@json_serializable(key_path="./General", value_path="./Value")
+class DrumSettings:
+    default_setting_file: str = "drum.yaml"
+
+    def __init__(self):
+        self.transcription_mode: str = None
+        self.checkpoint_path: dict = None
+        self.feature = self.DrumFeature()
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class DrumFeature:
+        def __init__(self):
+            self.padding_seconds: float = None
+            self.lowest_note: int = None
+            self.number_of_notes: int = None
+            self.hop_size: int = None
+            self.mini_beat_per_bar: int = None
+            self.mini_beat_per_segment: int = None
 
 
 from omnizart.utils import load_yaml

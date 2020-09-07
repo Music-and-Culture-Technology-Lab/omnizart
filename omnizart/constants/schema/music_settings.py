@@ -47,7 +47,8 @@ FEATURE_SCHEMA = {
                 "TimeCenter": simple_unit("number"),
                 "Gamma": list_unit("number"),
                 "BinsPerOctave": simple_unit("integer"),
-                "HarmonicNumber": simple_unit("integer")
+                "HarmonicNumber": simple_unit("integer"),
+                "Harmonic": simple_unit("boolean"),
             },
             "required": [
                 "SamplingRate",
@@ -58,7 +59,8 @@ FEATURE_SCHEMA = {
                 "TimeCenter",
                 "Gamma",
                 "BinsPerOctave",
-                "HarmonicNumber"
+                "HarmonicNumber",
+                "Harmonic"
             ],
             "additionalProperties": False
         }
@@ -111,11 +113,10 @@ MODEL_SCHEMA = {
         "Settings": {
             "type": "object",
             "properties": {
-                "CheckpointPath": MODEL_CHECKPOINT_PATH_SCHEMA,
                 "SavePrefix": simple_unit("string"),
                 "SavePath": simple_unit("string")
             },
-            "required": ["CheckpointPath", "SavePrefix", "SavePath"],
+            "required": ["SavePrefix", "SavePath"],
             "additionalProperties": False
         }
     },
@@ -160,7 +161,6 @@ TRAINING_SCHEMA = {
                 "LossFunction": simple_unit("string", choices=["smooth", "focal", "bce"]),
                 "LabelType": simple_unit("string", choices=["note-stream", "frame-stream", "note", "frame"]),
                 "Channels": list_unit("string", choices=["Spec", "GCoS", "Ceps"]),
-                "Harmonic": simple_unit("boolean"),
                 "Timesteps": simple_unit("integer")
             },
             "required": [
@@ -173,7 +173,6 @@ TRAINING_SCHEMA = {
                 "LossFunction",
                 "LabelType",
                 "Channels",
-                "Harmonic",
                 "Timesteps"
             ],
             "additionalProperties": False
@@ -187,6 +186,7 @@ MUSIC_GENERAL_SETTINGS_SCHEMA = {
     "type": "object",
     "properties": {
         "TranscriptionMode": simple_unit("string"),
+        "CheckpointPath": MODEL_CHECKPOINT_PATH_SCHEMA,
         "Feature": FEATURE_SCHEMA,
         "Dataset": DATASET_SCHEMA,
         "Model": MODEL_SCHEMA,
