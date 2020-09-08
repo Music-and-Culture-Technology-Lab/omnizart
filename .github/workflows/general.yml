@@ -34,11 +34,12 @@ jobs:
         pip install flake8 pytest pylint
     - name: Check with linters
       run: |
-        make check
-    - name: Test with pytest
-      run: |
         make install
         source .venv/bin/activate
+        make check
+        deactivate
+    - name: Test with pytest
+      run: |
         make test
     - name: Test installation
       run: |
