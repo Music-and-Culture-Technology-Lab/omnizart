@@ -1,6 +1,5 @@
-# pylint: disable=C0103,W0612,C0413,E0611
+# pylint: disable=C0103,W0612,E0611
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 
