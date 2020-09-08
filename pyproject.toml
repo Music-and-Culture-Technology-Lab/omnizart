@@ -12,7 +12,6 @@ exclude = ["bootstrap_data"]
 python = "^3.6"
 click = "^7.1.2"
 pretty_midi = "^0.2.9"
-soundfile = "^0.10.3"
 librosa = "^0.8.0"
 tensorflow = "^2.3.0"
 madmom = "^0.16.1"

@@ -14,7 +14,15 @@ packages = \
  'omnizart.music']
 
 package_data = \
-{'': ['*'], 'omnizart': ['defaults/music.yaml']}
+{'': ['*'],
+ 'omnizart': ['checkpoints/drum/1p5/*',
+              'checkpoints/drum/2p5/*',
+              'checkpoints/drum/final/*',
+              'checkpoints/music/Maestro-Note/*',
+              'defaults/drum.yaml',
+              'defaults/drum.yaml',
+              'defaults/music.yaml',
+              'defaults/music.yaml']}
 
 install_requires = \
 ['click>=7.1.2,<8.0.0',
@@ -24,7 +32,6 @@ install_requires = \
  'opencv-python>=4.4.0,<5.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
  'pyyaml>=5.3.1,<6.0.0',
- 'soundfile>=0.10.3,<0.11.0',
  'tensorflow>=2.3.0,<3.0.0']
 
 entry_points = \

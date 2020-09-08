@@ -30,10 +30,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pylint
-        #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Check with linters
       run: |
         make check
     - name: Test with pytest
       run: |
         make test
+    - name: Test installation
+      run: |
+        make install

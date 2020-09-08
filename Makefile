@@ -19,7 +19,7 @@ check-flake:
 .PHONY: check-pylint
 check-pylint:
 	@echo "Checking with pylint..."
-	@pylint --rcfile .config/pylintrc $(CHECK_SRC)
+	@pylint --fail-under 9.5 --rcfile .config/pylintrc $(CHECK_SRC)
 
 .PHONY: check-black
 check-black:

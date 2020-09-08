@@ -4,14 +4,14 @@ set -e
 
 # Script for installing the 'omnizart' command and the required packages.
 #
-# The script will first create the virtual environment, separating the system's environment.
-# There are two approaches of creating the virtual env: poetry and venv. 
-# The former is a third-party library, and the latter is the built-in library.
-# The script use venv as the default tool. You could setup environment variable
-# 'DEFAULT_VENV_APPROACH' to 'poetry' to use poetry for both create virtual env and
-# installation.
+# The script will first create a virtual environment, separating from the system's environment.
+# There are two approaches for creating the virtual env: poetry or venv. 
+# The former relies on the third-party package 'poetry', and the latter is a built-in package.
+# This script uses venv as the default tool. You could also setup an environment variable
+# 'DEFAULT_VENV_APPROACH' to 'poetry' for using poetry to create virtual env and
+# install packages.
 #
-# After creating the virtual env with venv, the script automatically installs the
+# After creating virtual env with venv, the script automatically installs the
 # required packages and the 'omnizart' command in virtual env. As the installation
 # finished, just activate the environment and enjoy~.
 
