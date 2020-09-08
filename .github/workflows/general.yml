@@ -19,6 +19,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7]
+    env:
+        DEFAULT_VENV_APPROACH: venv
 
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +37,12 @@ jobs:
         make check
     - name: Test with pytest
       run: |
+        make install
+        source .venv/bin/activate
         make test
     - name: Test installation
       run: |
-        make install
+        pip install --upgrade setuptools
+        pip install madmom
+        python setup.py install
+
