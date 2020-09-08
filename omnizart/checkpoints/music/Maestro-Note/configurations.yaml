@@ -1,0 +1,156 @@
+# Self-documented configurable settings, with description, type hint, and available
+# options. All the parameters can be overriden by another specified configuration file 
+# with selected parameters.
+
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart music transribe` command.
+        Type: String 
+        Value: Piano
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            Piano: ./checkpoints/music/Maestro-Note
+    Feature:
+        Description: Default settings of feature extraction
+        Settings:
+            HopSize:
+                Description: Hop size in seconds with respect to sampling rate.
+                Type: Float
+                Value: 0.02
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 44100
+            WindowSize:
+                Type: Integer
+                Value: 7939
+            FrequencyResolution:
+                Type: Float
+                Value: 2.0
+            FrequencyCenter:
+                Description: Lowest frequency to extract.
+                Type: Float
+                Value: 27.5
+            TimeCenter:
+                Description: Highest frequency to extract (1/time_center).
+                Type: Float
+                Value: 0.00022287
+            Gamma:
+                Type: List
+                SubType: Float
+                Value: [0.24, 0.6, 1.0]
+            BinsPerOctave:
+                Description: Number of bins for each octave.
+                Type: Integer
+                Value: 48
+            HarmonicNumber:
+                Description: Number of harmonic bins of HCFP feature.
+                Type: Integer
+                Value: 6
+            Harmonic:
+                Description: Whether to use harmonic version of the input feature for training.
+                Type: Bool
+                Value: False
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureType:
+                Description: Type of feature to extract.
+                Type: String
+                Value: CFP
+                Choices: ["CFP", "HCFP"]
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: Music
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/music
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            MinLength:
+                Description: Minimum length of a note in seconds.
+                Type: Float
+                Value: 0.05
+            InstTh:
+                Description: Threshold for filtering instruments.
+                Type: Float
+                Value: 1.1
+            OnsetTh:
+                Description: Threshold of predicted onset channel.
+                Type: Float
+                Value: 6.0
+            DuraTh:
+                Description: Threshold of predicted duration channel.
+                Type: Float
+                Value: 0.5
+            FrameTh:
+                Description: Threshold of frame-level predictions.
+                Type: Float
+                Value: 0.5
+    Training:
+        Description: Parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 20
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 3000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 500
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 8
+            ValBatchSize:
+                Description: Batchs size of each validation step.
+                Type: Integer
+                Value: 8
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 6
+            LossFunction:
+                Description: Loss function for computing the objectives.
+                Type: String
+                Value: smooth
+                Choices: ["smooth", "focal", "bce"]
+            LabelType:
+                Description: Determines the training target to be single- or multi-instrument scenario, and more options.
+                Type: String
+                Value: note
+                Choices: ["note-stream", "frame-stream", "note", "frame"]
+            Channels:
+                Description: Use different types of feature for training.
+                Type: List
+                SubType: String
+                Value: ["Spec", "Ceps"]
+                Choices: ["Spec", "GCoS", "Ceps"]
+            Timesteps:
+                Description: Length of time axis of the input feature.
+                Type: Integer
+                Value: 128
+
+

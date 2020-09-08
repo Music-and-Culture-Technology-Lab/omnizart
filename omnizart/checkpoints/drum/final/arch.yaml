@@ -1,0 +1,2354 @@
+backend: tensorflow
+class_name: Functional
+config:
+  input_layers:
+  - - input_tensor
+    - 0
+    - 0
+  layers:
+  - class_name: InputLayer
+    config:
+      batch_input_shape: !!python/tuple
+      - null
+      - 120
+      - 120
+      - 4
+      dtype: float32
+      name: input_tensor
+      ragged: false
+      sparse: false
+    inbound_nodes: []
+    name: input_tensor
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - &id001 !!python/name:numpy.ndarray ''
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - &id002 !!python/object/apply:numpy.dtype
+            args:
+            - i4
+            - 0
+            - 1
+            state: !!python/tuple
+            - 3
+            - <
+            - null
+            - null
+            - null
+            - -1
+            - -1
+            - 0
+          - false
+          - !!binary |
+            AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: tf_diff2_pady_31
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+        input:
+        - input_tensor_31
+        - tf_diff2_pady_31/paddings
+        name: tf_diff2_pady_31
+        op: Pad
+      trainable: true
+    inbound_nodes:
+    - - - input_tensor
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_tf_diff2_pady_31
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAAAAAAA
+        2: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAD/////
+        3: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AQAAAAEAAAABAAAA
+      dtype: float32
+      name: strided_slice_698
+      node_def:
+        attr:
+          Index:
+            type: DT_INT32
+          T:
+            type: DT_FLOAT
+          begin_mask:
+            i: '7'
+          ellipsis_mask:
+            i: '0'
+          end_mask:
+            i: '3'
+          new_axis_mask:
+            i: '0'
+          shrink_axis_mask:
+            i: '0'
+        input:
+        - tf_diff2_pady_31
+        - strided_slice_698/begin
+        - strided_slice_698/end
+        - strided_slice_698/strides
+        name: strided_slice_698
+        op: StridedSlice
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_tf_diff2_pady_31
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_strided_slice_698
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: Sub_61
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - input_tensor_31
+        - strided_slice_698
+        name: Sub_61
+        op: Sub
+      trainable: true
+    inbound_nodes:
+    - - - input_tensor
+        - 0
+        - 0
+        - &id003 {}
+      - - tf_op_layer_strided_slice_698
+        - 0
+        - 0
+        - *id003
+    name: tf_op_layer_Sub_61
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: ZerosLike_31
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Sub_61
+        name: ZerosLike_31
+        op: ZerosLike
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Sub_61
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_ZerosLike_31
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAAAAAAA
+        2: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAA
+        3: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AQAAAAEAAAABAAAA
+      dtype: float32
+      name: strided_slice_699
+      node_def:
+        attr:
+          Index:
+            type: DT_INT32
+          T:
+            type: DT_FLOAT
+          begin_mask:
+            i: '7'
+          ellipsis_mask:
+            i: '0'
+          end_mask:
+            i: '3'
+          new_axis_mask:
+            i: '0'
+          shrink_axis_mask:
+            i: '0'
+        input:
+        - ZerosLike_31
+        - strided_slice_699/begin
+        - strided_slice_699/end
+        - strided_slice_699/strides
+        name: strided_slice_699
+        op: StridedSlice
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_ZerosLike_31
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_strided_slice_699
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAA
+        2: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAAAAAAA
+        3: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            AQAAAAEAAAABAAAA
+      dtype: float32
+      name: strided_slice_700
+      node_def:
+        attr:
+          Index:
+            type: DT_INT32
+          T:
+            type: DT_FLOAT
+          begin_mask:
+            i: '3'
+          ellipsis_mask:
+            i: '0'
+          end_mask:
+            i: '7'
+          new_axis_mask:
+            i: '0'
+          shrink_axis_mask:
+            i: '0'
+        input:
+        - Sub_61
+        - strided_slice_700/begin
+        - strided_slice_700/end
+        - strided_slice_700/strides
+        name: strided_slice_700
+        op: StridedSlice
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Sub_61
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_strided_slice_700
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        2: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id002
+        - !!binary |
+          AgAAAA==
+      dtype: float32
+      name: concat_31
+      node_def:
+        attr:
+          N:
+            i: '2'
+          T:
+            type: DT_FLOAT
+          Tidx:
+            type: DT_INT32
+        input:
+        - strided_slice_699
+        - strided_slice_700
+        - concat_31/axis
+        name: concat_31
+        op: ConcatV2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_strided_slice_699
+        - 0
+        - 0
+        - &id004 {}
+      - - tf_op_layer_strided_slice_700
+        - 0
+        - 0
+        - *id004
+    name: tf_op_layer_concat_31
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        2: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id002
+        - !!binary |
+          /////w==
+      dtype: float32
+      name: tf_diff2_concat_31
+      node_def:
+        attr:
+          N:
+            i: '2'
+          T:
+            type: DT_FLOAT
+          Tidx:
+            type: DT_INT32
+        input:
+        - input_tensor_31
+        - concat_31
+        - tf_diff2_concat_31/axis
+        name: tf_diff2_concat_31
+        op: ConcatV2
+      trainable: true
+    inbound_nodes:
+    - - - input_tensor
+        - 0
+        - 0
+        - &id005 {}
+      - - tf_op_layer_concat_31
+        - 0
+        - 0
+        - *id005
+    name: tf_op_layer_tf_diff2_concat_31
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_302
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - tf_diff2_concat_31
+        - MirrorPad_302/paddings
+        name: MirrorPad_302
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_tf_diff2_concat_31
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_302
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 3
+      - 3
+      name: init_resbk_res1_SN_sn_layer
+      scope: init_resbk_res1_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_302
+        - 0
+        - 0
+        - {}
+    name: init_resbk_res1_SN_sn_layer
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_271
+      trainable: true
+    inbound_nodes:
+    - - - init_resbk_res1_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: elu_271
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_303
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_271/Elu
+        - MirrorPad_303/paddings
+        name: MirrorPad_303
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_271
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_303
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 3
+      - 3
+      name: init_resbk_res2_SN_sn_layer
+      scope: init_resbk_res2_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_303
+        - 0
+        - 0
+        - {}
+    name: init_resbk_res2_SN_sn_layer
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_241
+      padding: same
+      pool_size: &id006 !!python/tuple
+      - 2
+      - 2
+      strides: &id007 !!python/tuple
+      - 2
+      - 2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_tf_diff2_concat_31
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_241
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_240
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - init_resbk_res2_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_240
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: init_resbk_shortcut_SN_sn_layer
+      scope: init_resbk_shortcut_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - average_pooling2d_241
+        - 0
+        - 0
+        - {}
+    name: init_resbk_shortcut_SN_sn_layer
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_269
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - average_pooling2d_240/AvgPool
+        - init_resbk_shortcut_SN_sn_layer/init_resbk_shortcut_SN_sn_layer/init_resbk_shortcut_SN_conv_in_sn/BiasAdd_30
+        name: AddV2_269
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - average_pooling2d_240
+        - 0
+        - 0
+        - &id008 {}
+      - - init_resbk_shortcut_SN_sn_layer
+        - 0
+        - 0
+        - *id008
+    name: tf_op_layer_AddV2_269
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_272
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_269
+        - 0
+        - 0
+        - {}
+    name: elu_272
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_304
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_272/Elu
+        - MirrorPad_304/paddings
+        name: MirrorPad_304
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_272
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_304
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: &id015 !!python/tuple
+      - 3
+      - 3
+      name: fd_resbk_res1_SN_sn_layer
+      scope: fd_resbk_res1_SN
+      strides: &id016 !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_304
+        - 0
+        - 0
+        - {}
+    name: fd_resbk_res1_SN_sn_layer
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_273
+      trainable: true
+    inbound_nodes:
+    - - - fd_resbk_res1_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: elu_273
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_305
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_273/Elu
+        - MirrorPad_305/paddings
+        name: MirrorPad_305
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_273
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_305
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: &id017 !!python/tuple
+      - 3
+      - 3
+      name: fd_resbk_res2_SN_sn_layer
+      scope: fd_resbk_res2_SN
+      strides: &id018 !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_305
+        - 0
+        - 0
+        - {}
+    name: fd_resbk_res2_SN_sn_layer
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: &id019 !!python/tuple
+      - 1
+      - 1
+      name: fd_resbk_shortcut_SN_sn_layer
+      scope: fd_resbk_shortcut_SN
+      strides: &id020 !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_269
+        - 0
+        - 0
+        - {}
+    name: fd_resbk_shortcut_SN_sn_layer
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_242
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - fd_resbk_res2_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_242
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_243
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - fd_resbk_shortcut_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_243
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_270
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - average_pooling2d_242/AvgPool
+        - average_pooling2d_243/AvgPool
+        name: AddV2_270
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - average_pooling2d_242
+        - 0
+        - 0
+        - &id009 {}
+      - - average_pooling2d_243
+        - 0
+        - 0
+        - *id009
+    name: tf_op_layer_AddV2_270
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 8
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: f_attn_conv_SN_sn_layer
+      scope: f_attn_conv_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_270
+        - 0
+        - 0
+        - {}
+    name: f_attn_conv_SN_sn_layer
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 8
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: g_attn_conv_SN_sn_layer
+      scope: g_attn_conv_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_270
+        - 0
+        - 0
+        - {}
+    name: g_attn_conv_SN_sn_layer
+  - class_name: MaxPooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: max_pooling2d_30
+      padding: same
+      pool_size: !!python/tuple
+      - 2
+      - 2
+      strides: !!python/tuple
+      - 2
+      - 2
+      trainable: true
+    inbound_nodes:
+    - - - f_attn_conv_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    - - - h_attn_conv_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: max_pooling2d_30
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            /////4QDAAAIAAAA
+      dtype: float32
+      name: Reshape_179
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - g_attn_conv_SN_sn_layer/g_attn_conv_SN_sn_layer/g_attn_conv_SN_conv_in_sn/BiasAdd_28
+        - Reshape_179/shape
+        name: Reshape_179
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - g_attn_conv_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_179
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            /////+EAAAAIAAAA
+      dtype: float32
+      name: Reshape_178
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - max_pooling2d_30/MaxPool
+        - Reshape_178/shape
+        name: Reshape_178
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - max_pooling2d_30
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_178
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: BatchMatMulV2_60
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          adj_x:
+            b: false
+          adj_y:
+            b: true
+        input:
+        - Reshape_179
+        - Reshape_178
+        name: BatchMatMulV2_60
+        op: BatchMatMulV2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Reshape_179
+        - 0
+        - 0
+        - &id010 {}
+      - - tf_op_layer_Reshape_178
+        - 0
+        - 0
+        - *id010
+    name: tf_op_layer_BatchMatMulV2_60
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id002
+        - !!binary |
+          /////w==
+      dtype: float32
+      name: Max_30
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tidx:
+            type: DT_INT32
+          keep_dims:
+            b: true
+        input:
+        - BatchMatMulV2_60
+        - Max_30/reduction_indices
+        name: Max_30
+        op: Max
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_BatchMatMulV2_60
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Max_30
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: Sub_62
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - BatchMatMulV2_60
+        - Max_30
+        name: Sub_62
+        op: Sub
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_BatchMatMulV2_60
+        - 0
+        - 0
+        - &id011 {}
+      - - tf_op_layer_Max_30
+        - 0
+        - 0
+        - *id011
+    name: tf_op_layer_Sub_62
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: Exp_30
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Sub_62
+        name: Exp_30
+        op: Exp
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Sub_62
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Exp_30
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 32
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: h_attn_conv_SN_sn_layer
+      scope: h_attn_conv_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_270
+        - 0
+        - 0
+        - {}
+    name: h_attn_conv_SN_sn_layer
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id002
+        - !!binary |
+          /////w==
+      dtype: float32
+      name: Sum_30
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tidx:
+            type: DT_INT32
+          keep_dims:
+            b: true
+        input:
+        - Exp_30
+        - Sum_30/reduction_indices
+        name: Sum_30
+        op: Sum
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Exp_30
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Sum_30
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: RealDiv_30
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Exp_30
+        - Sum_30
+        name: RealDiv_30
+        op: RealDiv
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Exp_30
+        - 0
+        - 0
+        - &id012 {}
+      - - tf_op_layer_Sum_30
+        - 0
+        - 0
+        - *id012
+    name: tf_op_layer_RealDiv_30
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 3
+          - *id002
+          - false
+          - !!binary |
+            /////+EAAAAgAAAA
+      dtype: float32
+      name: Reshape_180
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - max_pooling2d_30/MaxPool_1
+        - Reshape_180/shape
+        name: Reshape_180
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - max_pooling2d_30
+        - 1
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_180
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: BatchMatMulV2_61
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          adj_x:
+            b: false
+          adj_y:
+            b: false
+        input:
+        - RealDiv_30
+        - Reshape_180
+        name: BatchMatMulV2_61
+        op: BatchMatMulV2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_RealDiv_30
+        - 0
+        - 0
+        - &id013 {}
+      - - tf_op_layer_Reshape_180
+        - 0
+        - 0
+        - *id013
+    name: tf_op_layer_BatchMatMulV2_61
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+          - *id002
+          - false
+          - !!binary |
+            /////x4AAAAeAAAAIAAAAA==
+      dtype: float32
+      name: Reshape_181
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - BatchMatMulV2_61
+        - Reshape_181/shape
+        name: Reshape_181
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_BatchMatMulV2_61
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_181
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: out_attn_conv_SN_sn_layer
+      scope: out_attn_conv_SN
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_Reshape_181
+        - 0
+        - 0
+        - {}
+    name: out_attn_conv_SN_sn_layer
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        0: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 1
+          - &id024 !!python/object/apply:numpy.dtype
+            args:
+            - f4
+            - 0
+            - 1
+            state: !!python/tuple
+            - 3
+            - <
+            - null
+            - null
+            - null
+            - -1
+            - -1
+            - 0
+          - false
+          - !!binary |
+            AAAAAA==
+      dtype: float32
+      name: Mul_147
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Mul_147/x
+        - out_attn_conv_SN_sn_layer/out_attn_conv_SN_sn_layer/out_attn_conv_SN_conv_in_sn/BiasAdd_28
+        name: Mul_147
+        op: Mul
+      trainable: true
+    inbound_nodes:
+    - - - out_attn_conv_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Mul_147
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_271
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Mul_147
+        - AddV2_270
+        name: AddV2_271
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Mul_147
+        - 0
+        - 0
+        - &id014 {}
+      - - tf_op_layer_AddV2_270
+        - 0
+        - 0
+        - *id014
+    name: tf_op_layer_AddV2_271
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_274
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_271
+        - 0
+        - 0
+        - {}
+    name: elu_274
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_306
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_274/Elu
+        - MirrorPad_306/paddings
+        name: MirrorPad_306
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_274
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_306
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id015
+      name: md_resbk_0_res1_SN_sn_layer
+      scope: md_resbk_0_res1_SN
+      strides: *id016
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_306
+        - 0
+        - 0
+        - {}
+    name: md_resbk_0_res1_SN_sn_layer
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_275
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_0_res1_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: elu_275
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_307
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_275/Elu
+        - MirrorPad_307/paddings
+        name: MirrorPad_307
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_275
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_307
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id017
+      name: md_resbk_0_res2_SN_sn_layer
+      scope: md_resbk_0_res2_SN
+      strides: *id018
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_307
+        - 0
+        - 0
+        - {}
+    name: md_resbk_0_res2_SN_sn_layer
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id019
+      name: md_resbk_0_shortcut_SN_sn_layer
+      scope: md_resbk_0_shortcut_SN
+      strides: *id020
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_271
+        - 0
+        - 0
+        - {}
+    name: md_resbk_0_shortcut_SN_sn_layer
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_244
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_0_res2_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_244
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_245
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_0_shortcut_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_245
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_272
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - average_pooling2d_244/AvgPool
+        - average_pooling2d_245/AvgPool
+        name: AddV2_272
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - average_pooling2d_244
+        - 0
+        - 0
+        - &id021 {}
+      - - average_pooling2d_245
+        - 0
+        - 0
+        - *id021
+    name: tf_op_layer_AddV2_272
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_276
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_272
+        - 0
+        - 0
+        - {}
+    name: elu_276
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_308
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_276/Elu
+        - MirrorPad_308/paddings
+        name: MirrorPad_308
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_276
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_308
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id015
+      name: md_resbk_1_res1_SN_sn_layer
+      scope: md_resbk_1_res1_SN
+      strides: *id016
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_308
+        - 0
+        - 0
+        - {}
+    name: md_resbk_1_res1_SN_sn_layer
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_277
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_1_res1_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: elu_277
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_309
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_277/Elu
+        - MirrorPad_309/paddings
+        name: MirrorPad_309
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_277
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_309
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id017
+      name: md_resbk_1_res2_SN_sn_layer
+      scope: md_resbk_1_res2_SN
+      strides: *id018
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_309
+        - 0
+        - 0
+        - {}
+    name: md_resbk_1_res2_SN_sn_layer
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id019
+      name: md_resbk_1_shortcut_SN_sn_layer
+      scope: md_resbk_1_shortcut_SN
+      strides: *id020
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_272
+        - 0
+        - 0
+        - {}
+    name: md_resbk_1_shortcut_SN_sn_layer
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_246
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_1_res2_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_246
+  - class_name: AveragePooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: average_pooling2d_247
+      padding: same
+      pool_size: *id006
+      strides: *id007
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_1_shortcut_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: average_pooling2d_247
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_273
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - average_pooling2d_246/AvgPool
+        - average_pooling2d_247/AvgPool
+        name: AddV2_273
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - average_pooling2d_246
+        - 0
+        - 0
+        - &id022 {}
+      - - average_pooling2d_247
+        - 0
+        - 0
+        - *id022
+    name: tf_op_layer_AddV2_273
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_278
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_273
+        - 0
+        - 0
+        - {}
+    name: elu_278
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_310
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_278/Elu
+        - MirrorPad_310/paddings
+        name: MirrorPad_310
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_278
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_310
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id015
+      name: md_resbk_2_res1_SN_sn_layer
+      scope: md_resbk_2_res1_SN
+      strides: *id016
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_310
+        - 0
+        - 0
+        - {}
+    name: md_resbk_2_res1_SN_sn_layer
+  - class_name: ELU
+    config:
+      alpha: 1.0
+      dtype: float32
+      name: elu_279
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_2_res1_SN_sn_layer
+        - 0
+        - 0
+        - {}
+    name: elu_279
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            AAAAAAAAAAABAAAAAQAAAAEAAAABAAAAAAAAAAAAAAA=
+      dtype: float32
+      name: MirrorPad_311
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tpaddings:
+            type: DT_INT32
+          mode:
+            s: UkVGTEVDVA==
+        input:
+        - elu_279/Elu
+        - MirrorPad_311/paddings
+        name: MirrorPad_311
+        op: MirrorPad
+      trainable: true
+    inbound_nodes:
+    - - - elu_279
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_MirrorPad_311
+  - class_name: ConvSN2D
+    config:
+      dtype: float32
+      eps: 1.0e-12
+      filters: 64
+      iteration: 1
+      kernel_size: *id017
+      name: md_resbk_2_res2_SN_sn_layer
+      scope: md_resbk_2_res2_SN
+      strides: *id018
+      trainable: true
+      training: true
+    inbound_nodes:
+    - - - tf_op_layer_MirrorPad_311
+        - 0
+        - 0
+        - {}
+    name: md_resbk_2_res2_SN_sn_layer
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_274
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - md_resbk_2_res2_SN_sn_layer/md_resbk_2_res2_SN_sn_layer/md_resbk_2_res2_SN_conv_in_sn/BiasAdd_30
+        - AddV2_273
+        name: AddV2_274
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - md_resbk_2_res2_SN_sn_layer
+        - 0
+        - 0
+        - &id023 {}
+      - - tf_op_layer_AddV2_273
+        - 0
+        - 0
+        - *id023
+    name: tf_op_layer_AddV2_274
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 2
+          - *id002
+          - false
+          - !!binary |
+            /////wAQAAA=
+      dtype: float32
+      name: Reshape_182
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - AddV2_274
+        - Reshape_182/shape
+        name: Reshape_182
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_274
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_182
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      name: mdl_nn_mlp_o1
+      trainable: true
+      units: 1024
+      use_bias: true
+    inbound_nodes:
+    - - - tf_op_layer_Reshape_182
+        - 0
+        - 0
+        - {}
+    name: mdl_nn_mlp_o1
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      name: mdl_nn_mlp_o2
+      trainable: true
+      units: 1024
+      use_bias: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_o1
+        - 0
+        - 0
+        - {}
+    name: mdl_nn_mlp_o2
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id024
+        - !!binary |
+          AACAPg==
+      dtype: float32
+      name: Mul_149
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - mdl_nn_mlp_o2/Elu_30
+        - Mul_149/y
+        name: Mul_149
+        op: Mul
+      trainable: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_o2
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Mul_149
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_275
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - mdl_nn_mlp_o1/Elu_30
+        - Mul_149
+        name: AddV2_275
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_o1
+        - 0
+        - 0
+        - &id025 {}
+      - - tf_op_layer_Mul_149
+        - 0
+        - 0
+        - *id025
+    name: tf_op_layer_AddV2_275
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      name: mdl_nn_mlp_o3
+      trainable: true
+      units: 1024
+      use_bias: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_275
+        - 0
+        - 0
+        - {}
+    name: mdl_nn_mlp_o3
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id024
+        - !!binary |
+          AACAPg==
+      dtype: float32
+      name: Mul_150
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - AddV2_275
+        - Mul_150/y
+        name: Mul_150
+        op: Mul
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_275
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Mul_150
+  - class_name: TensorFlowOpLayer
+    config:
+      constants: {}
+      dtype: float32
+      name: AddV2_276
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - mdl_nn_mlp_o3/Elu_29
+        - Mul_150
+        name: AddV2_276
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_o3
+        - 0
+        - 0
+        - &id026 {}
+      - - tf_op_layer_Mul_150
+        - 0
+        - 0
+        - *id026
+    name: tf_op_layer_AddV2_276
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      name: mdl_nn_mlp_of2
+      trainable: true
+      units: 1024
+      use_bias: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_276
+        - 0
+        - 0
+        - {}
+    name: mdl_nn_mlp_of2
+  - class_name: Dense
+    config:
+      activation: tanh
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      name: mdl_nn_mlp_of3
+      trainable: true
+      units: 52
+      use_bias: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_of2
+        - 0
+        - 0
+        - {}
+    name: mdl_nn_mlp_of3
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id024
+        - !!binary |
+          AACMQg==
+      dtype: float32
+      name: Mul_151
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - mdl_nn_mlp_of3/Tanh_28
+        - Mul_151/y
+        name: Mul_151
+        op: Mul
+      trainable: true
+    inbound_nodes:
+    - - - mdl_nn_mlp_of3
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Mul_151
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray.scalar
+        - *id024
+        - !!binary |
+          AABIQg==
+      dtype: float32
+      name: AddV2_277
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+        input:
+        - Mul_151
+        - AddV2_277/y
+        name: AddV2_277
+        op: AddV2
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_Mul_151
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_AddV2_277
+  - class_name: TensorFlowOpLayer
+    config:
+      constants:
+        1: !!python/object/apply:numpy.core.multiarray._reconstruct
+          args:
+          - *id001
+          - !!python/tuple
+            - 0
+          - !!binary |
+            Yg==
+          state: !!python/tuple
+          - 1
+          - !!python/tuple
+            - 4
+          - *id002
+          - false
+          - !!binary |
+            /////w0AAAAEAAAAAQAAAA==
+      dtype: float32
+      name: Reshape_183
+      node_def:
+        attr:
+          T:
+            type: DT_FLOAT
+          Tshape:
+            type: DT_INT32
+        input:
+        - AddV2_277
+        - Reshape_183/shape
+        name: Reshape_183
+        op: Reshape
+      trainable: true
+    inbound_nodes:
+    - - - tf_op_layer_AddV2_277
+        - 0
+        - 0
+        - {}
+    name: tf_op_layer_Reshape_183
+  name: functional_56
+  output_layers:
+  - - tf_op_layer_Reshape_183
+    - 0
+    - 0
+keras_version: 2.4.0

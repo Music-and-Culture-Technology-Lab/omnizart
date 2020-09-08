@@ -1,0 +1,26 @@
+{
+  "model_name": "Maestro-Note",
+  "model_type": "attn",
+  "output_classes": 3,
+  "label_type": "frame_onset",
+  "timesteps": 128,
+  "frame_threshold": 0.5,
+  "instrument_threshold": 1.1,
+  "onset_threshold": 6,
+  "duration_threshold": 0,
+  "feature_type": "CFP",
+  "input_channels": [
+    1,
+    3
+  ],
+  "training_settings": {
+    "dataset": "Maestro",
+    "epochs": 20,
+    "steps": 3000,
+    "train_batch_size": 8,
+    "val_batch_size": 8,
+    "loss_function": "smooth",
+    "early_stop": 6
+  },
+  "description": "            Model name: Maestro-Note\n            Input feature type: CFP\n            Input channels: [1, 3]\n            Timesteps: 128\n            Label type: frame_onset\n            Thresholds:\n                Instrument: 1.1\n                Frame: 0.5\n                Onset: 6\n                Duration: 0\n            Training settings:\n                Previously trained on Maestro\n                Maximum epochs: 20\n                Steps per epoch: 3000\n                Training batch size: 8\n                Validation batch size: 8\n                Loss function type: smooth\n                Early stopping: 6\n        "
+}
