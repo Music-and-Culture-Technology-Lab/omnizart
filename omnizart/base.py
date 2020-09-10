@@ -3,12 +3,9 @@ from abc import ABCMeta, abstractmethod
 
 from tensorflow.keras.models import model_from_yaml
 
-import omnizart
+from omnizart import MODULE_PATH, SETTING_DIR
 from omnizart.utils import load_yaml, get_logger
 
-
-MODULE_PATH = os.path.abspath(omnizart.__file__ + "/..")
-SETTING_DIR = os.path.join(MODULE_PATH, "defaults")
 
 logger = get_logger("Base Class")
 
@@ -46,6 +43,18 @@ class BaseTranscription(metaclass=ABCMeta):
             logger.info("Using built-in model %s for transcription.", model_path)
         elif not os.path.exists(model_path):
             raise FileNotFoundError(f"The given path doesn't exist: {model_path}.")
+        elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \
+                and not set(["arch.yaml", "weights.h5", "configurations.yaml"]).issubset(os.listdir(model_path)):
+            # Search checkpoint folders under the given path
+            dirs = [c_dir for c_dir in os.listdir(model_path) if os.path.isdir(c_dir)]
+            prefix = self.settings.model.save_prefix.lower()
+            cand_dirs = [c_dir for c_dir in dirs if c_dir.startswith(prefix)]
+
+            if len(cand_dirs) == 0:
+                raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}.")
+            elif len(cand_dirs) > 1:
+                logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
+            model_path = os.path.join(model_path, cand_dirs[0])
 
         arch_path = os.path.join(model_path, "arch.yaml")
         weight_path = os.path.join(model_path, "weights.h5")

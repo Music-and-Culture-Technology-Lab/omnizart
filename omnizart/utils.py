@@ -11,26 +11,36 @@ import librosa
 import jsonschema
 
 
-def get_logger(name=None, level="info"):
+def get_logger(name=None, level="warn"):
     logger_name = str(uuid.uuid4())[:8] if name is None else name
     logger = logging.getLogger(logger_name)
-
-    msg_format = "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]"
-    date_format = "%Y-%m-%d %H:%M:%S"
-    if len(logger.handlers) == 0:
-        formatter = logging.Formatter(fmt=msg_format, datefmt=date_format)
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-    level_mapping = {
-        "info": logging.INFO,
-        "warn": logging.WARN,
-        "warning": logging.WARNING,
-        "debug": logging.DEBUG,
-        "error": logging.ERROR
-    }
     level = os.environ.get("LOG_LEVEL", level)
+
+    msg_formats = {
+        "debug": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]",
+        "info": "%(asctime)s %(message)s  [at %(filename)s:%(lineno)d]",
+        "warn": "%(asctime)s %(message)s",
+        "warning": "%(asctime)s %(message)s",
+        "error": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]",
+        "critical": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]"
+    }
+    level_mapping = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warn": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }
+
+    date_format = "%Y-%m-%d %H:%M:%S"
+    formatter = logging.Formatter(fmt=msg_formats[level.lower()], datefmt=date_format)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    if len(logger.handlers) > 0:
+        rm_idx = [idx for idx, handler in enumerate(logger.handlers) if isinstance(handler, logging.StreamHandler)]
+        del logger.handlers[rm_idx]
+    logger.addHandler(handler)
     logger.setLevel(level_mapping[level.lower()])
     return logger
 

@@ -85,6 +85,7 @@ class DrumSettings:
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
         self.feature = self.DrumFeature()
+        self.model = self.DrumModel()
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class DrumFeature:
@@ -95,3 +96,9 @@ class DrumSettings:
             self.hop_size: int = None
             self.mini_beat_per_bar: int = None
             self.mini_beat_per_segment: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class DrumModel:
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None

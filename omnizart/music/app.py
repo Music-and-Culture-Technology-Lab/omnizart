@@ -87,9 +87,11 @@ class MusicTranscription(BaseTranscription):
             channel_program_mapping=MUSICNET_INSTRUMENT_PROGRAMS,
         )
 
-        save_to = os.path.join(output, os.path.basename(input_audio).replace(".wav", ".mid"))
-        midi.write(save_to)
-        logger.info("MIDI file has been written to %s", save_to)
+        if output is not None:
+            save_to = os.path.join(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            midi.write(save_to)
+            logger.info("MIDI file has been written to %s", save_to)
+        return midi
 
     def _predict(self, feature, model, timesteps=128, feature_num=384, batch_size=4):
         """Make predictions on the feature.

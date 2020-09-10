@@ -1,7 +1,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart drum transribe` command.
+        Description: Mode of transcription by executing the `omnizart transribe drum` command.
         Type: String
         Value: Drum1
     CheckpointPath:
@@ -9,9 +9,9 @@ General:
         Type: Map
         SubType: [String, String]
         Value:
-            Drum1: ./checkpoints/drum/2p5
-            Drum2: ./checkpoints/drum/1p5
-            Drum3: ./checkpoints/drum/final
+            Drum1: ./checkpoints/drum/drum_2p5
+            Drum2: ./checkpoints/drum/drum_1p5
+            Drum3: ./checkpoints/drum/drum_final
     Feature:
         Description: Defatult settings of feature extraction for drum transcription.
         Settings:
@@ -39,4 +39,14 @@ General:
                 Description: Number of mini beats in a single 4/4 measure.
                 Type: Integer
                 Value: 4
-
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: drum
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/drum

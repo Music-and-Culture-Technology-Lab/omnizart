@@ -5,7 +5,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart music transribe` command.
+        Description: Mode of transcription by executing the `omnizart transribe music` command.
         Type: String 
         Value: Piano
     CheckpointPath:
@@ -13,7 +13,7 @@ General:
         Type: Map
         SubType: [String, String]
         Value:
-            Piano: ./checkpoints/music/Maestro-Note
+            Piano: ./checkpoints/music/music_piano
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -77,7 +77,7 @@ General:
             SavePrefix:
                 Description: Prefix of the trained model's name to be saved.
                 Type: String
-                Value: Music
+                Value: music
             SavePath:
                 Description: Path to save the trained model.
                 Type: String
