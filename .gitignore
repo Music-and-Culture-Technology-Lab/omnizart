@@ -15,6 +15,7 @@ __pycache__/
 .venv/
 bootstrap_data/
 .vscode/
+*.code-workspace
 
 # Built files
 dist/
