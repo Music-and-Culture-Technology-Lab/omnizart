@@ -15,7 +15,6 @@ from madmom.features import (
 
 from omnizart.utils import load_audio_with_librosa, get_logger
 
-
 logger = get_logger("Beat Extraction")
 
 
@@ -25,21 +24,28 @@ class MadmomBeatTracking:
     Three different beat tracking methods are used together for producing a more
     stable beat tracking result.
     """
+    def __init__(self, num_threads=3):
+        self.num_threads = num_threads
+
     def _get_dbn_down_beat(self, audio_data_in1, min_bpm_in=50, max_bpm_in=230):
         proccesor = DBNDownBeatTrackingProcessor(
-            beats_per_bar=[3, 4, 5, 6, 7], min_bpm=min_bpm_in, max_bpm=max_bpm_in, fps=100
+            beats_per_bar=[3, 4, 5, 6, 7],
+            min_bpm=min_bpm_in,
+            max_bpm=max_bpm_in,
+            fps=100,
+            num_threads=self.num_threads
         )
-        action = RNNDownBeatProcessor()(audio_data_in1)
+        action = RNNDownBeatProcessor(num_threads=self.num_threads)(audio_data_in1)
         return proccesor(action)[:, 0]
 
     def _get_dbn_beat(self, audio_data_in2):
-        proccesor = DBNBeatTrackingProcessor(fps=100)
-        action = RNNBeatProcessor()(audio_data_in2)
+        proccesor = DBNBeatTrackingProcessor(fps=100, num_threads=self.num_threads)
+        action = RNNBeatProcessor(num_threads=self.num_threads)(audio_data_in2)
         return proccesor(action)
 
     def _get_beat(self, audio_data_in3):
-        proccesor = BeatTrackingProcessor(fps=100)
-        action = RNNBeatProcessor()(audio_data_in3)
+        proccesor = BeatTrackingProcessor(fps=100, num_threads=self.num_threads)
+        action = RNNBeatProcessor(num_threads=self.num_threads)(audio_data_in3)
         return proccesor(action)
 
     def process(self, audio_data):
@@ -50,11 +56,7 @@ class MadmomBeatTracking:
             future_2 = executor.submit(self._get_dbn_beat, audio_data)
             future_3 = executor.submit(self._get_beat, audio_data)
 
-            queue = {
-                future_1: "dbn_down_beat",
-                future_2: "dbn_beat",
-                future_3: "beat"
-            }
+            queue = {future_1: "dbn_down_beat", future_2: "dbn_beat", future_3: "beat"}
 
         results = {}
         for future in concurrent.futures.as_completed(queue, timeout=120):
