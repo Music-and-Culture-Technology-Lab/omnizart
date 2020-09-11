@@ -1,3 +1,13 @@
+"""Application class of music.
+
+Inludes core functions and interfaces for transcribing the audio, train
+a model, generate feature of datasets, and evaluate on models.
+
+See Also
+--------
+omnizart.base.BaseTranscription: The base class of all transcription/application classes.
+"""
+
 # pylint: disable=C0103,W0612,E0611
 import os
 
@@ -13,7 +23,6 @@ from omnizart.utils import get_logger
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
 from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
-
 
 logger = get_logger("Music Transcription")
 
@@ -68,7 +77,7 @@ class MusicTranscription(BaseTranscription):
             "multi_instrument_note": "note-stream",
             "note": "note",
             "note-stream": "note-stream",
-            "frame-stream": "true_frame"
+            "frame-stream": "true_frame",
         }
 
         logger.info("Predicting...")

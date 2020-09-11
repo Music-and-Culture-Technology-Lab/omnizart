@@ -9,13 +9,13 @@ from omnizart.cli import apps
 from omnizart.utils import get_logger
 
 logger = get_logger("Trancribe CLI")
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 click.option = partial(click.option, show_default=True)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument("trans_type", type=click.Choice(list(apps.keys())+["all"], case_sensitive=False))
+@click.argument("trans_type", type=click.Choice(list(apps.keys()) + ["all"], case_sensitive=False))
 @click.argument("input_audio", type=click.Path(exists=True))
 @click.option(
     "-m",
@@ -58,10 +58,26 @@ def process_doc():
     # Some dirty work for preserving and converting the docstring inside the decorated
     # function into .rst format.
     doc = transcribe.__doc__
-    doc = doc.replace("\b", "").replace("    ", "").replace("--", "        --")
+    secs = doc.split("\n\n")
+    secs = [sec.replace("    ", "") for sec in secs]
 
+    # List of available functions
+    func_sec = secs[2]
+    func_sec = func_sec.replace("functions are:", "functions are:\n\n")
+    func_sec = func_sec.replace("* ", "* ``").replace(" -", "`` -")
+    secs[2] = func_sec
+
+    # Example section
+    example_sec = secs[-1]
+    space = " " * 8
+    example_sec = (
+        example_sec.replace("\b", "").replace("--", space + "--").replace("example.wav", space + "example.wav")
+    )
     code_block = "\n.. code-block:: bash\n\n"
-    doc = doc.replace("$", f"{code_block}    $")
+    example_sec = example_sec.replace("$", f"{code_block}    $")
+
+    secs[-1] = example_sec
+    doc = "\n\n".join(secs)
 
     return doc
 

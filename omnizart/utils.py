@@ -12,6 +12,21 @@ import jsonschema
 
 
 def get_logger(name=None, level="warn"):
+    """Get the logger for printing informations.
+
+    Used for layout the information of various stages while executing the program.
+    Set the environment variable ``LOG_LEVEL`` to change the default level.
+
+    Parameters
+    ----------
+    name: str
+        Name of the logger.
+    level: {'debug', 'info', 'warn', 'warning', 'error', 'critical'}
+        Level of the logger. The level 'warn' and 'warning' are different. The former
+        is the default level and the actual level is set to logging.INFO, and for
+        'warning' which will be set to true logging.WARN level. The purpose behind this
+        design is to categorize the message layout into several different formats.
+    """
     logger_name = str(uuid.uuid4())[:8] if name is None else name
     logger = logging.getLogger(logger_name)
     level = os.environ.get("LOG_LEVEL", level)
@@ -22,7 +37,7 @@ def get_logger(name=None, level="warn"):
         "warn": "%(asctime)s %(message)s",
         "warning": "%(asctime)s %(message)s",
         "error": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]",
-        "critical": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]"
+        "critical": "%(asctime)s [%(levelname)s] %(message)s  [at %(filename)s:%(lineno)d]",
     }
     level_mapping = {
         "debug": logging.DEBUG,
@@ -30,7 +45,7 @@ def get_logger(name=None, level="warn"):
         "warn": logging.INFO,
         "warning": logging.WARNING,
         "error": logging.ERROR,
-        "critical": logging.CRITICAL
+        "critical": logging.CRITICAL,
     }
 
     date_format = "%Y-%m-%d %H:%M:%S"
