@@ -31,8 +31,7 @@ release = '0.1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'numpydoc',
-    'sphinxcontrib.fulltoc'
+    'numpydoc'
 ]
 numpydoc_show_inherited_class_members = False
 

@@ -4,10 +4,10 @@ Music Transcription
 Transcribes notes of each instruments in the music.
 
 
-Transcribe
-##########
-
-.. autofunction:: omnizart.music.transcribe
+App
+###
+.. automodule:: omnizart.music.app
+    :members:
 
 
 Inference
@@ -21,11 +21,6 @@ Loss Functions
 .. automodule:: omnizart.music.losses
     :members:
 
-Model Manager
-#############
-.. automodule:: omnizart.music.model_manager
-    :members:
-    :show-inheritance:
 
 Utils
 #####

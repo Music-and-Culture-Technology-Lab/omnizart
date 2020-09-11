@@ -1,8 +1,7 @@
 Models
 ======
 
-Module
-######
+.. Introduction
 
 .. automodule:: omnizart.models
     :members:

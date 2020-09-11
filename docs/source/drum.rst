@@ -8,15 +8,8 @@ Drum Transcription
 Transcribe
 ##########
 
-.. autofunction:: omnizart.drum.transcribe
+.. autofunction:: omnizart.drum.app.DrumTranscription.transcribe
 
-
-Feature
-#######
-
-.. automodule:: omnizart.drum.patched_cqt
-    :members:
-    :undoc-members:
 
 Utils
 #####

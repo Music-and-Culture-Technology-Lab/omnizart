@@ -14,19 +14,27 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Index
+   :caption: Contents
 
-   cli/index.rst
+   quick-start.rst
+   cli.rst
+   
+   
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+
    music.rst
    drum.rst
+   base.rst
    feature.rst
    models.rst
    constants.rst
-   io_utils.rst
+   utils.rst
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. Indices and tables
+  ==================
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

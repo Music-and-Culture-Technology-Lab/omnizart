@@ -1,8 +1,8 @@
 Feature
 =======
 
-Module
-######
+
+.. Introduction
 
 .. automodule:: omnizart.feature
     :members:

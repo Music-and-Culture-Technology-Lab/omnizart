@@ -14,14 +14,12 @@ This page describes the basic concept and usage of ``omnizart`` command.
 
 The root entry is ``omnizart``, and followed by several sub-commands. To see a list of available sub-commands, type ``omnizart --help``.
 
-More detail descriptions and usage of each sub-commands can be found from their own page.
+More detailed descriptions and the usage of each sub-commands can be found from their own page.
 
 
-Sub-Commands
-############
+Transcribe
+##########
 
-.. toctree::
-   :maxdepth: 1
-
-   music.rst
+.. automodule:: omnizart.cli.transcribe
+   :members:
 

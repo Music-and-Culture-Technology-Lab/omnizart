@@ -1,18 +1,7 @@
 Constants
 =========
 
-Settings that should not be modified easily within the scope of this project.
-There are three categories of settings:
-
-* Feature
-* Datasets
-* Midi
-
-See descriptions below.
-
-
-Module
-######
+.. Introduction
 
 .. automodule:: omnizart.constants
     :members:
