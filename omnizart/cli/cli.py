@@ -9,7 +9,6 @@ Examples
     omnizart --help
     omnizart music --help
 """
-import os
 
 import click
 

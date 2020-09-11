@@ -47,14 +47,15 @@ class BaseTranscription(metaclass=ABCMeta):
             logger.info("Using built-in model %s for transcription.", model_path)
         elif not os.path.exists(model_path):
             raise FileNotFoundError(f"The given path doesn't exist: {model_path}.")
-        elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \ 
+        elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \
                 and not set(["arch.yaml", "weights.h5", "configurations.yaml"]).issubset(os.listdir(model_path)):
+
             # Search checkpoint folders under the given path
             dirs = [c_dir for c_dir in os.listdir(model_path) if os.path.isdir(c_dir)]
             prefix = self.settings.model.save_prefix.lower()
             cand_dirs = [c_dir for c_dir in dirs if c_dir.startswith(prefix)]
 
-            if len(cand_dirs) == 0:
+            if len(cand_dirs) == 0:  # pylint: disable=R1720
                 raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}.")
             elif len(cand_dirs) > 1:
                 logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
@@ -66,5 +67,5 @@ class BaseTranscription(metaclass=ABCMeta):
 
         return arch_path, weight_path, conf_path
 
-    def _get_model_from_yaml(self, arch_path, custom_objects=None):
+    def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
         return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)

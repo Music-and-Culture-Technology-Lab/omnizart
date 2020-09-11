@@ -7,4 +7,3 @@ def process(apps, **kwargs):
         midi = app.transcribe(output=None, **kwargs)
         mix_midi.instruments += midi.instruments
     return mix_midi
-    

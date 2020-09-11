@@ -32,7 +32,7 @@ def transcribe(trans_type, input_audio, model_path, output):
     input audio, except the extension will be replaced with '.mid'.
 
     \b
-    Available functions are: 
+    Available functions are:
     * music - trancribes instrument notes
     * drum - transcribes drum percussions
     * vocal - transcribes vocal melodies

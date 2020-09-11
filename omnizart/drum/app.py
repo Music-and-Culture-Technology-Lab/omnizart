@@ -67,7 +67,7 @@ class DrumTranscription(BaseTranscription):
 
         return pred
 
-    def _predict(self, cqt_feature, mini_beat_arr, model, mini_beat_per_seg, batch_size=6):
+    def _predict(self, cqt_feature, mini_beat_arr, model, mini_beat_per_seg, batch_size=6):  # pylint: disable=R0201
         patch_cqt_feature = extract_patch_cqt(cqt_feature, mini_beat_arr)
         batches = create_batches(patch_cqt_feature, mini_beat_per_seg, b_size=batch_size)
         batch_pred = []
