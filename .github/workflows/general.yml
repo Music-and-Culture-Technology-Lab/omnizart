@@ -7,7 +7,7 @@ name: general-check
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, github-workflow ]
   pull_request:
     branches: [ master ]
     
@@ -20,7 +20,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7]
     env:
-        DEFAULT_VENV_APPROACH: venv
+        DEFAULT_VENV_APPROACH: poetry
 
     steps:
     - uses: actions/checkout@v2
@@ -30,21 +30,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        ./scripts/install.sh
         pip install flake8 pytest pylint
     - name: Check with linters
       run: |
-        pip install Cython
-        make install
-        source .venv/bin/activate
         make check
-        deactivate
     - name: Test with pytest
       run: |
         make test
-    - name: Test installation
-      run: |
-        pip install --upgrade setuptools
-        pip install madmom
-        python setup.py install
-
