@@ -16,17 +16,17 @@ set -e
 # finished, just activate the environment and enjoy~.
 
 
+USE_VENV=false
+if [ ! -z "$1" ] && [ "$1" = "venv"  ]; then
+    USE_VENV=true
+fi
+
 VENV_APPROACH="${DEFAULT_VENV_APPROACH:=venv}"
-echo "Using $VENV_APPROACH to create virtual environment"
+if [ "$USE_VENV" = "true" ]; then echo "Using $VENV_APPROACH to create virtual environment"; fi
+
 
 
 activate_venv_with_poetry() {
-    if ! hash poetry 2>/dev/null; then
-        # Poetry haven't been installed, install it first.
-        echo "Installing poetry..."
-        pip install poetry
-    fi
-
     # Create virtual environment.
     poetry shell
 
@@ -51,6 +51,14 @@ pre_install() {
 
 install_with_poetry() {
     pre_install
+    if ! hash poetry 2>/dev/null; then
+        echo "Installing poetry..."
+        pip install poetry
+    fi
+    
+    if [ "$USE_VENV" = "false" ]; then
+        poetry config virtualenvs.create false
+    fi
     poetry install --no-dev
 }
 
@@ -77,15 +85,19 @@ check_if_venv_activated() {
 
 
 if [ "$VENV_APPROACH" = "poetry"  ]; then
-    activate_venv_with_poetry
-    check_if_venv_activated
+    if [ "$USE_VENV" = "true" ]; then
+        activate_venv_with_poetry
+        check_if_venv_activated
+    fi
     install_with_poetry
 
     echo -e "\nTo activate the environment, run the following command:"
     echo "source \$(dirname \$(poetry run which python))/activate"
 elif [ "$VENV_APPROACH" = "venv" ]; then
-    activate_venv_with_venv
-    check_if_venv_activated
+    if [ "$USE_VENV" = "venv" ]; then
+        activate_venv_with_venv
+        check_if_venv_activated
+    fi
     install_with_pip
 
     echo -e "\nTo activate the environment, run the following command:"

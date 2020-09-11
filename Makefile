@@ -54,7 +54,7 @@ export:
 
 .PHONY: install
 install:
-	@./scripts/install.sh
+	@./scripts/install.sh venv
 
 .PHONY: clean
 clean:
