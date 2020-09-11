@@ -19,7 +19,7 @@ Combines all the hard works developed by everyone in MCTLab into a single comman
 
 Example usage
 <pre>
-omnizart music transcribe --audio-path <i>path/to/audio</i> --model-path <i>path/to/model</i>
+omnizart transcribe music <i>path/to/audio</i> --model-path <i>path/to/model</i>
 </pre>
 
 
@@ -42,15 +42,27 @@ All documents and docstrings use **reStructured Text** format. More informations
 [Sphinx's Document](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html).
 
 ## Linters
-flake8, pylint, black
+Uses flake8 and pylint for coding style check.
 
-To check with linters, execute `make check`. To format the code with black, enter `make format`.
+To check with linters, execute `make check`.
+
+You don't have to achieve a full score on pylint check, just pass 9.5 point still counted as a successful check.
+
+### Caution!
+There is convenient make command for formating the code, but it should be used very carefully.
+Not only it could format the code for you, but also could mess up the code, and eventually you should still need
+to check the format manually after refacorting the code with tools. 
+
+To format the code with black and yapf, enter `make format`.
 
 ## Unittest
 Uses `pytest` for unittesting. Under construction...
 
 ## CI/CD
 Uses github actions for automatic linting, unittesting, document building, and package release. Under construction...
+
+## Docker
+Pack everything into a docker file. Under construction...
 
 ## Command Test
 To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 
