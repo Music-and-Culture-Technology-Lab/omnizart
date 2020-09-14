@@ -71,6 +71,13 @@ def create_batches(feature, mini_beat_per_seg, b_size=6):
         Dimensions are [batches x b_size x time x freq x mini_beat_per_seg].
     """
     assert (len(feature.shape) == 3), f"Invalid feature shape: {feature.shape}. Should be three dimensional."
+
+    # Pad zeros to the end of the feature if not long enough.
+    if len(feature) < mini_beat_per_seg:
+        pad_len = mini_beat_per_seg - len(feature)
+        pads = np.zeros((pad_len, *feature.shape[1:]))
+        feature = np.concatenate([feature, pads])
+
     hops = len(feature) - mini_beat_per_seg + 1
     hop_list = []
     for idx in range(hops):
@@ -93,8 +100,10 @@ def create_batches(feature, mini_beat_per_seg, b_size=6):
 def merge_batches(batch_pred):
     """Reverse process of create_batches.
 
-    Merges a 5D batched-prediction into 3D output.
+    Merges a 5D batched-prediction into 2D output.
     """
+    assert(len(batch_pred.shape) == 5)
+    assert(batch_pred.shape[-1] == 1)
 
     batches, b_size, out_classes, mini_beat_per_seg = batch_pred.shape[:4]
     pred = np.zeros((batches*b_size + mini_beat_per_seg - 1, out_classes))  # noqa: E226
@@ -104,8 +113,9 @@ def merge_batches(batch_pred):
             end_idx = start_idx + mini_beat_per_seg
             pred[start_idx:end_idx] += step.T.squeeze()
 
-    pred[mini_beat_per_seg - 1:1 - mini_beat_per_seg] /= mini_beat_per_seg
-    for idx in range(mini_beat_per_seg - 1):
+    max_len = min(mini_beat_per_seg - 1, len(pred) - mini_beat_per_seg)
+    pred[max_len:-max_len] /= max_len + 1
+    for idx in range(max_len):
         pred[idx] /= idx + 1
         pred[-1 - idx] /= idx + 1
     return pred

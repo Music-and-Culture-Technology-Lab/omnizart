@@ -128,7 +128,7 @@ def write_yaml(json_obj, output_path):
 
 def camel_to_snake(string):
     """Convert a camel case to snake case"""
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", string).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", string).lower().replace("__", "_")
 
 
 def snake_to_camel(string):
@@ -188,7 +188,12 @@ def json_serializable(key_path="./", value_path="./"):
     Notes
     -----
     The attributes should be defined inside '__init__', or those defined as
-    class attributes will not be serialized.
+    class attributes will not be serialized as thery are invisible for
+    __dict__ attribute.
+
+    See Also
+    --------
+    tests.test_utils.test_normal_serializable: Unit test of this decorator.
 
     """
     def from_json(self, json_obj):
@@ -203,7 +208,8 @@ def json_serializable(key_path="./", value_path="./"):
         k_obj = json_obj
         if len(self.key_path) != 0:
             for key in self.key_path.split("/"):
-                k_obj = k_obj[key]
+                cmk = snake_to_camel(key)
+                k_obj = k_obj[cmk]
 
         # Iterate through the target key-value pair, and assign the value to the object
         for key in self.__dict__:
@@ -224,8 +230,10 @@ def json_serializable(key_path="./", value_path="./"):
                 value = k_obj[camel_key]
                 if len(self.value_path) != 0:
                     for v_key in self.value_path.split("/"):
-                        value = value[v_key]
+                        cmv = snake_to_camel(v_key)
+                        value = value[cmv]
                 self.__dict__[key] = value
+        return self
 
     def to_json(self):
         if self.key_path.startswith("./"):
@@ -256,7 +264,8 @@ def json_serializable(key_path="./", value_path="./"):
                     camel_v_key = snake_to_camel(v_key)
                     v_ref[camel_v_key] = {}
                     v_ref = v_ref[camel_v_key]
-                v_ref[v_keys[-1]] = value
+                camel_last_v_key = snake_to_camel(v_keys[-1])
+                v_ref[camel_last_v_key] = value
             else:
                 ref[camel_key] = value
         return json_obj
