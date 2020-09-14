@@ -83,7 +83,7 @@ def infer_piece(piece, shortest_sec=0.1, offset_sec=0.12, t_unit=0.02):
 
 def find_min_max_stren(notes):
     """Function for detemine the note velocity accroding to prediction value.
-    
+
     Parameters
     ----------
     notes: list[dict]

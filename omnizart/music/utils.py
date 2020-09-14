@@ -43,7 +43,7 @@ def create_batches(feature, b_size, timesteps, feature_num=384):
             if start_i >= f_len:
                 break
             end_i = min(start_i + timesteps, len(feature))
-            container[ii, 0:(end_i-start_i)] = feature[start_i:end_i]
+            container[ii, 0:(end_i - start_i)] = feature[start_i:end_i]
         batch.append(container)
 
     return batch
@@ -101,7 +101,7 @@ def down_sample(pred, occur_num=3):
         Thresholded prediction with multiple channels. Dimension: [timesteps x pitch x instruments]
     occur_num: int
         Minimum occurance of each pitch for determining true activation of the pitch.
-    
+
     Returns
     -------
     d_sample: 3D numpy array
