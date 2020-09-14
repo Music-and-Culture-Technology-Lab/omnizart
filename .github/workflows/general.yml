@@ -34,7 +34,7 @@ jobs:
         pip install flake8 pytest pylint
     - name: Check with linters
       run: |
-        make check
+        make lint
     - name: Test with pytest
       run: |
         make test

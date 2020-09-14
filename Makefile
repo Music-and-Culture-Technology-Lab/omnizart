@@ -8,8 +8,8 @@ all: check test
 # Linter
 # --------------------------------------------------------------
 
-.PHONY: check
-check: check-flake check-pylint
+.PHONY: lint
+lint: check-flake check-pylint
 
 .PHONY: check-flake
 check-flake:
