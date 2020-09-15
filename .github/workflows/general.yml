@@ -32,7 +32,7 @@ jobs:
       run: |
         sudo apt-get install libsndfile1
         ./scripts/install.sh
-        pip install flake8 pytest pylint
+        pip install flake8 pylint pytest pytest-cov
     - name: Check with linters
       run: |
         make lint
