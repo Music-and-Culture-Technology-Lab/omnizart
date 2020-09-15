@@ -28,17 +28,17 @@ def infer_pitch(pitch, shortest=5, offset_interval=6):
     adjust = 5 if shortest == 10 else 2
     for i in range(len(peaks) - 1):
         notes.append({"start": peaks[i] - adjust, "end": peaks[i + 1] - adjust, "stren": pitch[peaks[i], 2]})
-    notes.append({"start": peaks[-1] - adjust, "end": len(w_on), "stren": pitch[peaks[-1], 2]})
+    notes.append({"start": peaks[-1] - adjust, "end": len(w_on) - adjust, "stren": pitch[peaks[-1], 2]})
 
     del_idx = []
     for idx, peak in enumerate(peaks):
-        upper = int(peaks[idx + 1]) if idx < len(peaks) - 2 else len(w_dura)
+        upper = int(peaks[idx + 1]) if idx < len(peaks) - 1 else len(w_dura)
         for i in range(peak, upper):
             if np.sum(w_dura[i:i + offset_interval]) == 0:
-                if i - notes[idx]["start"] < shortest:
+                if i - notes[idx]["start"] - adjust < shortest - 1:
                     del_idx.append(idx)
                 else:
-                    notes[idx]["end"] = i
+                    notes[idx]["end"] = i - adjust
                 break
 
     for ii, i in enumerate(del_idx):
@@ -82,23 +82,32 @@ def infer_piece(piece, shortest_sec=0.1, offset_sec=0.12, t_unit=0.02):
 
 
 def find_min_max_stren(notes):
-    min_v = 999
-    max_v = 0
-    for note in notes:
-        nn_s = note["stren"]
-        if nn_s > max_v:
-            max_v = nn_s
-        if nn_s < min_v:
-            min_v = nn_s
-
-    return min_v, max_v
+    """Function for detemine the note velocity accroding to prediction value.
+    
+    Parameters
+    ----------
+    notes: list[dict]
+        Data structure returned by function `infer_piece`.
+    """
+    stren = [nn["stren"] for nn in notes]
+    return np.min(stren), np.max(stren)
 
 
 def find_occur(pitch, t_unit=0.02, min_duration=0.03):
-    """Find the onset and offset of a thresholded frame-level prediction."""
+    """Find the onset and offset of a thresholded prediction.
+
+    Parameters
+    ----------
+    pitch: 1D numpy array
+        Time series of predicted pitch activations.
+    t_unit: float
+        Time unit of each entry.
+    min_duration: float
+        Minimum interval of each note in seconds.
+    """
 
     min_duration = max(t_unit, min_duration)
-    min_frm = min_duration / t_unit
+    min_frm = max(0.1, min_duration/t_unit - 1)  # noqa: E226
 
     cand = np.where(pitch > 0.5)[0]
     if len(cand) == 0:

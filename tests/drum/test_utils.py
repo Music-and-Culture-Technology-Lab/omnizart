@@ -1,7 +1,26 @@
+import pickle
+
 import pytest
 import numpy as np
 
 from omnizart.drum import utils
+
+
+def test_get_frame_by_time():
+    assert utils.get_frame_by_time(150) == 25840
+    assert utils.get_frame_by_time(77, 16000) == 4812
+    assert utils.get_frame_by_time(2, 16000, 128) == 250
+
+
+def test_extract_patch_cqt():
+    data = pickle.load(open("tests/resource/sample_feature.pickle", "rb"))
+    mini_beat_arr = data["mini_beat_arr"]
+    cqt = data["cqt"]
+    patch_cqt = data["patch_cqt"]
+    extracted = utils.extract_patch_cqt(cqt, mini_beat_arr, sampling_rate=44100, hop_size=256)
+
+    assert extracted.shape == (1100, 120, 120)
+    assert np.array_equiv(patch_cqt, extracted)
 
 
 @pytest.mark.parametrize("shape,mini_beat_per_seg,batch_size", [

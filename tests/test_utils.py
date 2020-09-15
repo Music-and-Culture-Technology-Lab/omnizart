@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 from jsonschema import ValidationError
@@ -6,19 +7,30 @@ from jsonschema import ValidationError
 from omnizart import utils
 
 
-def test_pickle_io(tmp_path):
+def test_logger(caplog):
+    logger = utils.get_logger("MyLogger")
+    logger.info("hello")
+    for record in caplog.records:
+        assert record.levelname == "INFO"
+        assert "hello" in record.message
+
+    logger = utils.get_logger("MyLogger")
+    assert len(logger.handlers) == 1
+
+
+def test_pickle_io():
     data = {
         "int": 1,
         "list": [1,2,3],
         "dict": {"a": "haha", "b": "iii"},
         "rrrr": "RRRRRRRRRRRRRRRRRR!"
     }
-
-    f_name = tmp_path.joinpath("test.pickle")
+    path = "./tmp/"
+    f_name = os.path.join(path, "one_more_level", "test.pickle")
     utils.dump_pickle(data, f_name)
     loaded = utils.load_pickle(f_name)
-
     assert data == loaded
+    shutil.rmtree(path)
 
 
 def test_yaml_io(tmp_path):
@@ -56,6 +68,14 @@ def test_snake_to_camel(name, expected):
 ])
 def test_camel_to_snake(name, expected):
     assert utils.camel_to_snake(name) == expected
+
+
+def test_load_audio_with_librosa():
+    audio = "./tests/resource/sample.wav"
+    samp = 16000
+    data, sampling_rate = utils.load_audio_with_librosa(audio, sampling_rate=samp)
+    assert sampling_rate == samp
+    assert len(data) == 749252
 
 
 @utils.json_serializable()
@@ -136,3 +156,22 @@ def test_serializable_with_schema():
     example_input["Settings"]["Nested"]["B"] = "Some non-null value"
     with pytest.raises(ValidationError):
         data_b.from_json(example_input)
+
+
+def test_serializable_fail_to_match_attributes():
+    data_a = DataA()
+    data = {"A": 20, "B": "bbbbb"}
+    with pytest.raises(AttributeError) as exc:
+        data_a.from_json(data)
+        assert "Attribute C is not defined in configuration file for class DataA" in exc
+
+
+def test_serializable_recursive_value_path():
+    data_a = DataA()
+    data_a.value_path = "./level1/level2"
+    data = {
+        "A": {"Level1": {"Level2": 10}},
+        "B": {"Level1": {"Level2": None}},
+        "C": {"Level1": {"Level2": "HelloWorld"}}
+    }
+    assert data_a.to_json() == data

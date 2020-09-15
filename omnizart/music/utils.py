@@ -43,10 +43,7 @@ def create_batches(feature, b_size, timesteps, feature_num=384):
             if start_i >= f_len:
                 break
             end_i = min(start_i + timesteps, len(feature))
-            length = end_i - start_i
-
-            part = feature[start_i:start_i + length]
-            container[ii, 0:length] = part
+            container[ii, 0:(end_i-start_i)] = feature[start_i:end_i]
         batch.append(container)
 
     return batch
@@ -81,14 +78,14 @@ def roll_down_sample(data, occur_num=3, base=88):
     assert total_roll % base == 0, f"Wrong length: {total_roll}, {total_roll} % {base} should be zero!"
 
     scale = round(total_roll / base)
-    assert 0 < occur_num < scale
+    assert 0 < occur_num <= scale
 
     return_v = np.zeros((len(data), base), dtype=int)
 
     for i in range(0, data.shape[1], scale):
         total = np.sum(data[:, i:i + scale], axis=1)
         return_v[:, int(i / scale)] = np.where(total >= occur_num, total / occur_num, 0)
-    return_v = np.where(return_v > 1, 1, return_v)
+    return_v = np.where(return_v >= 1, 1, return_v)
 
     return return_v
 
@@ -97,6 +94,18 @@ def down_sample(pred, occur_num=3):
     """Down sample multi-channel predictions along the feature dimension.
 
     Down sample the feature size from 354 to 88 for infering the notes from a multi-channel prediction.
+
+    Parameters
+    ----------
+    pred: 3D numpy array
+        Thresholded prediction with multiple channels. Dimension: [timesteps x pitch x instruments]
+    occur_num: int
+        Minimum occurance of each pitch for determining true activation of the pitch.
+    
+    Returns
+    -------
+    d_sample: 3D numpy array
+        Down-sampled prediction. Dimension: [timesteps x 88 x instruments]
     """
     d_sample = roll_down_sample(pred[:, :, 0], occur_num=occur_num)
     for i in range(1, pred.shape[2]):
