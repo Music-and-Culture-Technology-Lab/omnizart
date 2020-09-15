@@ -14,8 +14,10 @@ __pycache__/
 .pytest_cache/
 .venv/
 bootstrap_data/
+htmlcov/
 .vscode/
 *.code-workspace
+.coverage
 
 # Built files
 dist/

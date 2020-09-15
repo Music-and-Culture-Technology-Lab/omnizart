@@ -40,7 +40,7 @@ format:
 .PHONY: test
 test:
 	@echo "Run unit tests"
-	@python -m pytest ./tests
+	@pytest --cov-fail-under=25 --cov-report=html --cov=omnizart tests
 
 # --------------------------------------------------------------
 # Other convenient utilities
