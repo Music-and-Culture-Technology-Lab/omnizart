@@ -7,13 +7,14 @@ General:
     TranscriptionMode:
         Description: Mode of transcription by executing the `omnizart transribe music` command.
         Type: String 
-        Value: Piano
+        Value: Pop
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
         SubType: [String, String]
         Value:
             Piano: ./checkpoints/music/music_piano
+            Pop: ./checkpoints/music/music_pop
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -141,7 +142,14 @@ General:
                 Description: Determines the training target to be single- or multi-instrument scenario, and more options.
                 Type: String
                 Value: note-stream
-                Choices: ["note-stream", "frame-stream", "note", "frame"]
+                Choices: 
+                    - note-stream
+                    - frame-stream
+                    - note
+                    - frame
+                    - true-frame
+                    - true-frame-stream
+                    - pop-note-stream
             Channels:
                 Description: Use different types of feature for training.
                 Type: List

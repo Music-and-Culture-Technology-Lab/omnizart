@@ -7,6 +7,12 @@ MIDI_PROGRAM_NAME_MAPPING: Dict
 
 """
 
+from librosa import note_to_midi
+
+
+LOWEST_MIDI_NOTE = note_to_midi("A0")
+HIGHEST_MIDI_NOTE = note_to_midi("C8")
+
 
 # Mappings of MIDI program number and the corresponding name derived from the
 # Wiki page: https://en.wikipedia.org/wiki/General_MIDI
@@ -142,3 +148,6 @@ MIDI_PROGRAM_NAME_MAPPING = {
 }
 
 MUSICNET_INSTRUMENT_PROGRAMS = [0, 6, 40, 41, 42, 43, 60, 68, 70, 71, 73]
+
+# Guitar, bass, strings, organ, piano, and others
+RHYTHM_INSTRUMENT_PROGRAMES = [24, 32, 40, 0, 56]
