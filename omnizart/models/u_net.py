@@ -11,7 +11,7 @@ from tensorflow.keras.layers import (
     Conv2D,
     Conv2DTranspose,
     Add,
-    Concatenate,
+    Concatenate
 )
 from omnizart.models.t2t import local_attention_2d, split_heads_2d, combine_heads_2d
 
@@ -63,7 +63,7 @@ def transpose_conv_block(input_tensor, channel, kernel_size, strides=(2, 2), dro
 
 
 def semantic_segmentation(
-    feature_num=128, timesteps=256, multi_grid_layer_n=1, multi_grid_n=3, ch_num=1, out_class=2
+    feature_num=352, timesteps=256, multi_grid_layer_n=1, multi_grid_n=3, ch_num=1, out_class=2
 ):
     """Improved U-net model with Atrous Spatial Pyramid Pooling (ASPP) block."""
     layer_out = []
@@ -234,7 +234,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         return config
 
 
-def semantic_segmentation_attn(feature_num=128, timesteps=256, ch_num=1, out_class=2):
+def semantic_segmentation_attn(feature_num=352, timesteps=256, ch_num=1, out_class=2):
     """Customized attention U-net model."""
     layer_out = []
 

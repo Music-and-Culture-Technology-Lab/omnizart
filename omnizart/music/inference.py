@@ -89,7 +89,7 @@ def find_min_max_stren(notes):
     notes: list[dict]
         Data structure returned by function `infer_piece`.
     """
-    stren = [nn["stren"] for nn in notes]
+    stren = [nn["stren"] for nn in notes] + [0.5]
     return np.min(stren), np.max(stren)
 
 
@@ -271,7 +271,7 @@ def note_inference(
     normalize=True,
     t_unit=0.02,
 ):
-    if mode.startswith("note"):
+    if "note" in mode:
         if lower_onset_th is not None:
             norm_pred = norm_split_onset_dura(
                 pred,
@@ -289,7 +289,7 @@ def note_inference(
         notes = infer_piece(down_sample(norm_pred), t_unit=0.01)
         midi = to_midi(notes, t_unit=t_unit / 2)
 
-    elif mode.startswith("frame") or mode == "true_frame":
+    else:
         ch_num = pred.shape[2]
         if ch_num == 2:
             mix = pred[:, :, 1]
@@ -314,10 +314,6 @@ def note_inference(
                 }
                 notes.append(note_info)
         midi = to_midi(notes, t_unit=t_unit)
-
-    else:
-        raise ValueError(f"Supported mode are ['note', 'frame']. Given mode: {mode}")
-
     return midi
 
 
@@ -372,8 +368,8 @@ def multi_inst_note_inference(
         ch_per_inst = 2
     elif mode in ["frame-stream", "frame"]:
         ch_per_inst = 2
-    elif mode == "true_frame":
-        # For older version model compatibility that was trained on pure frame-level.
+    elif mode in ["true-frame", "true-frame-stream"]:
+        # For older version compatibility that models were trained on pure frame-level.
         mode = "frame"
         ch_per_inst = 1
     else:
@@ -397,16 +393,19 @@ def multi_inst_note_inference(
             normed_p[:, :, 0] = np.average(normed_p, axis=2)
             ch_container[i] = normed_p
 
+    # Handling given thresholds that could be type of either scalar value or list
     onset_th = threshold_type_converter(onset_th, iters)
     dura_th = threshold_type_converter(dura_th, iters)
     frm_th = threshold_type_converter(frm_th, iters)
 
+    # Multi-instrument inference loop, iterate through different instrument channels
     zeros = np.zeros((pred.shape[:-1]))
     out_midi = pretty_midi.PrettyMIDI()
     for i in range(iters):
         normed_ch = []
         std = 0
         ent = 0
+        # Compute confidence of the instrument
         for ii in range(ch_per_inst):
             cha = ch_container[ii][:, :, i]
             std += np.std(cha)
@@ -418,8 +417,10 @@ def multi_inst_note_inference(
         )
         logger.debug("Instrument confidence: %s", confidence)
         if iters > 1 and (std / ch_per_inst < inst_th):
+            # Filter out instruments that the confidence is under the given threshold
             continue
 
+        # Infer notes according to raw predictions
         normed_p = np.dstack([zeros] + normed_ch)
         midi = note_inference(
             normed_p,
@@ -431,6 +432,7 @@ def multi_inst_note_inference(
             t_unit=t_unit,
         )
 
+        # Assign instrument class to the infered MIDI accroding to its channel index
         inst_program = channel_program_mapping[i]
         inst_name = MIDI_PROGRAM_NAME_MAPPING[str(inst_program)]
         inst = pretty_midi.Instrument(program=inst_program, name=inst_name)

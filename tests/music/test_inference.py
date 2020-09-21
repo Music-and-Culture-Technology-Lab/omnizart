@@ -26,6 +26,7 @@ def test_find_min_max_stren():
     max_v, min_v = np.max(stren), np.min(stren)
     notes = [{"stren": stv} for stv in stren]
     assert inf.find_min_max_stren(notes) == (min_v, max_v)
+    assert inf.find_min_max_stren([]) == (0.5, 0.5)
 
 
 def test_infer_pitch():
