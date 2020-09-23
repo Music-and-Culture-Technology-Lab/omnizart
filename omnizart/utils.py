@@ -123,8 +123,10 @@ def load_yaml(yaml_path):
     return yaml.load(open(yaml_path, "r"), Loader=yaml.Loader)
 
 
-def write_yaml(json_obj, output_path):
-    open(output_path, "w").write(yaml.dump(json_obj))
+def write_yaml(json_obj, output_path, dump=True):
+    # If dump is false, then the json_obj should be yaml string already.
+    out_str = yaml.dump(json_obj) if dump else json_obj
+    open(output_path, "w").write(out_str)
 
 
 def camel_to_snake(string):
