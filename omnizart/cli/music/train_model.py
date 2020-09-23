@@ -2,14 +2,18 @@ from functools import partial
 
 import click
 
+from omnizart.music import app
+from omnizart.setting_loaders import MusicSettings
+
+
 click.option = partial(click.option, show_default=True)
 
 
 @click.command()
 @click.option(
     "-d",
-    "--dataset-path",
-    help="Path to the dataset, which should contain the extracted feature",
+    "--feature-path",
+    help="Path to the folder of extracted feature",
     type=click.Path(exists=True),
     required=True,
 )
@@ -17,8 +21,14 @@ click.option = partial(click.option, show_default=True)
     "-m",
     "--model-name",
     help="Name for the output model (can be a path)",
-    type=click.Path(writable=True),
-    required=True,
+    type=click.Path(writable=True)
+)
+@click.option(
+    "-y",
+    "--model-type",
+    help="Type of the neural network model",
+    type=click.Choice(["attn", "aspp"]),
+    default="attn",
 )
 @click.option(
     "-i",
@@ -31,21 +41,21 @@ click.option = partial(click.option, show_default=True)
     "--feature-type",
     help="Determine the input feature types for training",
     multiple=True,
-    default=["S", "C"],
-    type=click.Choice(["S", "C", "G"]),
+    default=["Spec", "Ceps"],
+    type=click.Choice(["Spec", "Ceps", "GCoS"]),
 )
 @click.option(
     "-l",
     "--label-type",
     help="Detemine the output label should be note- (onset, duration) or stream-level (onset, duration, instrument)",
-    type=click.Choice(["note", "note-stream"]),
-    default="note",
+    type=click.Choice(["note", "note-stream", "pop-note-stream", "frame", "frame-stream"]),
+    default="note-stream",
 )
 @click.option(
     "-s",
     "--loss-function",
     help="Detemine which loss function to use",
-    type=click.Choice(["sparse", "smooth", "bce"]),
+    type=click.Choice(["focal", "smooth", "bce"]),
     default="smooth",
 )
 @click.option("-t", "--timesteps", help="Time width of each input feature", type=int, default=256)
@@ -61,8 +71,9 @@ click.option = partial(click.option, show_default=True)
     default=6,
 )
 def train_model(
-    dataset_path,
+    feature_path,
     model_name,
+    model_type,
     input_model,
     feature_type,
     label_type,
@@ -76,4 +87,17 @@ def train_model(
     early_stop,
 ):
     """Train a new model or continue to train on a pre-trained model"""
-    pass
+    settings = MusicSettings()
+    settings.training.channels = feature_type
+    settings.training.label_type = label_type
+    settings.training.loss_function = loss_function
+    settings.training.timesteps = timesteps
+    settings.training.epoch = epochs
+    settings.training.steps = steps
+    settings.training.val_steps = val_steps
+    settings.training.batch_size = batch_size
+    settings.training.val_batch_size = val_batch_size
+    settings.training.early_stop = early_stop
+    settings.model.model_type = model_type
+
+    app.train(feature_path, model_name=model_name, input_model_path=input_model, music_settings=settings)

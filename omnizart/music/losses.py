@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.python.ops import array_ops
 
 
-def focal_loss(prediction_tensor, target_tensor, weights=None, alpha=0.25, gamma=2):
+def focal_loss(target_tensor, prediction_tensor, weights=None, alpha=0.25, gamma=2):
     r"""Compute focal loss for predictions.
 
     Multi-labels Focal loss formula:
@@ -52,17 +52,11 @@ def focal_loss(prediction_tensor, target_tensor, weights=None, alpha=0.25, gamma
     return tf.reduce_mean(per_entry_cross_ent)
 
 
-def sparse_loss(y_true, y_pred, weights=None):
-    """Wrapper of focal loss."""
-    loss = focal_loss(y_pred, y_true, weights=weights)
-    return loss
-
-
 def q_func(y_true, gamma=0.1, total_chs=22):
     return (1-gamma) * y_true + gamma/total_chs  # noqa: E226
 
 
-def smooth_loss(y_true, y_pred, gamma=0.1, total_chs=22):
+def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22):
     """Function to compute loss after applying **label-smoothing**."""
 
     total_chs = min(25, max(total_chs, 5))
