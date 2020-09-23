@@ -151,29 +151,13 @@ def semantic_segmentation(
     return Model(inputs=input_score, outputs=out)
 
 
-def multihead_attention(x, out_channel=64, d_model=32, n_heads=8, query_shape=(128, 24), memory_flange=(8, 8)):
+class MultiHeadAttention(tf.keras.layers.Layer):
     """Attention layer for 2D input feature.
 
     As the attention mechanism consumes a large amount of memory, here we leverage a divide-and-conquer approach
     implemented in the ``tensor2tensor`` repository. The input feature is first partitioned into smaller parts before
     being passed to do self-attention computation. The processed outputs are then assembled back into the same
     size as the input.
-
-    Parameters
-    ----------
-    x
-        Input tensor
-    out_channel: int
-        Number of output channels.
-    d_model: int
-        Dimension of embeddings for each position of input feature.
-    n_heads: int
-        Number of heads for multi-head attention computation. Should be division of `d_model`.
-    query_shape: Tuple(int, int)
-        Size of each partition.
-    memory_flange: Tuple(int, int)
-        Additional overlapping size to be extended to each partition, indicating the final size to be
-        computed is: (query_shape[0]+memory_flange[0]) x (query_shape[1]+memory_flange[1])
 
     References
     ----------
@@ -182,26 +166,23 @@ def multihead_attention(x, out_channel=64, d_model=32, n_heads=8, query_shape=(1
     .. [1] Niki Parmar, Ashish Vaswani, Jakob Uszkoreit, Lukasz Kaiser, Noam Shazeer, Alexander Ku, and Dustin Tran,
        “Image Transformer,” in Proceedings of the 35th International Conference on Machine Learning (ICML), 2018
     """
-    q = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_q_conv")(x)
-    k = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_k_conv")(x)
-    v = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_v_conv")(x)
-
-    q = split_heads_2d(q, n_heads)
-    k = split_heads_2d(k, n_heads)
-    v = split_heads_2d(v, n_heads)
-
-    k_depth_per_head = d_model // n_heads
-    q *= k_depth_per_head**-0.5
-
-    output = local_attention_2d(q, k, v, query_shape=query_shape, memory_flange=memory_flange)
-    output = combine_heads_2d(output)
-    output = Conv2D(out_channel, (3, 3), strides=(1, 1), padding="same", use_bias=False)(output)
-    return output
-
-
-class MultiHeadAttention(tf.keras.layers.Layer):
-    """Wrapper layer of multi-head attention."""
     def __init__(self, out_channel=64, d_model=32, n_heads=8, query_shape=(128, 24), memory_flange=(8, 8), **kwargs):
+        """Initialize neccessary instances for later forward computation.
+
+        Parameters
+        ----------
+        out_channel: int
+            Number of output channels.
+        d_model: int
+            Dimension of embeddings for each position of input feature.
+        n_heads: int
+            Number of heads for multi-head attention computation. Should be division of `d_model`.
+        query_shape: Tuple(int, int)
+            Size of each partition.
+        memory_flange: Tuple(int, int)
+            Additional overlapping size to be extended to each partition, indicating the final size to be
+            computed is: (query_shape[0]+memory_flange[0]) x (query_shape[1]+memory_flange[1])
+        """
         super().__init__(**kwargs)
 
         self.out_channel = out_channel
@@ -210,15 +191,26 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         self.query_shape = query_shape
         self.memory_flange = memory_flange
 
+        self.q_conv = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_q_conv")
+        self.k_conv = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_k_conv")
+        self.v_conv = Conv2D(d_model, (3, 3), strides=(1, 1), padding="same", name="gen_v_conv")
+        self.out_conv = Conv2D(out_channel, (3, 3), strides=(1, 1), padding="same", use_bias=False)
+
     def call(self, inputs):
-        return multihead_attention(
-            inputs,
-            out_channel=self.out_channel,
-            d_model=self.d_model,
-            n_heads=self.n_heads,
-            query_shape=self.query_shape,
-            memory_flange=self.memory_flange,
-        )
+        q = self.q_conv(inputs)
+        k = self.k_conv(inputs)
+        v = self.v_conv(inputs)
+
+        q = split_heads_2d(q, self.n_heads)
+        k = split_heads_2d(k, self.n_heads)
+        v = split_heads_2d(v, self.n_heads)
+
+        k_depth_per_head = self.d_model // self.n_heads
+        q *= k_depth_per_head**-0.5
+
+        output = local_attention_2d(q, k, v, query_shape=self.query_shape, memory_flange=self.memory_flange)
+        output = combine_heads_2d(output)
+        return self.out_conv(output)
 
     def get_config(self):
         config = super().get_config().copy()
