@@ -114,7 +114,8 @@ MODEL_SCHEMA = {
             "type": "object",
             "properties": {
                 "SavePrefix": simple_unit("string"),
-                "SavePath": simple_unit("string")
+                "SavePath": simple_unit("string"),
+                "ModelType": simple_unit("string", choices=["aspp", "attn"])
             },
             "required": ["SavePrefix", "SavePath"],
             "additionalProperties": False
@@ -159,7 +160,17 @@ TRAINING_SCHEMA = {
                 "ValBatchSize": simple_unit("integer"),
                 "EarlyStop": simple_unit("integer"),
                 "LossFunction": simple_unit("string", choices=["smooth", "focal", "bce"]),
-                "LabelType": simple_unit("string", choices=["note-stream", "frame-stream", "note", "frame"]),
+                "LabelType": simple_unit(
+                    "string",
+                    choices=[
+                        "note-stream",
+                        "frame-stream",
+                        "note", "frame",
+                        "true-frame",
+                        "true-frame-stream",
+                        "pop-note-stream"
+                    ]
+                ),
                 "Channels": list_unit("string", choices=["Spec", "GCoS", "Ceps"]),
                 "Timesteps": simple_unit("integer")
             },
