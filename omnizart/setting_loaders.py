@@ -11,8 +11,20 @@ from omnizart.utils import json_serializable, load_yaml
 from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
 
+class Settings:
+    default_setting_file = None
+
+    def __init__(self, conf_path=None):
+        # Load default settings
+        if conf_path is not None:
+            self.from_json(load_yaml(conf_path))  # pylint: disable=E1101
+        else:
+            conf_path = os.path.join(SETTING_DIR, self.default_setting_file)
+            self.from_json(load_yaml(conf_path))  # pylint: disable=E1101
+
+
 @json_serializable(key_path="./General", value_path="./Value")
-class MusicSettings:
+class MusicSettings(Settings):
     default_setting_file: str = "music.yaml"
 
     def __init__(self, conf_path=None):
@@ -28,13 +40,8 @@ class MusicSettings:
         # then the input json object will be validated when parsing
         # settings using the from_json function.
         self.schema = MUSIC_SETTINGS_SCHEMA
-        
-        # Load default settings
-        if conf_path is not None:
-            self.from_json(load_yaml(conf_path))
-        else:
-            conf_path = os.path.join(SETTING_DIR, MusicSettings.default_setting_file)
-            self.from_json(load_yaml(conf_path))
+
+        super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicInference:
@@ -89,7 +96,7 @@ class MusicSettings:
 
 
 @json_serializable(key_path="./General", value_path="./Value")
-class DrumSettings:
+class DrumSettings(Settings):
     default_setting_file: str = "drum.yaml"
 
     def __init__(self, conf_path=None):
@@ -97,6 +104,8 @@ class DrumSettings:
         self.checkpoint_path: dict = None
         self.feature = self.DrumFeature()
         self.model = self.DrumModel()
+
+        super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class DrumFeature:

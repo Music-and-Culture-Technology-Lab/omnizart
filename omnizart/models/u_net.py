@@ -159,6 +159,20 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     being passed to do self-attention computation. The processed outputs are then assembled back into the same
     size as the input.
 
+    Parameters
+    ----------
+    out_channel: int
+        Number of output channels.
+    d_model: int
+        Dimension of embeddings for each position of input feature.
+    n_heads: int
+        Number of heads for multi-head attention computation. Should be division of `d_model`.
+    query_shape: Tuple(int, int)
+        Size of each partition.
+    memory_flange: Tuple(int, int)
+        Additional overlapping size to be extended to each partition, indicating the final size to be
+        computed is: (query_shape[0]+memory_flange[0]) x (query_shape[1]+memory_flange[1])
+
     References
     ----------
     This approach is originated from [1]_.
@@ -167,22 +181,6 @@ class MultiHeadAttention(tf.keras.layers.Layer):
        “Image Transformer,” in Proceedings of the 35th International Conference on Machine Learning (ICML), 2018
     """
     def __init__(self, out_channel=64, d_model=32, n_heads=8, query_shape=(128, 24), memory_flange=(8, 8), **kwargs):
-        """Initialize neccessary instances for later forward computation.
-
-        Parameters
-        ----------
-        out_channel: int
-            Number of output channels.
-        d_model: int
-            Dimension of embeddings for each position of input feature.
-        n_heads: int
-            Number of heads for multi-head attention computation. Should be division of `d_model`.
-        query_shape: Tuple(int, int)
-            Size of each partition.
-        memory_flange: Tuple(int, int)
-            Additional overlapping size to be extended to each partition, indicating the final size to be
-            computed is: (query_shape[0]+memory_flange[0]) x (query_shape[1]+memory_flange[1])
-        """
         super().__init__(**kwargs)
 
         self.out_channel = out_channel

@@ -8,7 +8,7 @@ See Also
 omnizart.base.BaseTranscription: The base class of all transcription/application classes.
 """
 
-# pylint: disable=C0103,W0612,E0611
+# pylint: disable=C0103,W0621,E0611
 import os
 import glob
 import random
@@ -27,7 +27,7 @@ from omnizart.music.dataset import get_dataset
 from omnizart.music.labels import LabelType
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription
-from omnizart.utils import get_logger, dump_pickle, load_yaml, write_yaml
+from omnizart.utils import get_logger, dump_pickle, write_yaml
 from omnizart.train import train_epochs
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings
@@ -79,10 +79,10 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Extracting feature...")
         if model_settings.feature.harmonic:
-            spec, gcos, ceps, cenf = extract_hcfp(input_audio)
+            spec, gcos, ceps, _ = extract_hcfp(input_audio)
             feature = np.dstack([spec, gcos, ceps])
         else:
-            z, spec, gcos, ceps, cenf = extract_cfp(input_audio)
+            z, spec, gcos, ceps, _ = extract_cfp(input_audio)
             feature = np.dstack([z.T, spec.T, gcos.T, ceps.T])
 
         logger.info("Predicting...")
@@ -109,7 +109,7 @@ class MusicTranscription(BaseTranscription):
             dump_pickle({"pred": pred}, os.path.join(save_to, "debug_pred.pickle"))
         return midi
 
-    def _predict(self, feature, model, timesteps=128, feature_num=384, batch_size=4):
+    def _predict(self, feature, model, timesteps=128, feature_num=384, batch_size=4):  # pylint: disable=R0201
         """Make predictions on the feature.
 
         Generate predictions by using the loaded model.
@@ -265,9 +265,9 @@ class MusicTranscription(BaseTranscription):
         )
         return model_save_path, history
 
-    def _get_train_val_feat_file_list(self, feature_folder, split=0.9):
+    def _get_train_val_feat_file_list(self, feature_folder, split=0.9):  # pylint: disable=R0201
         feat_files = glob.glob(f"{feature_folder}/*.hdf")
-        sidx = round(len(feat_files)*split)
+        sidx = round(len(feat_files) * split)
         random.shuffle(feat_files)
         train_files = feat_files[:sidx]
         val_files = feat_files[sidx:]
@@ -293,4 +293,3 @@ if __name__ == "__main__":
     model_path, history = app.train(
         feature_folder, music_settings=settings, model_name="test2", input_model_path="checkpoints/music/music_test"
     )
-

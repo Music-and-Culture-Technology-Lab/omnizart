@@ -1,14 +1,16 @@
+# pylint: disable=W0201
 import os
 import abc
 
 import numpy as np
 
-from omnizart.utils import get_logger
+from omnizart.utils import write_yaml, get_logger
 
 logger = get_logger("Callbacks")
 
 
 class Callback(metaclass=abc.ABCMeta):
+    """Base class of all callback classes"""
     def __init__(self, monitor=None):
         if monitor is not None:
             self.monitor = monitor
@@ -17,28 +19,28 @@ class Callback(metaclass=abc.ABCMeta):
             else:
                 self.monitor_op = np.less
 
-    def on_train_begin(self):
+    def on_train_begin(self, history=None):
         pass
 
-    def on_train_end(self):
+    def on_train_end(self, history=None):
         pass
 
-    def on_epoch_begin(self):
+    def on_epoch_begin(self, epoch, history=None):
         pass
 
-    def on_epoch_end(self):
+    def on_epoch_end(self, epoch, history=None):
         pass
 
-    def on_train_batch_begin(self):
+    def on_train_batch_begin(self, history=None):
         pass
 
-    def on_train_batch_end(self):
+    def on_train_batch_end(self, history=None):
         pass
 
-    def on_test_batch_begin(self):
+    def on_test_batch_begin(self, history=None):
         pass
 
-    def on_test_batch_end(self):
+    def on_test_batch_end(self, history=None):
         pass
 
     def _set_model(self, model):
@@ -46,7 +48,7 @@ class Callback(metaclass=abc.ABCMeta):
 
     def _get_monitor_value(self, history, callback_name="Callback"):
         history = history or {"train": [], "validate": []}
-        
+
         if self.monitor.startswith("val"):
             hist = history["validate"]
         else:
@@ -61,14 +63,23 @@ class Callback(metaclass=abc.ABCMeta):
         score = current.get(metric)
         if score is None:
             logger.warning(
-                f"{callback_name} conditioned on metric %s "
+                "%s conditioned on metric %s "
                 "which is not available. Available metrics are %s",
-                self.monitor, list(current.keys())
+                callback_name, self.monitor, list(current.keys())
             )
         return score
 
 
 class EarlyStopping(Callback):
+    """Early stop the training after no improvement on the monitor for a certain period.
+
+    Parameters
+    ----------
+    patience: int
+        Longeset period of epochs for waiting the target metrics showing improvement.
+    monitor: str
+        Metric name for the observation.
+    """
     def __init__(self, patience=5, monitor="val_acc"):
         super().__init__(monitor=monitor)
         self.patience = patience
@@ -100,6 +111,22 @@ class EarlyStopping(Callback):
 
 
 class ModelCheckpoint(Callback):
+    """Saving the model during training.
+
+    The newest checkpoint will override the original checkpoint during a single
+    training period.
+
+    Parameters
+    ----------
+    filepath: Path
+        Path for saving the checkpoint.
+    monitor: str
+        Metric name for the observation. No effect if `save_bset_only` is set to false.
+    save_best_only: bool
+        Whether to save the model having the best performance on the metric only.
+    save_weights_only: bool
+        Save the model's weight only, without architecture.
+    """
     def __init__(self, filepath, monitor='val_acc', save_best_only=False, save_weights_only=False):
         super().__init__(monitor=monitor)
         self.filepath = filepath
@@ -122,7 +149,7 @@ class ModelCheckpoint(Callback):
             self._save_model()
 
     def _ensure_path_exists(self):
-        if hasattr(self, "_path_checked") and self._path_checked:
+        if hasattr(self, "_path_checked") and self._path_checked:  # pylint: disable=E0203
             return
         if not os.path.exists(self.filepath):
             os.makedirs(self.filepath)
@@ -131,7 +158,5 @@ class ModelCheckpoint(Callback):
     def _save_model(self):
         self._ensure_path_exists()
         if not self.save_weights_only:
-            with open(os.path.join(self.filepath, "arch.yaml"), "w") as out:
-                out.write(self.model.to_yaml())
+            write_yaml(self.model.to_yaml(), os.path.join(self.filepath, "arch.yaml"), dump=False)
         self.model.save_weights(os.path.join(self.filepath, "weights.h5"))
-

@@ -8,8 +8,8 @@ from abc import ABCMeta, abstractmethod
 
 from tensorflow.keras.models import model_from_yaml
 
-from omnizart import MODULE_PATH, SETTING_DIR
-from omnizart.utils import load_yaml, get_logger
+from omnizart import MODULE_PATH
+from omnizart.utils import get_logger
 
 logger = get_logger("Base Class")
 

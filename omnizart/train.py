@@ -1,25 +1,18 @@
-
 import tqdm
-import tensorflow as tf
-
-from omnizart.models.u_net import semantic_segmentation
-from omnizart.music.dataset import get_dataset
-from omnizart.music.labels import LabelType
-from omnizart.callbacks import EarlyStopping, ModelCheckpoint
-from omnizart.music.losses import focal_loss, smooth_loss
 
 
-PROGRESS_BAR_FORMAT = "{desc} - {percentage:3.0f}% |{bar:40}| {n_fmt}/{total_fmt} [{elapsed}<{remaining},{rate_fmt}{postfix}]"
+PROGRESS_BAR_FORMAT = "{desc} - {percentage:3.0f}% |{bar:40}| {n_fmt}/{total_fmt} \
+    [{elapsed}<{remaining},{rate_fmt}{postfix}]"
 
 
 def format_num(num, digit=4):
     rounding = f".{digit}g"
     num_str = f"{num:{rounding}}".replace("+0", "+").replace("-0", "-")
     num = str(num)
-    return num_str if len(num_str)<len(num) else num
+    return num_str if len(num_str) < len(num) else num
 
 
-def gen_bar_postfix(result, targets=["loss", "accuracy"], name_transform=["loss", "acc"]):
+def gen_bar_postfix(result, targets=["loss", "accuracy"], name_transform=["loss", "acc"]):  # pylint: disable=W0102
     info = []
     for target, name in zip(targets, name_transform):
         if target not in result:
@@ -49,7 +42,7 @@ def train_steps(model, dataset, steps=None, bar_title=None, validate=False):
 
         for metric in metrics:
             state[f"{metric}_sum"] += step_result[metric]
-            state[metric] = state[f"{metric}_sum"] / (iters+1)
+            state[metric] = state[f"{metric}_sum"] / (iters + 1)
         iter_bar.set_postfix_str(gen_bar_postfix(state))
 
     # Remove metric_sum columns in the state
@@ -78,7 +71,7 @@ def train_epochs(
     execute_callbacks(callbacks, "on_train_begin")
     for epoch_idx in range(epochs):
         # Epoch begin
-        execute_callbacks(callbacks, "on_epoch_begin")
+        execute_callbacks(callbacks, "on_epoch_begin", epoch=epoch_idx+1)  # noqa: E226
         if model.stop_training:
             break
 
@@ -105,8 +98,7 @@ def train_epochs(
             history["validate"].append(val_results)
 
         # Epoch end
-        execute_callbacks(callbacks, "on_epoch_end", epoch=epoch_idx+1, history=history)
+        execute_callbacks(callbacks, "on_epoch_end", epoch=epoch_idx+1, history=history)  # noqa: E226
 
     execute_callbacks(callbacks, "on_train_end")
     return history
-

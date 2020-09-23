@@ -1,9 +1,30 @@
-import numpy as np 
+import numpy as np
 
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
 
 
 class LabelType:
+    """Defines different types of `music` label.
+
+    Defines functions that converts the customized label format into numpy
+    array. With the customized format, it is more flexible to transform
+    labels into different different numpy formats according to the usage
+    scenario, and also saves a lot of storage space by using the customized
+    format.
+
+    Parameters
+    ----------
+    mode: ['note', 'note-stream', 'pop-note-stream', 'frame', 'frame-stream']
+        Mode of label conversion.
+
+        * note: outputs onset and duration channel
+        * note-stream: outputs onset and duration channel of instruments (for MusicNet)
+        * pop-note-stream: similar to ``note-stream`` mode, but is for ``Pop`` dataset
+        * frame: same as ``note`` mode. To truely output duration channel only, use \
+        `true-frame` mode.
+        * frame-stream: same as ``note-stream``. To truely output duration channel only \
+        for each instrument, use ``true-frame-stream`` mode.
+    """
     def __init__(self, mode):
         self.mode = mode
 
@@ -22,10 +43,10 @@ class LabelType:
         if mode not in self.mode_mapping:
             raise ValueError(f"Available mode: {self.mode_mapping.keys()}. Provided: {mode}")
 
-    def _init_classical_channel_mapping(self):
-        return {val: idx+1 for idx, val in enumerate(MUSICNET_INSTRUMENT_PROGRAMS)}
+    def _init_classical_channel_mapping(self):  # pylint: disable=R0201
+        return {val: idx + 1 for idx, val in enumerate(MUSICNET_INSTRUMENT_PROGRAMS)}
 
-    def _init_pop_channel_mapping(self):
+    def _init_pop_channel_mapping(self):  # pylint: disable=R0201
         guitar = {i: 1 for i in range(24, 32)}
         bass = {i: 2 for i in range(32, 40)}
         strings = {i: 3 for i in range(40, 56)}
@@ -50,11 +71,11 @@ class LabelType:
         frame = self.get_frame(label)
         onset = label_conversion(
             label, channel_mapping=self._classical_channel_mapping, onsets=True, mpe=True
-        )[:,:,1]
+        )[:, :, 1]
 
-        frame[:,:,1] -= onset
+        frame[:, :, 1] -= onset
         frm_on = np.dstack([frame, onset])
-        frm_on[:,:,0] = 1 - np.sum(frm_on[:,:,1:], axis=2)
+        frm_on[:, :, 0] = 1 - np.sum(frm_on[:, :, 1:], axis=2)
 
         return frm_on
 
@@ -64,12 +85,12 @@ class LabelType:
     def multi_inst_note(self, label):
         onsets = label_conversion(label, channel_mapping=self._classical_channel_mapping, onsets=True)
         dura = label_conversion(label, channel_mapping=self._classical_channel_mapping) - onsets
-        out = np.zeros(onsets.shape[:-1]+(23,))
+        out = np.zeros(onsets.shape[:-1] + (23,))
 
         for i in range(len(set(self._classical_channel_mapping.values()))):
-            out[:,:,i*2+2] = onsets[:,:,i+1]
-            out[:,:,i*2+1] = dura[:,:,i+1]
-        out[:,:,0] = 1 - np.sum(out[:,:,1:], axis=2)
+            out[:, :, i*2+2] = onsets[:, :, i+1]  # noqa: E226
+            out[:, :, i*2+1] = dura[:, :, i+1]  # noqa: E226
+        out[:, :, 0] = 1 - np.sum(out[:, :, 1:], axis=2)
 
         return out
 
@@ -80,12 +101,12 @@ class LabelType:
         dura = label_conversion(
             label, channel_mapping=self._pop_channel_mapping
         ) - onsets
-        out = np.zeros(onsets.shape[:-1]+(13,))
+        out = np.zeros(onsets.shape[:-1] + (13,))
 
         for i in range(len(set(self._pop_channel_mapping.values()))):
-            out[:,:,i*2+2] = onsets[:,:,i+1]
-            out[:,:,i*2+1] = dura[:,:,i+1]
-        out[:,:,0] = 1 - np.sum(out[:,:,1:], axis=2)
+            out[:, :, i*2+2] = onsets[:, :, i+1]  # noqa: E226
+            out[:, :, i*2+1] = dura[:, :, i+1]  # noqa: E226
+        out[:, :, 0] = 1 - np.sum(out[:, :, 1:], axis=2)
 
         return out
 
@@ -106,12 +127,12 @@ def label_conversion(
         channel_mapping = {i: i for i in range(1, 129)}
 
     inst_num = len(set(channel_mapping.keys()))
-    output = np.zeros((len(label), ori_feature_size, inst_num+1))
-    for t, ll in enumerate(label):
-        if len(ll) == 0:
+    output = np.zeros((len(label), ori_feature_size, inst_num+1))  # noqa: E226
+    for t, lab in enumerate(label):
+        if len(lab) == 0:
             continue
 
-        for pitch, insts in ll.items():
+        for pitch, insts in lab.items():
             for inst, prob in insts.items():
                 # TODO: Remove minus one in future!!
                 inst = int(inst) - 1
@@ -120,11 +141,11 @@ def label_conversion(
 
                 pitch = int(pitch)
                 channel = channel_mapping[inst]
-                feat_range = range(pitch*scale, (pitch+1)*scale)
+                feat_range = range(pitch*scale, (pitch+1)*scale)  # noqa: E226
                 output[t, feat_range, channel] = prob[0]
 
     if not onsets:
-        output = np.where(output>0, 1, 0)
+        output = np.where(output > 0, 1, 0)
 
     pad_b = (feature_num - output.shape[1]) // 2
     pad_t = feature_num - pad_b - output.shape[1]
@@ -135,8 +156,8 @@ def label_conversion(
     output = np.concatenate([bottom, output, top], axis=1)
 
     if mpe:
-        mpe_label = np.nanmax(output[:,:,1:], axis=2)
-        output = np.dstack([output[:,:,0], mpe_label])
+        mpe_label = np.nanmax(output[:, :, 1:], axis=2)
+        output = np.dstack([output[:, :, 0], mpe_label])
 
-    output[:,:,0] = 1 - np.sum(output[:,:,1:], axis=2)
+    output[:, :, 0] = 1 - np.sum(output[:, :, 1:], axis=2)
     return output
