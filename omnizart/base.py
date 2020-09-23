@@ -16,12 +16,9 @@ logger = get_logger("Base Class")
 
 class BaseTranscription(metaclass=ABCMeta):
     """Base class of transcription applications."""
-    def __init__(self, setting_class):
+    def __init__(self, setting_class, conf_path=None):
         self.setting_class = setting_class
-
-        default_conf_path = os.path.join(SETTING_DIR, setting_class.default_setting_file)
-        logger.debug("Loading default configurations: %s", default_conf_path)
-        self.settings = self._load_settings(default_conf_path)
+        self.settings = setting_class(conf_path=conf_path)
 
     @abstractmethod
     def transcribe(self, input_audio, model_path, output="./"):
@@ -31,14 +28,8 @@ class BaseTranscription(metaclass=ABCMeta):
         arch_path, weight_path, conf_path = self._resolve_model_path(model_path)
         model = self._get_model_from_yaml(arch_path, custom_objects=custom_objects)
         model.load_weights(weight_path)
-        settings = self._load_settings(conf_path)
+        settings = self.setting_class(conf_path=conf_path)
         return model, settings
-
-    def _load_settings(self, setting_path):
-        json_obj = load_yaml(setting_path)
-        settings = self.setting_class()
-        settings.from_json(json_obj)
-        return settings
 
     def _resolve_model_path(self, model_path=None):
         if model_path is None:

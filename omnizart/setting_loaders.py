@@ -4,7 +4,10 @@ Parse settings into pre-defined classes, similar to the 'view model'
 concept in MVVC, and instead of access values key by key.
 """
 # pylint: disable=R0903,C0115
-from omnizart.utils import json_serializable
+import os
+
+from omnizart import SETTING_DIR
+from omnizart.utils import json_serializable, load_yaml
 from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
 
@@ -12,7 +15,7 @@ from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 class MusicSettings:
     default_setting_file: str = "music.yaml"
 
-    def __init__(self):
+    def __init__(self, conf_path=None):
         self.feature = self.MusicFeature()
         self.dataset = self.MusicDataset()
         self.model = self.MusicModel()
@@ -25,6 +28,13 @@ class MusicSettings:
         # then the input json object will be validated when parsing
         # settings using the from_json function.
         self.schema = MUSIC_SETTINGS_SCHEMA
+        
+        # Load default settings
+        if conf_path is not None:
+            self.from_json(load_yaml(conf_path))
+        else:
+            conf_path = os.path.join(SETTING_DIR, MusicSettings.default_setting_file)
+            self.from_json(load_yaml(conf_path))
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicInference:
@@ -61,6 +71,7 @@ class MusicSettings:
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+            self.model_type: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class MusicTraining:
@@ -81,7 +92,7 @@ class MusicSettings:
 class DrumSettings:
     default_setting_file: str = "drum.yaml"
 
-    def __init__(self):
+    def __init__(self, conf_path=None):
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
         self.feature = self.DrumFeature()
