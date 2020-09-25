@@ -5,15 +5,10 @@ Author: Lisu
 Mantainer: BreezeWhite
 """
 # pylint: disable=C0103,W0102,R0914
-
-import os
-import concurrent.futures
-from concurrent.futures import ProcessPoolExecutor
-
 import numpy as np
 import scipy
 
-from omnizart.utils import load_audio_with_librosa, get_logger
+from omnizart.utils import load_audio_with_librosa, get_logger, parallel_generator
 
 
 logger = get_logger("CFP Feature")
@@ -149,33 +144,32 @@ def cfp_filterbank(x, fr, fs, Hop, h, fc, tc, g, bin_per_octave):
 
 def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_octave):
     freq_width = max_sample * Hop
-    Round = np.ceil(samples / max_sample).astype("int")
+    iters = np.ceil(samples / max_sample).astype("int")
     tmpL0, tmpLF, tmpLQ, tmpZ = {}, {}, {}, {}
 
-    max_workers = min(os.cpu_count(), Round)
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_segment = {}
-        logger.debug("Submitting and executing parallel jobs")
-        for i in range(Round):
-            tmpX = x[i * freq_width:(i+1) * freq_width]
-            future = executor.submit(cfp_filterbank, tmpX, fr, fs, Hop, h, fc, tc, g, bin_per_octave)
-            future_to_segment[future] = i
+    slice_list = [x[i * freq_width:(i+1) * freq_width] for i in range(iters)]
 
-        count = 0
-        for future in concurrent.futures.as_completed(future_to_segment):
-            seg_id = future_to_segment[future]
-            try:
-                tfrL0, tfrLF, tfrLQ, f, q, t, cen_freq = future.result()
-                count += 1
-                logger.debug("Job finished: %d/%d", count, len(future_to_segment))
-                tmpL0[seg_id] = tfrL0
-                tmpLF[seg_id] = tfrLF
-                tmpLQ[seg_id] = tfrLQ
-                tmpZ[seg_id] = tfrLF * tfrLQ
-            except Exception as exc:
-                logger.error("Something generated an exception: %s", exc)
-                raise exc
-
+    feat_generator = enumerate(
+        parallel_generator(
+            cfp_filterbank,
+            slice_list,
+            fr=fr,
+            fs=fs,
+            Hop=Hop,
+            h=h,
+            fc=fc,
+            tc=tc,
+            g=g,
+            bin_per_octave=bin_per_octave,
+            max_workers=3)
+    )
+    for idx, (feat_list, slice_idx) in feat_generator:
+        logger.debug("Slice feature extraced: %d/%d", idx+1, len(slice_list))
+        tfrL0, tfrLF, tfrLQ, f, q, t, cen_freq = feat_list
+        tmpL0[slice_idx] = tfrL0
+        tmpLF[slice_idx] = tfrLF
+        tmpLQ[slice_idx] = tfrLQ
+        tmpZ[slice_idx] = tfrLF * tfrLQ
     return tmpL0, tmpLF, tmpLQ, tmpZ, f, q, t, cen_freq
 
 

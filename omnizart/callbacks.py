@@ -4,7 +4,7 @@ import abc
 
 import numpy as np
 
-from omnizart.utils import write_yaml, get_logger
+from omnizart.utils import write_yaml, get_logger, ensure_path_exists
 
 logger = get_logger("Callbacks")
 
@@ -151,9 +151,8 @@ class ModelCheckpoint(Callback):
     def _ensure_path_exists(self):
         if hasattr(self, "_path_checked") and self._path_checked:  # pylint: disable=E0203
             return
-        if not os.path.exists(self.filepath):
-            os.makedirs(self.filepath)
-            self._path_checked = True
+        ensure_path_exists(self.filepath)
+        self._path_checked = True
 
     def _save_model(self):
         self._ensure_path_exists()
