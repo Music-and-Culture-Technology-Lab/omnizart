@@ -6,20 +6,30 @@ Omniscient Mozart, being able to transcribe everything in the music, including v
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
 # About
-[Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by levering cutting-edge AI techiniques.
+[Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leverging cutting-edge AI techiniques.
 
 # Plan to support
-| Commands | transcribe         | train | evaluate | Description                       |
-|----------|--------------------|-------|----------|-----------------------------------|
-| music    | :heavy_check_mark: |       |          | Transcribes notes of instruments. |
-| drum     |                    |       |          | Transcribes drum tracks.          |
-| vocal    |                    |       |          | Transcribes pitch of vocal.       |
-| chord    |                    |       |          | Transcribes chord progression.    |
-| beat     |                    |       |          | Transcribes beat position.        |
+| Commands | transcribe         | train              | evaluate | Description                       |
+|----------|--------------------|--------------------|----------|-----------------------------------|
+| music    | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes notes of instruments. |
+| drum     |                    |                    |          | Transcribes drum tracks.          |
+| vocal    |                    |                    |          | Transcribes pitch of vocal.       |
+| chord    |                    |                    |          | Transcribes chord progression.    |
+| beat     |                    |                    |          | Transcribes beat position.        |
 
 Example usage
 <pre>
 omnizart transcribe music <i>path/to/audio</i> --model-path <i>path/to/model</i>
+</pre>
+
+For training a new model, download the dataset first and follow steps described below.
+<pre>
+# The following command will default saving the extracted feature under the same folder,
+# called <b>train_feature</b> and <b>test_feature</b>
+omnizart music generate-featuer -d <i>path/to/dataset</i>
+
+# Train a new model
+omnizart music train-model -d <i>path/to/dataset</i>/train_feature --model-name My-Model
 </pre>
 
 
