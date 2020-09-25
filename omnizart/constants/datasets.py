@@ -134,7 +134,7 @@ class MusicNetStructure(BaseStructure):
     @property
     def test_labels(self):
         """"""
-        return ["tets_labels"]
+        return ["test_labels"]
 
 
 class MaestroStructure(BaseStructure):
@@ -165,8 +165,8 @@ class MaestroStructure(BaseStructure):
         return self.test_wavs
 
 
-class RhythmStructure(BaseStructure):
-    """Structure of Rhythm dataset"""
+class PopStructure(BaseStructure):
+    """Structure of Pop dataset"""
     @property
     def label_ext(self):
         """"""

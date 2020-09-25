@@ -8,12 +8,76 @@ from scipy.interpolate import CubicSpline
 from scipy.signal import find_peaks
 from librosa import note_to_midi
 
-from omnizart.music.utils import roll_down_sample, down_sample
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, MIDI_PROGRAM_NAME_MAPPING
 from omnizart.utils import get_logger
 
 
 logger = get_logger("Music Inference")
+
+
+def roll_down_sample(data, occur_num=3, base=88):
+    """Down sample feature size for a single pitch.
+
+    Down sample the feature size from 354 to 88 for infering the notes.
+
+    Parameters
+    ----------
+    data: 2D numpy array
+        The thresholded 2D prediction..
+    occur_num: int
+        For each pitch, the original prediction expands 4 bins wide. This value determines how many positive bins
+        should there be to say there is a real activation after down sampling.
+    base
+        Should be constant as there are 88 pitches on the piano.
+
+    Returns
+    -------
+    return_v: 2D numpy array
+        Down sampled prediction.
+
+    Warnings
+    --------
+    The parameter `data` should be thresholded!
+    """
+
+    total_roll = data.shape[1]
+    assert total_roll % base == 0, f"Wrong length: {total_roll}, {total_roll} % {base} should be zero!"
+
+    scale = round(total_roll / base)
+    assert 0 < occur_num <= scale
+
+    return_v = np.zeros((len(data), base), dtype=int)
+
+    for i in range(0, data.shape[1], scale):
+        total = np.sum(data[:, i:i + scale], axis=1)
+        return_v[:, int(i / scale)] = np.where(total >= occur_num, total / occur_num, 0)
+    return_v = np.where(return_v >= 1, 1, return_v)
+
+    return return_v
+
+
+def down_sample(pred, occur_num=3):
+    """Down sample multi-channel predictions along the feature dimension.
+
+    Down sample the feature size from 354 to 88 for infering the notes from a multi-channel prediction.
+
+    Parameters
+    ----------
+    pred: 3D numpy array
+        Thresholded prediction with multiple channels. Dimension: [timesteps x pitch x instruments]
+    occur_num: int
+        Minimum occurance of each pitch for determining true activation of the pitch.
+
+    Returns
+    -------
+    d_sample: 3D numpy array
+        Down-sampled prediction. Dimension: [timesteps x 88 x instruments]
+    """
+    d_sample = roll_down_sample(pred[:, :, 0], occur_num=occur_num)
+    for i in range(1, pred.shape[2]):
+        d_sample = np.dstack([d_sample, roll_down_sample(pred[:, :, i], occur_num=occur_num)])
+
+    return d_sample
 
 
 def infer_pitch(pitch, shortest=5, offset_interval=6):

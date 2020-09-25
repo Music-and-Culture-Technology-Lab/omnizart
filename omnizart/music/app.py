@@ -10,29 +10,31 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 
 # pylint: disable=C0103,W0621,E0611
 import os
+from os.path import join as jpath
 import glob
 import random
 from datetime import datetime
 
-import numpy as np
+import h5py
 import tensorflow as tf
-from scipy.special import expit
 
-from omnizart.feature.cfp import extract_cfp
-from omnizart.feature.hcfp import extract_hcfp
+from omnizart.feature.wrapper_func import extract_cfp_feature
 from omnizart.models.u_net import MultiHeadAttention, semantic_segmentation, semantic_segmentation_attn
 from omnizart.music.inference import multi_inst_note_inference
-from omnizart.music.utils import create_batches, cut_batch_pred, cut_frame
+from omnizart.music.prediction import predict
 from omnizart.music.dataset import get_dataset
-from omnizart.music.labels import LabelType
+from omnizart.music.labels import (
+    LabelType, MaestroLabelExtraction, MapsLabelExtraction, MusicNetLabelExtraction, PopLabelExtraction
+)
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription
-from omnizart.utils import get_logger, dump_pickle, write_yaml
+from omnizart.utils import get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists
 from omnizart.train import train_epochs
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, POP_INSTRUMENT_PROGRAMES
 from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
+import omnizart.constants.datasets as d_struct
 
 logger = get_logger("Music Transcription")
 
@@ -78,16 +80,11 @@ class MusicTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
-        if model_settings.feature.harmonic:
-            spec, gcos, ceps, _ = extract_hcfp(input_audio)
-            feature = np.dstack([spec, gcos, ceps])
-        else:
-            z, spec, gcos, ceps, _ = extract_cfp(input_audio)
-            feature = np.dstack([z.T, spec.T, gcos.T, ceps.T])
+        feature = extract_cfp_feature(input_audio, harmonic=model_settings.feature.harmonic)
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
-        pred = self._predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
+        pred = predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
 
         logger.info("Infering notes....")
         midi = multi_inst_note_inference(
@@ -102,80 +99,99 @@ class MusicTranscription(BaseTranscription):
         )
 
         if output is not None:
-            save_to = os.path.join(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            save_to = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
             midi.write(save_to)
             logger.info("MIDI file has been written to %s", save_to)
         if os.environ["LOG_LEVEL"] == "debug":
-            dump_pickle({"pred": pred}, os.path.join(save_to, "debug_pred.pickle"))
+            dump_pickle({"pred": pred}, jpath(save_to, "debug_pred.pickle"))
         return midi
 
-    def _predict(self, feature, model, timesteps=128, feature_num=384, batch_size=4):  # pylint: disable=R0201
-        """Make predictions on the feature.
+    def generate_feature(self, dataset_path, music_settings=None):
+        if music_settings is not None:
+            assert isinstance(music_settings, MusicSettings)
+            settings = music_settings
+        else:
+            settings = self.settings
 
-        Generate predictions by using the loaded model.
+        dataset_type = _resolve_dataset_type(dataset_path)
+        if dataset_type is None:
+            logger.warning(
+                "The given path %s does not match any built-in processable dataset. Do nothing...",
+                dataset_path
+            )
+            return
+        logger.info("Inferred dataset type: %s", dataset_type)
 
-        Parameters
-        ----------
-        feature: numpy.ndarray
-            Extracted feature of the audio.
-            Dimension:  timesteps x feature_size x channels
-        model: keras.Model
-            The loaded model instance
-        feature_num: int
-            Padding along the feature dimension to the size `feature_num`
-        batch_size: int
-            Batch size for each step of prediction. The size is depending on the available GPU memory.
+        # Build instance mapping
+        struct = {
+            "maps": d_struct.MapsStructure(),
+            "musicnet": d_struct.MusicNetStructure(),
+            "maestro": d_struct.MaestroStructure(),
+            "pop": d_struct.PopStructure()
+        }[dataset_type]
+        label_extractor = {
+            "maps": MapsLabelExtraction,
+            "musicnet": MusicNetLabelExtraction,
+            "maestro": MaestroLabelExtraction,
+            "pop": PopLabelExtraction
+        }[dataset_type]
 
-        Returns
-        -------
-        pred: numpy.ndarray
-            The predicted results. The values are ranging from 0~1.
-        """
+        # Fetching wav files
+        train_wav_files = []
+        test_wav_files = []
+        for wav_folder in struct.train_wavs:
+            train_wav_files += glob.glob(jpath(dataset_path, wav_folder, "*.wav"))
+        for wav_folder in struct.test_wavs:
+            test_wav_files += glob.glob(jpath(dataset_path, wav_folder, "*.wav"))
+        logger.info("Number of total training wavs: %d", len(train_wav_files))
+        logger.info("Number of total testing wavs: %d", len(test_wav_files))
 
-        # Create batches of the feature
-        features = create_batches(feature, b_size=batch_size, timesteps=timesteps, feature_num=feature_num)
+        # Resolve feature output path
+        if settings.dataset.feature_save_path == "+":
+            base_output_path = dataset_path
+            settings.dataset.save_path = dataset_path
+        else:
+            base_output_path = settings.datset.feature_save_path
+        train_feat_out_path = jpath(base_output_path, "train_feature")
+        test_feat_out_path = jpath(base_output_path, "test_feature")
+        ensure_path_exists(train_feat_out_path)
+        ensure_path_exists(test_feat_out_path)
+        logger.info("Output training feature to %s", train_feat_out_path)
+        logger.info("Output testing feature to %s", test_feat_out_path)
 
-        # Container for the batch prediction
-        pred = []
+        # Feature extraction
+        logger.info(
+            "Start extract the feature of the dataset %s. "
+            "This may take time to finish and affect the computer's performance.",
+            dataset_type.title()
+        )
+        logger.info("Extracting training feature")
+        _parallel_feature_extraction(train_wav_files[:4], train_feat_out_path, settings)
+        logger.info("Extracting testing feature")
+        _parallel_feature_extraction(test_wav_files[:5], test_feat_out_path, settings)
+        logger.info("Extraction finished")
 
-        # Initiate lamda function for latter processing of prediction
-        cut_frm = lambda x: cut_frame(x, ori_feature_size=352, feature_num=features[0][0].shape[1])
+        # Fetching label files
+        train_label_files = []
+        test_label_files = []
+        for label_folder in struct.train_labels:
+            train_label_files += glob.glob(jpath(dataset_path, label_folder, "*" + struct.label_ext))
+        for label_folder in struct.test_labels:
+            test_label_files += glob.glob(jpath(dataset_path, label_folder, "*" + struct.label_ext))
+        logger.info("Number of total training labels: %d", len(train_label_files))
+        logger.info("Number of total testing labels: %d", len(test_label_files))
+        assert len(train_label_files) == len(train_wav_files)
+        assert len(test_label_files) == len(test_wav_files)
 
-        t_len = len(features[0][0])
-        first_split_start = round(t_len * 0.75)
-        second_split_start = t_len + round(t_len * 0.25)
+        # Extract labels
+        logger.info("Start extracting the label of the dataset %s", dataset_type.title())
+        label_extractor.process(train_label_files, out_path=train_feat_out_path, t_unit=settings.feature.hop_size)
+        label_extractor.process(test_label_files, out_path=test_feat_out_path, t_unit=settings.feature.hop_size)
 
-        total_batches = len(features)
-        features.insert(0, [np.zeros_like(features[0][0])])
-        features.append([np.zeros_like(features[0][0])])
-        logger.debug("Total batches: %d", total_batches)
-        for i in range(1, total_batches + 1):
-            print("batch: {}/{}".format(i, total_batches), end="\r")
-            first_half_batch = []
-            second_half_batch = []
-            b_size = len(features[i])
-            features[i] = np.insert(features[i], 0, features[i - 1][-1], axis=0)
-            features[i] = np.insert(features[i], len(features[i]), features[i + 1][0], axis=0)
-            for ii in range(1, b_size + 1):
-                ctx = np.concatenate(features[i][ii - 1:ii + 2], axis=0)
-
-                first_half = ctx[first_split_start:first_split_start + t_len]
-                first_half_batch.append(first_half)
-
-                second_half = ctx[second_split_start:second_split_start + t_len]
-                second_half_batch.append(second_half)
-
-            p_one = model.predict(np.array(first_half_batch), batch_size=b_size)
-            p_two = model.predict(np.array(second_half_batch), batch_size=b_size)
-            p_one = cut_batch_pred(p_one)
-            p_two = cut_batch_pred(p_two)
-
-            for ii in range(b_size):
-                frm = np.concatenate([p_one[ii], p_two[ii]])
-                pred.append(cut_frm(frm))
-
-        pred = expit(np.concatenate(pred))  # sigmoid function, mapping the ReLU output value to [0, 1]
-        return pred
+        # Writing out the settings
+        write_yaml(settings.to_json(), jpath(train_feat_out_path, ".success.yaml"))
+        write_yaml(settings.to_json(), jpath(test_feat_out_path, ".success.yaml"))
+        logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, music_settings=None):
         if music_settings is not None:
@@ -197,7 +213,7 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
-        train_feat_files, val_feat_files = self._get_train_val_feat_file_list(feature_folder, split=split)
+        train_feat_files, val_feat_files = _get_train_val_feat_file_list(feature_folder, split=split)
         train_dataset = get_dataset(
             l_type.get_conversion_func(),
             feature_files=train_feat_files,
@@ -240,11 +256,11 @@ class MusicTranscription(BaseTranscription):
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
-            model_save_path = os.path.join(settings.model.save_path, model_name)
+            model_save_path = jpath(settings.model.save_path, model_name)
         if not os.path.exists(model_save_path):
             os.makedirs(model_save_path)
-        write_yaml(settings.to_json(), os.path.join(model_save_path, "configurations.yaml"))
-        write_yaml(model.to_yaml(), os.path.join(model_save_path, "arch.yaml"), dump=False)
+        write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
+        write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
 
         logger.info("Constructing callbacks")
         callbacks = [
@@ -265,16 +281,64 @@ class MusicTranscription(BaseTranscription):
         )
         return model_save_path, history
 
-    def _get_train_val_feat_file_list(self, feature_folder, split=0.9):  # pylint: disable=R0201
-        feat_files = glob.glob(f"{feature_folder}/*.hdf")
-        sidx = round(len(feat_files) * split)
-        random.shuffle(feat_files)
-        train_files = feat_files[:sidx]
-        val_files = feat_files[sidx:]
-        return train_files, val_files
+
+def _parallel_feature_extraction(audio_list, out_path, settings):
+    feat_extract_params = {
+        "hop": settings.feature.hop_size,
+        "win_size": settings.feature.window_size,
+        "fr": settings.feature.frequency_resolution,
+        "fc": settings.feature.frequency_center,
+        "tc": settings.feature.time_center,
+        "g": settings.feature.gamma,
+        "bin_per_octave": settings.feature.bins_per_octave,
+        "harmonic_num": settings.feature.harmonic_number
+    }
+
+    iters = enumerate(
+        parallel_generator(
+            extract_cfp_feature,
+            audio_list,
+            max_workers=2,
+            use_thread=True,
+            chunk_size=3,
+            harmonic=settings.feature.harmonic,
+            **feat_extract_params
+        )
+    )
+    for idx, (feature, audio_idx) in iters:
+        audio = audio_list[audio_idx]
+        # logger.info("Progress: %s/%s - %s", idx+1, len(audio_list), audio)
+        print(f"Progress: {idx+1}/{len(audio_list)} - {audio}" + " "*6, end="\r")  # noqa: E226
+
+        basename = os.path.basename(audio)
+        filename, _ = os.path.splitext(basename)
+        out_hdf = jpath(out_path, filename + ".hdf")
+        with h5py.File(out_hdf, "w") as out_f:
+            out_f.create_dataset("feature", data=feature)
+    print("")
 
 
-if __name__ == "__main__":
+def _resolve_dataset_type(dataset_path):
+    low_path = dataset_path.lower()
+    keywords = {"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
+    d_type = [val for key, val in keywords.items() if key in low_path]
+    if len(d_type) == 0:
+        return None
+
+    assert len(d_type) == 1
+    return d_type[0]
+
+
+def _get_train_val_feat_file_list(feature_folder, split=0.9):
+    feat_files = glob.glob(f"{feature_folder}/*.hdf")
+    sidx = round(len(feat_files) * split)
+    random.shuffle(feat_files)
+    train_files = feat_files[:sidx]
+    val_files = feat_files[sidx:]
+    return train_files, val_files
+
+
+def model_training_test():
     feature_folder = "/data/omnizart/tf_dataset_experiment/feature"
 
     settings = MusicSettings()
@@ -293,3 +357,10 @@ if __name__ == "__main__":
     model_path, history = app.train(
         feature_folder, music_settings=settings, model_name="test2", input_model_path="checkpoints/music/music_test"
     )
+    return model_path, history
+
+
+if __name__ == "__main__":
+    settings = MusicSettings()
+    app = MusicTranscription()
+    app.generate_feature("/media/data/maestro-v1.0.0")

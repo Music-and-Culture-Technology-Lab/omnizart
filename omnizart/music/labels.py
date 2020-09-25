@@ -1,10 +1,19 @@
+import os
+import abc
+import csv
+
+import pretty_midi
 import numpy as np
 
-from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS
+from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
+from omnizart.utils import get_logger, dump_pickle
+
+
+logger = get_logger("Music Labels")
 
 
 class LabelType:
-    """Defines different types of `music` label.
+    """Defines different types of `music` label for training.
 
     Defines functions that converts the customized label format into numpy
     array. With the customized format, it is more flexible to transform
@@ -120,7 +129,33 @@ def label_conversion(
     onsets=False,
     channel_mapping=None
 ):
-    assert(ori_feature_size % base == 0)
+    """Converts the customized label format into numpy array.
+
+    Parameters
+    ----------
+    label: object
+        List of dict that is in customized label format.
+    ori_feature_size: int
+        Size of the original feature dimension.
+    feature_num: int
+        Size of the target output feature dimension.
+    base: int
+        Number of total available pitches.
+    mpe: bool
+        Whether to merge all channels into a single one, discarding information
+        about instruments.
+    onsets: bool
+        Fill in onset probabilities if set to true, or fill one to all activations.
+    channel_mapping: dict
+        Maps the instrument program number to the specified channel index, used
+        to indicate which channel should represent what instruments.
+
+    See Also
+    --------
+    omnizart.music.labels.BaseLabelExtraction.extract_label:
+        Function that generates the customized label format.
+    """
+    assert ori_feature_size % base == 0
     scale = ori_feature_size // base
 
     if channel_mapping is None:
@@ -161,3 +196,270 @@ def label_conversion(
 
     output[:, :, 0] = 1 - np.sum(output[:, :, 1:], axis=2)
     return output
+
+
+class Label:
+    """Interface of different label format.
+
+    Plays role for generalize the label format, and subsequent dataset class should
+    implement functions transforming labels (whether in .mid, .txt, or .csv format)
+    and parse the necessary columns into attributes this class holds.
+
+    Parameters
+    ----------
+    start_time: float
+        Onset time of the note in seconds.
+    end_time: float
+        Offset time of the note in seconds.
+    note: int
+        Midi number of the number, should be within 21~108.
+    velocity: int
+        Velocity of keypress, should be wihtin 0~127
+    start_beat: float
+        Start beat index of the note.
+    end_beat: float
+        End beat index of the note.
+    note_value: str
+        Type of the note (e.g. quater, eighth, sixteenth).
+    is_drum: bool
+        Whether the note represents the drum channel.
+    """
+    def __init__(
+        self,
+        start_time,
+        end_time,
+        note,
+        instrument=0,
+        velocity=64,
+        start_beat=0,
+        end_beat=10,
+        note_value="",
+        is_drum=False
+    ):
+        self.start_time = start_time
+        self.end_time = end_time
+        self.note = note
+        self.velocity = velocity
+        self.instrument = instrument
+        self.start_beat = start_beat
+        self.end_beat = end_beat
+        self.note_value = note_value
+        self.is_drum = is_drum
+
+    @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, midi_num):
+        if LOWEST_MIDI_NOTE <= midi_num <= HIGHEST_MIDI_NOTE:
+            self._note = midi_num
+        else:
+            logger.warning(
+                "The given midi number is out-of-bound and will be skipped."
+                "Received midi number: %d. Available: [%d - %d]",
+                midi_num, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
+            )
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        assert 0 <= value <= 127
+        self._velocity = value
+
+
+class BaseLabelExtraction(metaclass=abc.ABCMeta):
+    """Base class for extract label informations.
+
+    Provides basic functions to process native label format into the format
+    required by ``music`` module. All sub-classes should parse the original
+    label information into :class:`Label` class.
+
+    See Also
+    --------
+    omnizart.music.labels.label_conversion:
+
+    """
+    @classmethod
+    @abc.abstractmethod
+    def load_label(cls, label_path):  # -> list[Label]
+        """Load the label file and parse information into ``Label`` class.
+
+        Sub-classes should override this function to process their own label
+        format.
+
+        Parameters
+        ----------
+        label_path: Path
+            Path to the label file.
+
+        Returns
+        -------
+        labels: list[Label]
+            List of :class:`Label` instances.
+        """
+        raise NotImplementedError
+
+    @classmethod
+    def process(cls, label_list, out_path, t_unit=0.02, onset_len_sec=0.05):
+        """Process the given list of label files and output to the target folder.
+
+        Parameters
+        ----------
+        label_list: list[Path]
+            List of label paths.
+        out_path: Path
+            Path for saving the extracted label files.
+        t_unit: float
+            Time unit of each step in seconds. Should be consistent with the time unit of
+            each frame of the extracted feature.
+        onset_len_sec: float
+            Length of the first few frames with probability one. The later onset
+            probabilities will be in a 'fade-out' manner until the note offset.
+        """
+        for idx, label_path in enumerate(label_list):
+            print(f"Progress: {idx+1}/{len(label_list)} - {label_path}" + " "*6, end="\r")  # noqa: E226
+            label_obj = cls.extract_label(label_path, t_unit=t_unit, onset_len_sec=onset_len_sec)
+            basename = os.path.basename(label_path)  # File name with extension
+            filename, _ = os.path.splitext(basename)  # File name without extension
+            output_name = cls.name_transform(filename)  # Output the same name as feature file
+            output_path = os.path.join(out_path, output_name + ".pickle")
+            dump_pickle(label_obj, output_path)
+        print("")
+
+    @classmethod
+    def extract_label(cls, label_path, t_unit, onset_len_sec=0.05):
+        """Extract labels into customized storage format.
+
+        Process the given path of label into list of :class:`Label` instances,
+        then further convert them into deliberately customized storage format.
+
+        Parameters
+        ----------
+        label_path: Path
+            Path to the label file.
+        t_unit: float
+            Time unit of each step in seconds. Should be consistent with the time unit of
+            each frame of the extracted feature.
+        onset_len_sec: float
+            Length of the first few frames with probability one. The later onset
+            probabilities will be in a 'fade-out' manner until the note offset.
+        """
+        label_list = cls.load_label(label_path)
+
+        end_note = max(label_list, key=lambda label: label.end_time)
+        num_frm = int(round(end_note.end_time / t_unit))
+        label_obj = [{}] * num_frm
+        for label in label_list:
+            start_frm = int(round(label.start_time / t_unit))
+            end_frm = int(round(label.end_time / t_unit))
+            pitch = label.note - LOWEST_MIDI_NOTE
+            onset_value = 1
+            onset_len_frm = int(round(onset_len_sec / t_unit))
+            for idx, frm_idx in enumerate(range(start_frm, end_frm)):
+                if pitch not in label_obj[frm_idx]:
+                    label_obj[frm_idx][pitch] = {}
+                label_obj[frm_idx][pitch][label.instrument] = onset_value
+
+                # Decrease the onset probability
+                if idx >= onset_len_frm and onset_value > 1e-5:
+                    onset_value /= idx
+        return label_obj
+
+    @classmethod
+    def name_transform(cls, name):
+        """Maps the filename of label to the same name of the corresponding wav file.
+
+        Parameters
+        ----------
+        name: str
+            Name of the label file, without parent directory prefix and file extension.
+
+        Returns
+        -------
+        trans_name: str
+            The name same as the coressponding wav (or says feature) file.
+        """
+        return name
+
+
+class MaestroLabelExtraction(BaseLabelExtraction):
+    """Label extraction class for Maestro dataset"""
+    @classmethod
+    def load_label(cls, label_path):
+        midi = pretty_midi.PrettyMIDI(label_path)
+        labels = []
+        for inst in midi.instruments:
+            for note in inst.notes:
+                labels.append(
+                    Label(
+                        start_time=note.start,
+                        end_time=note.end,
+                        note=note.pitch,
+                        velocity=note.velocity,
+                        instrument=inst.program
+                    )
+                )
+        return labels
+
+
+class MapsLabelExtraction(BaseLabelExtraction):
+    """Label extraction class for Maps dataset"""
+    @classmethod
+    def load_label(cls, label_path):
+        lines = open(label_path, "r").readlines()[1:]  # Discard the first line which contains column names
+        labels = []
+        for line in lines:
+            if line.strip() == "":
+                continue
+            values = line.split("\t")
+            onset, offset, note = float(values[0]), float(values[1]), int(values[2].strip())
+            labels.append(Label(start_time=onset, end_time=offset, note=note))
+        return labels
+
+
+class MusicNetLabelExtraction(BaseLabelExtraction):
+    """Label extraction class for MusicNet dataset"""
+    @classmethod
+    def load_label(cls, label_path):
+        labels = []
+        sample_rate = 44100
+        with open(label_path, "r") as label_file:
+            reader = csv.DictReader(label_file, delimiter=",")
+            for row in reader:
+                onset = float(row["start_time"]) / sample_rate
+                offset = float(row["end_time"]) / sample_rate
+                inst = int(row["instrument"])
+                note = int(row["note"])
+                start_beat = float(row["start_beat"])
+                end_beat = float(row["end_beat"])
+                note_value = row["note_value"]
+
+                label = Label(
+                    start_time=onset,
+                    end_time=offset,
+                    note=note,
+                    instrument=inst,
+                    start_beat=start_beat,
+                    end_beat=end_beat,
+                    note_value=note_value
+                )
+                labels.append(label)
+        return labels
+
+
+class SuLabelExtraction(MaestroLabelExtraction):
+    """Label extraction class for Extended-Su dataset
+
+    Uses the same process as Maestro dataset
+    """
+
+
+class PopLabelExtraction(MaestroLabelExtraction):
+    """Label extraction class for Pop Rhythm dataset"""
+    @classmethod
+    def name_transform(cls, name):
+        return name.replace("align_mid", "ytd_audio")
