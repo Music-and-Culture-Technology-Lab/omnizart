@@ -5,6 +5,8 @@ import re
 import pickle
 import logging
 import uuid
+import concurrent.futures
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import yaml
 import librosa
@@ -59,6 +61,9 @@ def get_logger(name=None, level="warn"):
     logger.addHandler(handler)
     logger.setLevel(level_mapping[level.lower()])
     return logger
+
+
+logger = get_logger("Omnizart Utils")
 
 
 def dump_pickle(data, save_to):
@@ -283,3 +288,52 @@ def json_serializable(key_path="./", value_path="./"):
         return tar_cls
 
     return wrapper
+
+
+def ensure_path_exists(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_size=None, **kwargs):
+    if chunk_size is not None and max_workers > chunk_size:
+        logger.warning(
+            "Chunk size should larger than the maximum number of workers, or the parallel computation "
+            "can do nothing helpful. Received max workers: %d, chunk size: %d",
+            max_workers, chunk_size
+        )
+        max_workers = chunk_size
+
+    executor = ThreadPoolExecutor(max_workers=max_workers) \
+        if use_thread else ProcessPoolExecutor(max_workers=max_workers)
+
+    chunks = 1
+    slice_len = len(input_list)
+    if chunk_size is not None:
+        chunks = len(input_list) / chunk_size
+        if int(chunks) < chunks:
+            chunks = int(chunks) + 1
+        slice_len = chunk_size
+
+    for chunk_idx in range(chunks):
+        start_idx = chunk_idx * slice_len
+        end_idx = (chunk_idx + 1) * slice_len
+        future_to_input = {}
+        for idx, _input in enumerate(input_list[start_idx:end_idx]):
+            logger.debug("Parallel job submitted %s", func.__name__)
+            future = executor.submit(func, _input, **kwargs)
+            future_to_input[future] = idx
+
+        try:
+            for future in concurrent.futures.as_completed(future_to_input):
+                logger.debug("Yielded %s", func.__name__)
+                yield future.result(), future_to_input[future]
+        except KeyboardInterrupt as exp:
+            for future in future_to_input:
+                if future.cancel():
+                    logger.info("Job cancelled")
+                else:
+                    logger.warning("Fail to cancel job: %s", future)
+            executor.shutdown()
+            raise exp
+    executor.shutdown()
