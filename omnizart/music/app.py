@@ -151,7 +151,7 @@ class MusicTranscription(BaseTranscription):
             base_output_path = dataset_path
             settings.dataset.save_path = dataset_path
         else:
-            base_output_path = settings.datset.feature_save_path
+            base_output_path = settings.dataset.feature_save_path
         train_feat_out_path = jpath(base_output_path, "train_feature")
         test_feat_out_path = jpath(base_output_path, "test_feature")
         ensure_path_exists(train_feat_out_path)
@@ -166,7 +166,7 @@ class MusicTranscription(BaseTranscription):
             dataset_type.title()
         )
         logger.info("Extracting training feature")
-        _parallel_feature_extraction(train_wav_files[:4], train_feat_out_path, settings)
+        #_parallel_feature_extraction(train_wav_files, train_feat_out_path, settings)
         logger.info("Extracting testing feature")
         _parallel_feature_extraction(test_wav_files[:5], test_feat_out_path, settings)
         logger.info("Extraction finished")
@@ -185,7 +185,7 @@ class MusicTranscription(BaseTranscription):
 
         # Extract labels
         logger.info("Start extracting the label of the dataset %s", dataset_type.title())
-        label_extractor.process(train_label_files, out_path=train_feat_out_path, t_unit=settings.feature.hop_size)
+        #label_extractor.process(train_label_files, out_path=train_feat_out_path, t_unit=settings.feature.hop_size)
         label_extractor.process(test_label_files, out_path=test_feat_out_path, t_unit=settings.feature.hop_size)
 
         # Writing out the settings
