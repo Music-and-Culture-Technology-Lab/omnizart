@@ -38,7 +38,7 @@ jobs:
       run: |
         eval $(ssh-agent -s)
         ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
-        cp docs/build/html omnizart-doc
+        cp -r docs/build/html omnizart-doc
         cd omnizart-doc
         git add .
         utc_time=`date --utc`
