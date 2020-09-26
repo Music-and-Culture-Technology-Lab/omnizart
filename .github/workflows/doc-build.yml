@@ -33,13 +33,15 @@ jobs:
         make html
     - name: Clone documentation repo
       run: |
-        git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart-doc.git
+        eval $(ssh-agent -s)
+        ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
+        git clone git@github.com:Music-and-Culture-Technology-Lab/omnizart-doc.git
         git config --global user.name "omnizart-actions"
     - name: Push html to omnizart-doc repo
       run: |
         eval $(ssh-agent -s)
         ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
-        cp -r docs/build/html omnizart-doc
+        cp -r docs/build/html/* omnizart-doc
         cd omnizart-doc
         git add .
         utc_time=`date --utc`
