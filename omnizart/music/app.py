@@ -166,9 +166,9 @@ class MusicTranscription(BaseTranscription):
             dataset_type.title()
         )
         logger.info("Extracting training feature")
-        #_parallel_feature_extraction(train_wav_files, train_feat_out_path, settings)
+        _parallel_feature_extraction(train_wav_files, train_feat_out_path, settings.feature)
         logger.info("Extracting testing feature")
-        _parallel_feature_extraction(test_wav_files[:5], test_feat_out_path, settings)
+        _parallel_feature_extraction(test_wav_files, test_feat_out_path, settings.feature)
         logger.info("Extraction finished")
 
         # Fetching label files
@@ -185,7 +185,7 @@ class MusicTranscription(BaseTranscription):
 
         # Extract labels
         logger.info("Start extracting the label of the dataset %s", dataset_type.title())
-        #label_extractor.process(train_label_files, out_path=train_feat_out_path, t_unit=settings.feature.hop_size)
+        label_extractor.process(train_label_files, out_path=train_feat_out_path, t_unit=settings.feature.hop_size)
         label_extractor.process(test_label_files, out_path=test_feat_out_path, t_unit=settings.feature.hop_size)
 
         # Writing out the settings
@@ -257,8 +257,7 @@ class MusicTranscription(BaseTranscription):
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
             model_save_path = jpath(settings.model.save_path, model_name)
-        if not os.path.exists(model_save_path):
-            os.makedirs(model_save_path)
+        ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
 
@@ -282,16 +281,16 @@ class MusicTranscription(BaseTranscription):
         return model_save_path, history
 
 
-def _parallel_feature_extraction(audio_list, out_path, settings):
+def _parallel_feature_extraction(audio_list, out_path, feat_settings):
     feat_extract_params = {
-        "hop": settings.feature.hop_size,
-        "win_size": settings.feature.window_size,
-        "fr": settings.feature.frequency_resolution,
-        "fc": settings.feature.frequency_center,
-        "tc": settings.feature.time_center,
-        "g": settings.feature.gamma,
-        "bin_per_octave": settings.feature.bins_per_octave,
-        "harmonic_num": settings.feature.harmonic_number
+        "hop": feat_settings.hop_size,
+        "win_size": feat_settings.window_size,
+        "fr": feat_settings.frequency_resolution,
+        "fc": feat_settings.frequency_center,
+        "tc": feat_settings.time_center,
+        "g": feat_settings.feature.gamma,
+        "bin_per_octave": feat_settings.bins_per_octave,
+        "harmonic_num": feat_settings.harmonic_number
     }
 
     iters = enumerate(
@@ -301,7 +300,7 @@ def _parallel_feature_extraction(audio_list, out_path, settings):
             max_workers=2,
             use_thread=True,
             chunk_size=3,
-            harmonic=settings.feature.harmonic,
+            harmonic=feat_settings.harmonic,
             **feat_extract_params
         )
     )
@@ -325,7 +324,7 @@ def _resolve_dataset_type(dataset_path):
     if len(d_type) == 0:
         return None
 
-    assert len(d_type) == 1
+    assert len(set(d_type)) == 1
     return d_type[0]
 
 
