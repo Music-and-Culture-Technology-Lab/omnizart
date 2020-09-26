@@ -6,7 +6,7 @@ Omniscient Mozart, being able to transcribe everything in the music, including v
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
 # About
-[Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leverging cutting-edge AI techiniques.
+[Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leveraging cutting-edge AI techiniques.
 
 # Plan to support
 | Commands | transcribe         | train              | evaluate | Description                       |
