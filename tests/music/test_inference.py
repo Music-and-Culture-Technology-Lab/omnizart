@@ -1,7 +1,58 @@
-
 import numpy as np
 
 from omnizart.music import inference as inf
+
+
+def generate_pred(frame_size, on_pitch, scale=4, occur_num=3):
+    pred = np.zeros((frame_size, 88*scale))
+    for idx, pitch in enumerate(on_pitch):
+        pitch_range = range(pitch*scale, (pitch+1)*scale)
+        occur_pos = np.random.choice(pitch_range, size=occur_num, replace=False)
+        pred[idx, occur_pos] = 1
+    return pred
+
+
+def validate_down_sample(out, on_pitch):
+    for idx, frm in enumerate(out):
+        occur_idx = np.where(frm>0)[0][0]
+        assert occur_idx == on_pitch[idx]
+
+
+def test_roll_down_sample():
+    frame_size = 200
+    scale = 4
+    occur_num = 3
+    on_pitch = np.random.randint(88, size=frame_size)
+
+    pred = generate_pred(frame_size, on_pitch, scale=scale, occur_num=occur_num)
+    out = inf.roll_down_sample(pred, occur_num=occur_num)
+
+    assert out.shape == (frame_size, 88)
+    validate_down_sample(out, on_pitch)
+
+    pred_under_th = generate_pred(frame_size, on_pitch, scale=scale, occur_num=occur_num-1)
+    out = inf.roll_down_sample(pred_under_th, occur_num=occur_num)
+    assert np.array_equiv(out, 0)
+
+
+def test_down_sample():
+    frame_size = 300
+    occur_num = 3
+    channels = 10
+
+    preds = []
+    on_pitches = []
+    for _ in range(channels):
+        on_pitch = np.random.randint(88, size=frame_size)
+        pred = generate_pred(frame_size, on_pitch, occur_num=occur_num)
+        on_pitches.append(on_pitch)
+        preds.append(pred)
+
+    preds = np.dstack(preds)
+    outs = inf.down_sample(preds, occur_num=occur_num)
+    assert outs.shape == (frame_size, 88, channels)
+    for idx in range(channels):
+        validate_down_sample(outs[:,:,idx], on_pitches[idx])
 
 
 def test_find_occur():

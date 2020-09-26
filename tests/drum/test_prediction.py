@@ -3,24 +3,7 @@ import pickle
 import pytest
 import numpy as np
 
-from omnizart.drum import utils
-
-
-def test_get_frame_by_time():
-    assert utils.get_frame_by_time(150) == 25840
-    assert utils.get_frame_by_time(77, 16000) == 4812
-    assert utils.get_frame_by_time(2, 16000, 128) == 250
-
-
-def test_extract_patch_cqt():
-    data = pickle.load(open("tests/resource/sample_feature.pickle", "rb"))
-    mini_beat_arr = data["mini_beat_arr"]
-    cqt = data["cqt"]
-    patch_cqt = data["patch_cqt"]
-    extracted = utils.extract_patch_cqt(cqt, mini_beat_arr, sampling_rate=44100, hop_size=256)
-
-    assert extracted.shape == (1100, 120, 120)
-    assert np.array_equiv(patch_cqt, extracted)
+from omnizart.drum import prediction as putils
 
 
 @pytest.mark.parametrize("shape,mini_beat_per_seg,batch_size", [
@@ -35,7 +18,7 @@ def test_create_batches_size(shape, mini_beat_per_seg, batch_size):
     target_first_dim = max(1, int(np.ceil((shape[0]-mini_beat_per_seg+1)/batch_size)))
     target_shape = (target_first_dim, batch_size, shape[1], shape[2], mini_beat_per_seg)
 
-    result = utils.create_batches(data, mini_beat_per_seg, b_size=batch_size)
+    result, pad_size = putils.create_batches(data, mini_beat_per_seg, b_size=batch_size)
     assert result.shape == target_shape
 
 
@@ -54,7 +37,7 @@ def test_create_batches_value():
          [[ 0.,  0.,  0.], [ 0.,  0.,  0.], [ 0.,  0.,  0.], [ 0.,  0.,  0.]],
          [[ 0.,  0.,  0.], [ 0.,  0.,  0.], [ 0.,  0.,  0.], [ 0.,  0.,  0.]]],
     ]])
-    result = utils.create_batches(data, 3, 3)
+    result, pad_size = putils.create_batches(data, 3, 3)
     assert np.array_equal(result, expected)
 
 
@@ -71,7 +54,7 @@ def test_merge_batches_shape(shape):
     target_shape = (target_first_dim, out_classes)
     data = np.arange(np.prod(shape)).reshape(shape)
 
-    result = utils.merge_batches(data)
+    result = putils.merge_batches(data)
     assert result.shape == target_shape
 
 
@@ -84,5 +67,5 @@ def test_merge_batches_shape(shape):
 def test_merge_batches_value(shape, value):
     data = np.zeros(shape)
     data.fill(value)
-    result = utils.merge_batches(data)
+    result = putils.merge_batches(data)
     assert np.array_equiv(result, value)
