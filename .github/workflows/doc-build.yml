@@ -34,6 +34,7 @@ jobs:
     - name: Clone documentation repo
       run: |
         git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart-doc.git
+        git config --global user.name "omnizart-actions"
     - name: Push html to omnizart-doc repo
       run: |
         eval $(ssh-agent -s)
