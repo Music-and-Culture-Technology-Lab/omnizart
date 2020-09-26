@@ -28,7 +28,10 @@ jobs:
         pip install --upgrade pip
         pip install sphinx sphinx-press-theme numpydoc
     - name: Build html
+      env:
+        PYTHONPATH: ../
       run: |
+        pwd
         cd docs
         make html
     - name: Clone documentation repo
