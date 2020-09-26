@@ -8,6 +8,9 @@ name: docs
 on:
   push:
     branches: [ build_doc ]
+  release:
+    branches: [ master, main ]
+    type: [ published ]
 
 jobs:
   build:
