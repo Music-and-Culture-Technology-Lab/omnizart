@@ -16,6 +16,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6]
+    env:
+        DEFAULT_VENV_APPROACH: poetry
 
     steps:
     - uses: actions/checkout@v2
@@ -25,7 +27,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
+        sudo apt-get install libsndfile1
+        ./scripts/install.sh
         pip install sphinx sphinx-press-theme numpydoc
     - name: Build html
       env:
