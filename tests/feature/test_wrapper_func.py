@@ -1,5 +1,4 @@
-import pickle
-
+import h5py
 import numpy as np
 
 from omnizart.feature import wrapper_func as wfunc
@@ -12,10 +11,10 @@ def test_get_frame_by_time():
 
 
 def test_extract_patch_cqt(mocker):
-    data = pickle.load(open("tests/resource/sample_feature.pickle", "rb"))
-    mini_beat_arr = data["mini_beat_arr"]
-    cqt = data["cqt"]
-    patch_cqt = data["patch_cqt"]
+    with h5py.File("tests/resource/sample_feature.hdf") as fin:
+        mini_beat_arr = fin["mini_beat_arr"][:]
+        cqt = fin["cqt"][:]
+        patch_cqt = fin["patch_cqt"][:]
 
     mocked_extract_cqt = mocker.patch("omnizart.feature.wrapper_func.extract_cqt")
     mocked_extract_mini_beat = mocker.patch("omnizart.feature.wrapper_func.extract_mini_beat_from_audio_path")
