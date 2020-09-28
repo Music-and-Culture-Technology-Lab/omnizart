@@ -14,5 +14,4 @@ def music():
 
 music.add_command(generate_feature)
 music.add_command(train_model)
-music.add_command(evaluate)
 music.add_command(transcribe)
