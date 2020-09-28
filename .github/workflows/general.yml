@@ -29,7 +29,7 @@ jobs:
       env:
         cache-name: python-packages
       with:
-        path: ~/.local/lib/${{ matrix.python-version }}/site-packages
+        path: ~/.cache/pip
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -47,6 +47,8 @@ jobs:
         sudo apt-get install libsndfile1
         ./scripts/install.sh
         pip install flake8 pylint pytest pytest-cov pytest-mock
+        pacakge_location=`pip show tensorflow | grep Location`
+        echo 'Site-packages installed in "$pacakge_location"'
     - name: Check with linters
       run: |
         make lint
