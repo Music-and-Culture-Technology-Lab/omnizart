@@ -25,6 +25,7 @@ class Settings:
 
 @json_serializable(key_path="./General", value_path="./Value")
 class MusicSettings(Settings):
+    """Hello"""
     default_setting_file: str = "music.yaml"
 
     def __init__(self, conf_path=None):

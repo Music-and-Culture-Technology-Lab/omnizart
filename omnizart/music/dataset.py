@@ -12,7 +12,7 @@ from omnizart.music.labels import LabelType
 
 
 class FeatureDataset(tf.data.Dataset):
-    """Dataset loader for `music` module.
+    """Dataset loader for ``music`` module.
 
     It's much faster than passing the naive generator to the training loop.
     There are some work-around to dealing with the customized stored label format.
@@ -21,7 +21,7 @@ class FeatureDataset(tf.data.Dataset):
     and thus the work-around is to add one more column to the return data as the
     intermediate data that will not be used in the training loop, but will be
     used in the `map` processing.
-    In `music` module, the `map` conversion happened in `get_label_conversion_wrapper`,
+    In ``music`` module, the `map` conversion happened in ``get_label_conversion_wrapper``,
     and must be applied, or it will return the wrong data pair.
 
     Parameters

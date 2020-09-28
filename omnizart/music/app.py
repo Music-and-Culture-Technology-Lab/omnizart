@@ -107,6 +107,31 @@ class MusicTranscription(BaseTranscription):
         return midi
 
     def generate_feature(self, dataset_path, music_settings=None):
+        """Extract the feature of the whole dataset.
+
+        To train the model, the first thing is to pre-process the data into feature
+        representations. After downloading the dataset, use this function to generate
+        the feature by giving the path to where the dataset stored, and the program
+        will do all the rest of things.
+
+        To specify the output path, modify the attribute
+        ``music_settings.dataset.feature_save_path`` to the value you want.
+        It will default to the folder under where the dataset stored, generating
+        two folders: ``train_feature`` and ``test_feature``.
+
+        Parameters
+        ----------
+        dataset_path: Path
+            Path to the downloaded dataset.
+        music_settings: MusicSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+
+        See Also
+        --------
+        omnizart.constants.datasets:
+            Supported dataset that can be applied and the split of training/testing.
+        """
         if music_settings is not None:
             assert isinstance(music_settings, MusicSettings)
             settings = music_settings
@@ -194,6 +219,24 @@ class MusicTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, music_settings=None):
+        """Model training.
+
+        Train a new music model or continue to train on a pre-trained model.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the generated feature.
+        model_name: str
+            The name of the trained model. If not given, will default to the
+            current timestamp.
+        input_model_path: Path
+            Specify the path to the pre-trained model if you want to continue
+            to fine-tune on the model.
+        music_settings: MusicSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        """
         if music_settings is not None:
             assert isinstance(music_settings, MusicSettings)
             settings = music_settings

@@ -4,7 +4,15 @@ Attributes
 ----------
 MIDI_PROGRAM_NAME_MAPPING: Dict
     Mapping of program number to name.
-
+LOWEST_MIDI_NOTE: int
+    Lowest note midi number that will be used.
+HIGHEST_MIDI_NOTE: int
+    Highest note midi number that will be used.
+MUSICNET_INSTRUMENT_PROGRAMS: list[int]
+    Program numbers that are used in MusicNet dataset.
+POP_INSTRUMENT_PROGRAMS: list[int]
+    Program numbers that represent different groups of channels used
+    in Pop dataset.
 """
 
 from librosa import note_to_midi

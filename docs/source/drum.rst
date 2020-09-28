@@ -11,9 +11,9 @@ Transcribe
 .. autofunction:: omnizart.drum.app.DrumTranscription.transcribe
 
 
-Utils
-#####
+Prediction
+##########
 
-.. automodule:: omnizart.drum.utils
+.. automodule:: omnizart.drum.prediction
     :members:
     :undoc-members:

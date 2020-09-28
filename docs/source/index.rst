@@ -27,9 +27,10 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
 
    music.rst
    drum.rst
-   base.rst
    feature.rst
    models.rst
+   training.rst
+   base.rst
    constants.rst
    utils.rst
 

@@ -47,7 +47,7 @@ click.option = partial(click.option, show_default=True)
 @click.option(
     "-l",
     "--label-type",
-    help="Detemine the output label should be note- (onset, duration) or stream-level (onset, duration, instrument)",
+    help="Determine the output label should be note- (onset, duration) or stream-level (onset, duration, instrument)",
     type=click.Choice(["note", "note-stream", "pop-note-stream", "frame", "frame-stream"]),
     default="note-stream",
 )
