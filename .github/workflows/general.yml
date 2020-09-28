@@ -24,15 +24,29 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Cache site packages
+      uses: actions/cache@v2
+      env:
+        cache-name: python-packages
+      with:
+        path: ~/.local/lib/${{ matrix.python-version }}/site-packages
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        git lfs install
+        git lfs pull
         sudo apt-get install libsndfile1
         ./scripts/install.sh
-        pip install flake8 pylint pytest pytest-cov
+        pip install flake8 pylint pytest pytest-cov pytest-mock
     - name: Check with linters
       run: |
         make lint
