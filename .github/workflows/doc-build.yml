@@ -33,7 +33,9 @@ jobs:
       env:
         cache-name: python-packages
       with:
-        path: ~/.cache/pip
+        path: |
+          ~/.cache/pip
+          ~/.cache/pypoetry
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
