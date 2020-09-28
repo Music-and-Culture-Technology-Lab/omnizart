@@ -7,7 +7,6 @@ import logging
 import uuid
 import concurrent.futures
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from functools import wraps
 
 import yaml
 import librosa
