@@ -10,6 +10,12 @@ class BaseStructure(metaclass=ABCMeta):
     the necessary attributes, methods are overriden.
     """
     @property
+    @classmethod
+    def url(cls):
+        dataset = str(cls.__class__).replace('Structure', '')  # noqa: F841
+        raise AttributeError("Attribute 'url' not defined for dataset {dataset}")
+
+    @property
     @abstractmethod
     def label_ext(self):
         """The extension of ground-truth files.
@@ -111,6 +117,8 @@ class MapsStructure(BaseStructure):
 
 class MusicNetStructure(BaseStructure):
     """Structure of MusicNet dataset"""
+    url = "https://homes.cs.washington.edu/~thickstn/media/musicnet.tar.gz"
+
     @property
     def label_ext(self):
         """"""
@@ -139,6 +147,8 @@ class MusicNetStructure(BaseStructure):
 
 class MaestroStructure(BaseStructure):
     """Structure of Maestro dataset"""
+    url = "https://storage.googleapis.com/magentadata/datasets/maestro/v2.0.0/maestro-v2.0.0.zip"
+
     @property
     def label_ext(self):
         """"""
@@ -147,12 +157,12 @@ class MaestroStructure(BaseStructure):
     @property
     def train_wavs(self):
         """"""
-        return ["2004", "2006", "2008", "2009", "2011", "2013", "2014", "2015"]
+        return ["2004", "2006", "2008", "2009", "2011", "2013", "2014", "2015", "2017"]
 
     @property
     def test_wavs(self):
         """"""
-        return ["2017"]
+        return ["2018"]
 
     @property
     def train_labels(self):

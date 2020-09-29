@@ -1,9 +1,8 @@
 import click
 
-from .generate_feature import generate_feature
-from .train_model import train_model
-from .evaluate import evaluate
-from .transcribe import transcribe
+from omnizart.cli.music.generate_feature import generate_feature
+from omnizart.cli.music.train_model import train_model
+from omnizart.cli.music.transcribe import transcribe
 
 
 @click.group()

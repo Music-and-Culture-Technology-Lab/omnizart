@@ -365,7 +365,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings):
                 with h5py.File(out_hdf, "w") as out_f:
                     out_f.create_dataset("feature", data=feature)
             except OSError as exp:
-                logger.warning("OSError occurred, retrying %d times", retry + 1)
+                logger.warning("OSError occurred, retrying %d times. Reason: %s", retry + 1, str(exp))
         if not saved:
             logger.error("H5py failed to save the feature file after %d retries.", retry_times)
             raise OSError
