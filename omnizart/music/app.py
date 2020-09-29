@@ -331,7 +331,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings):
         "fr": feat_settings.frequency_resolution,
         "fc": feat_settings.frequency_center,
         "tc": feat_settings.time_center,
-        "g": feat_settings.feature.gamma,
+        "g": feat_settings.gamma,
         "bin_per_octave": feat_settings.bins_per_octave,
         "harmonic_num": feat_settings.harmonic_number
     }
@@ -355,8 +355,20 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings):
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)
         out_hdf = jpath(out_path, filename + ".hdf")
-        with h5py.File(out_hdf, "w") as out_f:
-            out_f.create_dataset("feature", data=feature)
+
+        saved = False
+        retry_times = 5
+        for retry in range(retry_times):
+            if saved:
+                break
+            try:
+                with h5py.File(out_hdf, "w") as out_f:
+                    out_f.create_dataset("feature", data=feature)
+            except OSError as exp:
+                logger.warning("OSError occurred, retrying %d times", retry + 1)
+        if not saved:
+            logger.error("H5py failed to save the feature file after %d retries.", retry_times)
+            raise OSError
     print("")
 
 

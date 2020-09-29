@@ -322,7 +322,7 @@ def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_
         for idx, _input in enumerate(input_list[start_idx:end_idx]):
             logger.debug("Parallel job submitted %s", func.__name__)
             future = executor.submit(func, _input, **kwargs)
-            future_to_input[future] = idx
+            future_to_input[future] = idx + start_idx
 
         try:
             for future in concurrent.futures.as_completed(future_to_input):
