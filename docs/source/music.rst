@@ -36,7 +36,7 @@ Labels
     :undoc-members:
 
 
-Prediciton
+Prediction
 ##########
 .. automodule:: omnizart.music.prediction
     :members:
