@@ -170,14 +170,13 @@ def label_conversion(
         for pitch, insts in lab.items():
             for inst, prob in insts.items():
                 # TODO: Remove minus one in future!!
-                inst = int(inst) - 1
+                inst = int(inst) -1
                 if inst not in channel_mapping:
                     continue
 
                 pitch = int(pitch)
                 channel = channel_mapping[inst]
-                feat_range = range(pitch*scale, (pitch+1)*scale)  # noqa: E226
-                output[t, feat_range, channel] = prob[0]
+                output[t, pitch*scale:(pitch+1)*scale, channel] = prob
 
     if not onsets:
         output = np.where(output > 0, 1, 0)
@@ -256,10 +255,11 @@ class Label:
             self._note = midi_num
         else:
             logger.warning(
-                "The given midi number is out-of-bound and will be skipped."
+                "The given midi number is out-of-bound and will be skipped. "
                 "Received midi number: %d. Available: [%d - %d]",
                 midi_num, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
             )
+            self._note = -1
 
     @property
     def velocity(self):
@@ -356,13 +356,13 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         for label in label_list:
             start_frm = int(round(label.start_time / t_unit))
             end_frm = int(round(label.end_time / t_unit))
-            pitch = label.note - LOWEST_MIDI_NOTE
+            pitch = str(label.note - LOWEST_MIDI_NOTE)
             onset_value = 1
             onset_len_frm = int(round(onset_len_sec / t_unit))
             for idx, frm_idx in enumerate(range(start_frm, end_frm)):
                 if pitch not in label_obj[frm_idx]:
                     label_obj[frm_idx][pitch] = {}
-                label_obj[frm_idx][pitch][label.instrument] = onset_value
+                label_obj[frm_idx][pitch][str(label.instrument)] = onset_value
 
                 # Decrease the onset probability
                 if idx >= onset_len_frm and onset_value > 1e-5:
@@ -393,16 +393,19 @@ class MaestroLabelExtraction(BaseLabelExtraction):
         midi = pretty_midi.PrettyMIDI(label_path)
         labels = []
         for inst in midi.instruments:
+            if inst.id_drum:
+                continue
             for note in inst.notes:
-                labels.append(
-                    Label(
-                        start_time=note.start,
-                        end_time=note.end,
-                        note=note.pitch,
-                        velocity=note.velocity,
-                        instrument=inst.program
-                    )
+                label = Label(
+                    start_time=note.start,
+                    end_time=note.end,
+                    note=note.pitch,
+                    velocity=note.velocity,
+                    instrument=inst.program
                 )
+                if label.note == -1:
+                    continue
+                labels.append(label)
         return labels
 
 
