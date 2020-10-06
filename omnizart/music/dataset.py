@@ -54,8 +54,8 @@ class FeatureDataset(tf.data.Dataset):
     """
     @staticmethod
     def _generator(feature_folder=None, feature_files=None, num_samples=100, slice_len=128, channels=[1, 3]):
-        sys.stdout.write('\033[2K\033[1G')  # Clear previous output
-        print("Loading data")
+        # sys.stdout.write('\033[2K\033[1G')  # Clear previous output
+        # print("Loading data")
 
         if feature_files is None:
             assert feature_folder is not None
@@ -118,6 +118,54 @@ def get_label_conversion_wrapper(feat, empty, label_str, conversion_func):
     return tf.py_function(wrapper, inp=(feat, empty, label_str), Tout=(feat.dtype, empty.dtype, label_str.dtype))
 
 
+class FeatureLoader:
+    def __init__(
+        self,
+        label_conversion_func,
+        feature_folder=None,
+        feature_files=None,
+        num_samples=100,
+        timesteps=128,
+        channels=[1, 3]
+    ):
+        if feature_files is None:
+            assert feature_folder is not None
+            self.hdf_files = glob.glob(f"{feature_folder}/*.hdf")
+        else:
+            self.hdf_files = feature_files
+
+        self.conv_func = label_conversion_func
+        self.feature_folder = feature_folder
+        self.feature_files = feature_files
+        self.num_samples = num_samples
+        self.timesteps = timesteps
+        self.channels = channels
+        self.cur_index = 0
+
+        self.hdf_refs = {}
+        self.pkls = {}
+        for hdf in self.hdf_files:
+            ref = h5py.File(hdf, "r")
+            self.hdf_refs[hdf] = ref
+            self.pkls[hdf] = pickle.load(open(hdf.replace(".hdf", ".pickle"), "rb"))["label"]
+        self.hdf_keys = list(self.hdf_refs.keys())
+
+    def __iter__(self):
+        half_slice_len = int(round(self.timesteps / 2))
+        for _ in range(self.num_samples):
+            key = random.choice(self.hdf_keys)
+            hdf_ref = self.hdf_refs[key]
+            length = min(len(self.hdf_refs[key]["feature"]), len(self.pkls[key]))
+            start_idx = half_slice_len
+            end_idx = length - half_slice_len
+            center_id = random.randint(start_idx, end_idx)
+            slice_range = range(center_id-half_slice_len, center_id+half_slice_len)  # noqa: E226
+
+            feature = self.hdf_refs[key]["feature"][slice_range][:]
+            label = self.pkls[key][slice_range[0]:slice_range[-1]+1]  # noqa: E226
+            yield feature[:, :, self.channels], self.conv_func(label)
+
+
 def get_dataset(
     label_conversion_func,
     feature_folder=None,
@@ -153,21 +201,26 @@ def get_dataset(
     channels: list[int]
         Channels to be used for training. Allowed values are [1, 2, 3].
     """
-    assert (feature_folder is not None) or (feature_files is not None)
-    return FeatureDataset(
-            feature_folder=feature_folder,  # noqa: E126
-            feature_files=feature_files,
-            num_samples=batch_size*steps,  # noqa: E226
-            timesteps=timesteps,
-            channels=channels) \
+    loader = FeatureLoader(
+        label_conversion_func,
+        feature_folder=feature_folder,
+        feature_files=feature_files,
+        num_samples=batch_size*steps,
+        timesteps=timesteps,
+        channels=channels
+    )
+    def gen_wrapper():
+        for data in loader:
+            yield data
+
+    return tf.data.Dataset.from_generator(
+            gen_wrapper, output_types=(tf.float32, tf.float32)) \
         .batch(batch_size, drop_remainder=True) \
-        .map(
-            lambda feat, empty, label_str: get_label_conversion_wrapper(feat, empty, label_str, label_conversion_func),
-            num_parallel_calls=tf.data.experimental.AUTOTUNE) \
-        .cache() \
         .prefetch(tf.data.experimental.AUTOTUNE)
 
 
 if __name__ == "__main__":
-    l_type = LabelType("pop-note-stream")
-    dataset = get_dataset(l_type.get_conversion_func(), feature_folder="/data/omnizart/tf_dataset_experiment/feature")
+    l_type = LabelType("note-stream")
+    feat_folder = "/host/home/76_pop_rhythm/train_feature/slice"
+    # loader = FeatureLoader(feature_folder=feat_folder)
+    dataset = get_dataset(l_type.get_conversion_func(), feature_folder=feat_folder)
