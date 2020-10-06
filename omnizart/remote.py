@@ -21,10 +21,11 @@ def download(url, save_path="./"):
     chunk_size = chunk_size_kb * 1024
     filename = os.path.basename(url)
     out_path = os.path.join(save_path, filename)
+    print(f"Output path: {out_path}")
     with open(out_path, "wb") as out:
         total_size = 0
         resp = urllib.request.urlopen(url)
-        length = int(resp.getheader("Content-Length"))
+        length = int(resp.getheader("Content-Length", -1))
         print(f"Total size: {format_byte(length)}")
 
         diff_t = 1
@@ -32,7 +33,8 @@ def download(url, save_path="./"):
         avg_speed = sum(speed_history) / len(speed_history)
         start_t = time.time()
         while True:
-            print(f"Progress: {total_size/length*100:.2f}%, {format_byte(total_size)}, "
+            percent = f"{(total_size/length*100):.2f}" if length > 0 else "?"
+            print(f"Progress: {percent}%, {format_byte(total_size)}, "
                     f"{format_byte(avg_speed)}/s"+" "*6, end="\r")  # noqa: E127,E226
             data = resp.read(chunk_size)
             if not data:
@@ -51,3 +53,9 @@ def download(url, save_path="./"):
             avg_speed = sum(speed_history) / len(speed_history)
             start_t = time.time()
         print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s"+" "*6)  # noqa: E226
+
+
+if __name__ == "__main__":
+    url = "https://drive.google.com/uc?export=download&id=1GVqlEq6we0xS9DoPK3vxCqpF1ZymxuGb"
+    url = "https://drive.google.com/u/1/uc?export=download&id=1sjv9mpLFSjFeJsr8vhtqp80DRnOO5ZYJ"
+    download(url)
