@@ -222,6 +222,14 @@ version = "*"
 
 [[package]]
 category = "main"
+description = "Clean single-source support for Python 3 and 2"
+name = "future"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+version = "0.18.2"
+
+[[package]]
+category = "main"
 description = "Python AST that abstracts the underlying Python version"
 name = "gast"
 optional = false
@@ -710,6 +718,17 @@ name = "pyflakes"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.2.0"
+
+[[package]]
+category = "main"
+description = "Python bindings for FluidSynth, a MIDI synthesizer that uses SoundFont instruments"
+name = "pyfluidsynth"
+optional = false
+python-versions = "*"
+version = "1.2.5"
+
+[package.dependencies]
+future = "*"
 
 [[package]]
 category = "dev"
@@ -1253,7 +1272,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "5d376784aa7c4c5b7c61020a0af5e084a94d6ca8b34065c2180efbde3c01eb07"
+content-hash = "c85e5a911c52633fb3a50294cc7919c77f550091db168c0bac4ac0bcb6e07191"
 lock-version = "1.0"
 python-versions = "^3.6"
 
@@ -1429,6 +1448,9 @@ docutils = [
 flake8 = [
     {file = "flake8-3.8.3-py2.py3-none-any.whl", hash = "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c"},
     {file = "flake8-3.8.3.tar.gz", hash = "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"},
+]
+future = [
+    {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
 ]
 gast = [
     {file = "gast-0.3.3-py2.py3-none-any.whl", hash = "sha256:8f46f5be57ae6889a4e16e2ca113b1703ef17f2b0abceb83793eaba9e1351a45"},
@@ -1829,6 +1851,11 @@ pycparser = [
 pyflakes = [
     {file = "pyflakes-2.2.0-py2.py3-none-any.whl", hash = "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92"},
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
+]
+pyfluidsynth = [
+    {file = "pyFluidSynth-1.2.5-py2-none-any.whl", hash = "sha256:49dcd181b9628326950ac35924f4328e1d12397f86917ff90979edff3666cd42"},
+    {file = "pyFluidSynth-1.2.5-py3-none-any.whl", hash = "sha256:9a002fd432759493b2b070fd08a1d3397b367601715adf3c3ce9c13afcdebb26"},
+    {file = "pyFluidSynth-1.2.5.tar.gz", hash = "sha256:8f62a4421d01b4e36cacc6f674d67435184e0bdc3df472d2a6b7538e75fe44ef"},
 ]
 pygments = [
     {file = "Pygments-2.6.1-py3-none-any.whl", hash = "sha256:ff7a40b4860b727ab48fad6360eb351cc1b33cbf9b15a0f689ca5353e9463324"},

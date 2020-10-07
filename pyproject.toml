@@ -20,6 +20,7 @@ pyyaml = "^5.3.1"
 jsonschema = "^3.2.0"
 numba = "0.48"
 tqdm = "^4.49.0"
+pyfluidsynth = "^1.2.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

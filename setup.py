@@ -19,7 +19,8 @@ package_data = \
               'checkpoints/drum/drum_2p5/*',
               'checkpoints/drum/drum_final/*',
               'checkpoints/music/music_piano/*',
-              'defaults/*']}
+              'defaults/*',
+              'resource/*']}
 
 install_requires = \
 ['click>=7.1.2,<8.0.0',
@@ -29,6 +30,7 @@ install_requires = \
  'numba==0.48',
  'opencv-python>=4.4.0,<5.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
+ 'pyfluidsynth>=1.2.5,<2.0.0',
  'pyyaml>=5.3.1,<6.0.0',
  'tensorflow>=2.3.0,<3.0.0',
  'tqdm>=4.49.0,<5.0.0']
