@@ -42,10 +42,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Download large files
+      run: |
+        ./scripts/gdrive.sh https://drive.google.com/file/d/10i8z1zH60a2coKEst47lELdkvZUmgd1b/view?usp=sharing
+        unzip resource.zip
+        mv resource/* tests/resource
     - name: Install dependencies
       run: |
-        git lfs install
-        git lfs pull -X omnizart/checkpoints
         sudo apt-get install libsndfile1
         ./scripts/install.sh
         pip install flake8 pylint pytest pytest-cov pytest-mock
