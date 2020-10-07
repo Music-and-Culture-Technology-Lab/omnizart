@@ -21,7 +21,7 @@ if [ ! -z "$1" ] && [ "$1" = "venv"  ]; then
     USE_VENV=true
 fi
 
-VENV_APPROACH="${DEFAULT_VENV_APPROACH:=venv}"
+VENV_APPROACH="${DEFAULT_VENV_APPROACH:=poetry}"
 if [ "$USE_VENV" = "true" ]; then echo "Using $VENV_APPROACH to create virtual environment"; fi
 
 
