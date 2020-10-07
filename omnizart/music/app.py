@@ -162,12 +162,8 @@ class MusicTranscription(BaseTranscription):
         }[dataset_type]
 
         # Fetching wav files
-        train_wav_files = []
-        test_wav_files = []
-        for wav_folder in struct.train_wavs:
-            train_wav_files += glob.glob(jpath(dataset_path, wav_folder, "*.wav"))
-        for wav_folder in struct.test_wavs:
-            test_wav_files += glob.glob(jpath(dataset_path, wav_folder, "*.wav"))
+        train_wav_files = struct.get_train_wavs(dataset_path=dataset_path)
+        test_wav_files = struct.get_test_wavs(dataset_path=dataset_path)
         logger.info("Number of total training wavs: %d", len(train_wav_files))
         logger.info("Number of total testing wavs: %d", len(test_wav_files))
 
@@ -197,12 +193,8 @@ class MusicTranscription(BaseTranscription):
         logger.info("Extraction finished")
 
         # Fetching label files
-        train_label_files = []
-        test_label_files = []
-        for label_folder in struct.train_labels:
-            train_label_files += glob.glob(jpath(dataset_path, label_folder, "*" + struct.label_ext))
-        for label_folder in struct.test_labels:
-            test_label_files += glob.glob(jpath(dataset_path, label_folder, "*" + struct.label_ext))
+        train_label_files = struct.get_train_labels(dataset_path=dataset_path)
+        test_label_files = struct.get_test_labels(dataset_path=dataset_path)
         logger.info("Number of total training labels: %d", len(train_label_files))
         logger.info("Number of total testing labels: %d", len(test_label_files))
         assert len(train_label_files) == len(train_wav_files)

@@ -1,5 +1,7 @@
 """Information about directory structure of each dataset."""
 # pylint: disable=C0112
+import os
+import glob
 from abc import abstractmethod, ABCMeta
 
 
@@ -78,6 +80,24 @@ class BaseStructure(metaclass=ABCMeta):
         Similar to the `train_labels` function, records information of where the corresponding
         ground-truth files are stored.
         """
+
+    def _get_file_list(self, dataset_path, dirs, ext):
+        files = []
+        for _dir in dirs:
+            files += glob.glob(os.path.join(dataset_path, _dir, ext))
+        return files
+
+    def get_train_wavs(self, dataset_path="./"):
+        return self._get_file_list(dataset_path, self.train_wavs, ".wav")
+
+    def get_test_wavs(self, dataset_path="./"):
+        return self._get_file_list(dataset_path, self.test_wavs, ".wav")
+
+    def get_train_labels(self, dataset_path="./"):
+        return self._get_file_list(dataset_path, self.train_labels, self.label_ext)
+
+    def get_test_labels(self, dataset_path="./"):
+        return self._get_file_list(dataset_path, self.test_labels, self.label_ext)
 
 
 class MapsStructure(BaseStructure):

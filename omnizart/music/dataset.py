@@ -1,5 +1,4 @@
 # pylint: disable=W0223,W0102
-import sys
 import glob
 import json
 import pickle
@@ -154,7 +153,6 @@ class FeatureLoader:
         half_slice_len = int(round(self.timesteps / 2))
         for _ in range(self.num_samples):
             key = random.choice(self.hdf_keys)
-            hdf_ref = self.hdf_refs[key]
             length = min(len(self.hdf_refs[key]["feature"]), len(self.pkls[key]))
             start_idx = half_slice_len
             end_idx = length - half_slice_len
@@ -205,16 +203,17 @@ def get_dataset(
         label_conversion_func,
         feature_folder=feature_folder,
         feature_files=feature_files,
-        num_samples=batch_size*steps,
+        num_samples=batch_size*steps,  # noqa: E226
         timesteps=timesteps,
         channels=channels
     )
+
     def gen_wrapper():
         for data in loader:
             yield data
 
     return tf.data.Dataset.from_generator(
-            gen_wrapper, output_types=(tf.float32, tf.float32)) \
+        gen_wrapper, output_types=(tf.float32, tf.float32)) \
         .batch(batch_size, drop_remainder=True) \
         .prefetch(tf.data.experimental.AUTOTUNE)
 

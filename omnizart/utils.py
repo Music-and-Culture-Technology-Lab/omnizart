@@ -315,7 +315,7 @@ def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_
             chunks = int(chunks) + 1
         slice_len = chunk_size
 
-    for chunk_idx in range(chunks):
+    for chunk_idx in range(int(chunks)):
         start_idx = chunk_idx * slice_len
         end_idx = (chunk_idx + 1) * slice_len
         future_to_input = {}

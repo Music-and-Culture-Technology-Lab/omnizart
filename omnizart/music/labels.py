@@ -170,13 +170,13 @@ def label_conversion(
         for pitch, insts in lab.items():
             for inst, prob in insts.items():
                 # TODO: Remove minus one in future!!
-                inst = int(inst) -1
+                inst = int(inst) - 1
                 if inst not in channel_mapping:
                     continue
 
                 pitch = int(pitch)
                 channel = channel_mapping[inst]
-                output[t, pitch*scale:(pitch+1)*scale, channel] = prob
+                output[t, pitch*scale:(pitch+1)*scale, channel] = prob  # noqa: E226
 
     if not onsets:
         output = np.where(output > 0, 1, 0)

@@ -68,4 +68,4 @@ def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
         m_beat_cqt_patch_list.append(m_beat_cqt_patch)
 
     # convert cqt patch into cqt array
-    return np.array(m_beat_cqt_patch_list)
+    return np.array(m_beat_cqt_patch_list), mini_beat_arr

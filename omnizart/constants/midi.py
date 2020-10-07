@@ -14,8 +14,11 @@ POP_INSTRUMENT_PROGRAMS: list[int]
     Program numbers that represent different groups of channels used
     in Pop dataset.
 """
+import os
 
 from librosa import note_to_midi
+
+from omnizart import MODULE_PATH
 
 
 LOWEST_MIDI_NOTE = note_to_midi("A0")
@@ -159,3 +162,5 @@ MUSICNET_INSTRUMENT_PROGRAMS = [0, 6, 40, 41, 42, 43, 60, 68, 70, 71, 73]
 
 # Guitar, bass, strings, organ, piano, and others
 POP_INSTRUMENT_PROGRAMES = [24, 32, 40, 0, 56]
+
+SOUNDFONT_PATH = os.path.join(MODULE_PATH, "resource/soundfonts.sf2")

@@ -15,6 +15,10 @@ General:
     Feature:
         Description: Defatult settings of feature extraction for drum transcription.
         Settings:
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 22050
             PaddingSeconds:
                 Description: Padding length to the begin and the end of the raw audio data.
                 Type: Float
@@ -39,6 +43,17 @@ General:
                 Description: Number of mini beats in a single 4/4 measure.
                 Type: Integer
                 Value: 4
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
     Model:
         Description: Default settings of training / testing the model.
         Settings:
