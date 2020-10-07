@@ -45,7 +45,7 @@ jobs:
     - name: Install dependencies
       run: |
         git lfs install
-        git lfs pull
+        git lfs pull -X omnizart/checkpoints
         sudo apt-get install libsndfile1
         ./scripts/install.sh
         pip install flake8 pylint pytest pytest-cov pytest-mock
