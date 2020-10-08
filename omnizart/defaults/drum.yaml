@@ -13,7 +13,7 @@ General:
             Drum2: ./checkpoints/drum/drum_1p5
             Drum3: ./checkpoints/drum/drum_final
     Feature:
-        Description: Defatult settings of feature extraction for drum transcription.
+        Description: Default settings of feature extraction for drum transcription.
         Settings:
             SamplingRate:
                 Description: Adjust input sampling rate to this value.

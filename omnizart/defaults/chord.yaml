@@ -1,0 +1,38 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart transribe drum` command.
+        Type: String
+        Value: ChordV1
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            ChordV1: ./checkpoints/chord/chord_v1
+    Feature:
+        Description: Default settings of feature extraction for drum transcription.
+        Settings:
+            SegmentWidth:
+                Description: Width of segments. Each frame last for 0.046 seconds, and thus each segment would last for around 0.5 seconds.
+                Type: Integer
+                Value: 21
+            SegmentHop:
+                Description: Hop size of the segment.
+                Type: Integer
+                Value: 5
+            NumSteps:
+                Description: Number of total steps. Default setting would have around 23 seconds.
+                Type: Integer
+                Value: 100
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +

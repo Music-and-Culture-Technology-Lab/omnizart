@@ -16,8 +16,8 @@ def format_byte(size, digit=3):
     return str(size)
 
 
-def download(url, file_length=None, save_path="./", cookie_file=None):
-    filename = os.path.basename(url)
+def download(url, file_length=None, save_path="./", save_name=None, cookie_file=None):
+    filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
     print(f"Output path: {out_path}")
 
@@ -48,7 +48,6 @@ def download(url, file_length=None, save_path="./", cookie_file=None):
                     f"{format_byte(avg_speed)}/s"+" "*6, end="\r")  # noqa: E127,E226
             data = resp.read(chunk_size)
             if not data:
-                print(f"Break. Status: {resp.status}")
                 break
             size = out.write(data)
             total_size += size
@@ -66,7 +65,7 @@ def download(url, file_length=None, save_path="./", cookie_file=None):
         print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s"+" "*6)  # noqa: E226
 
 
-def download_large_file_from_google_drive(url, save_path="./"):
+def download_large_file_from_google_drive(url, save_path="./", save_name=None):
     if not url.startswith("https://"):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
@@ -75,7 +74,6 @@ def download_large_file_from_google_drive(url, save_path="./"):
     else:
         id_start = url.find("id=") + 3
         fid = url[id_start:id_start+33]  # noqa: E226
-    print(fid)
 
     cookie_jar = http.cookiejar.MozillaCookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
@@ -110,7 +108,7 @@ def download_large_file_from_google_drive(url, save_path="./"):
     warn_col = [col for col in cols if "download_warning" in col][0]
     confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
-    download(url, file_length=size, save_path=save_path, cookie_file="./.cookie")
+    download(url, file_length=size, save_path=save_path, save_name=save_name, cookie_file="./.cookie")
 
 
 if __name__ == "__main__":

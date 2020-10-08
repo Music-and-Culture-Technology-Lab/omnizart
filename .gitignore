@@ -19,6 +19,7 @@ htmlcov/
 .vscode/
 *.code-workspace
 .coverage
+.cookie
 
 # Built files
 dist/

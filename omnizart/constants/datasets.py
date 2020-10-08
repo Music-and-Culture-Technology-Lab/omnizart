@@ -295,3 +295,15 @@ class ExtSuStructure(BaseStructure):
     def test_labels(self):
         """"""
         return self.test_wavs
+
+
+class McGillBillBoard:
+    feature_folder = "./McGill-Billboard-Features"
+    label_folder = "./McGill-Billboard-MIREX"
+    feature_file_name = "bothchroma.csv"
+    label_file_name = "majmin.lab"
+    index_file_path = "./billboard-2.0-index.csv"
+
+    train_test_split_id = 1000
+
+    url = "https://drive.google.com/uc?export=download&id=1_K_Fof4zt1IQvs1aDmf-5wY0wHqgcPlC"
