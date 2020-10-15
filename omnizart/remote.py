@@ -1,5 +1,7 @@
 import os
+import sys
 import time
+import zipfile
 import urllib.request
 import http.cookiejar
 
@@ -16,7 +18,7 @@ def format_byte(size, digit=3):
     return str(size)
 
 
-def download(url, file_length=None, save_path="./", save_name=None, cookie_file=None):
+def download(url, file_length=None, save_path="./", save_name=None, cookie_file=None, unzip=False):
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
     print(f"Output path: {out_path}")
@@ -62,10 +64,22 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
             speed_history = speed_history[-40:]  # Keep only 40 records
             avg_speed = sum(speed_history) / len(speed_history)
             start_t = time.time()
-        print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s"+" "*6)  # noqa: E226
+        sys.stdout.write('\033[2K\033[1G')
+        print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s")
+
+    if unzip:
+        print("Extracting files...")
+        with zipfile.ZipFile(out_path) as zip_ref:
+            members = zip_ref.infolist()
+            for idx, member in enumerate(members):
+                percent_finished = (idx+1) / len(members) * 100
+                sys.stdout.write('\033[2K\033[1G')
+                print(f"Progress: {percent_finished:.2f}% - {member.filename}", end="\r")
+                zip_ref.extract(member, path=save_path)
+            print("")
 
 
-def download_large_file_from_google_drive(url, save_path="./", save_name=None):
+def download_large_file_from_google_drive(url, save_path="./", save_name=None, unzip=False):
     if not url.startswith("https://"):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
@@ -82,7 +96,7 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None):
     cookie = resp.getheader("Set-Cookie")
     if cookie is None:
         # Actually a small file, without download confirmation.
-        download(url, save_path=save_path)
+        download(url, save_path=save_path, unzip=unzip)
         return
 
     page = []
@@ -108,7 +122,7 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None):
     warn_col = [col for col in cols if "download_warning" in col][0]
     confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
-    download(url, file_length=size, save_path=save_path, save_name=save_name, cookie_file="./.cookie")
+    download(url, file_length=size, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip)
 
 
 if __name__ == "__main__":
