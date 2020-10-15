@@ -9,7 +9,7 @@ from omnizart.feature.wrapper_func import extract_patch_cqt
 from omnizart.drum.prediction import predict
 from omnizart.drum.labels import extract_label_13_inst
 from omnizart.models.spectral_norm_net import ConvSN2D
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import DrumSettings
 from omnizart.constants.datasets import PopStructure
@@ -60,7 +60,7 @@ class DrumTranscription(BaseTranscription):
         logger.debug("Prediction shape: %s", pred.shape)
         return pred
 
-    def generate_feature(self, dataset_path, drum_settings=None):
+    def generate_feature(self, dataset_path, drum_settings=None, num_threads=3):
         if drum_settings is not None:
             assert isinstance(drum_settings, DrumSettings)
             settings = drum_settings
@@ -88,7 +88,9 @@ class DrumTranscription(BaseTranscription):
             "This may take time to finish and affect the computer's performance"
         )
         assert len(train_wavs) == len(train_labels)
-        _parallel_feature_extraction(train_wavs, train_labels, train_feat_out_path, settings.feature)
+        _parallel_feature_extraction(
+            train_wavs, train_labels, train_feat_out_path, settings.feature, num_threads=num_threads
+        )
 
         test_wavs = struct.get_test_wavs(dataset_path=dataset_path)
         test_labels = struct.get_test_labels(dataset_path=dataset_path)
@@ -97,25 +99,33 @@ class DrumTranscription(BaseTranscription):
             "This may take time to finish and affect the computer's performance"
         )
         assert len(test_wavs) == len(test_labels)
-        _parallel_feature_extraction(test_wavs, test_labels, test_feat_out_path, settings.feature)
+        _parallel_feature_extraction(
+            test_wavs, test_labels, test_feat_out_path, settings.feature, num_threads=num_threads
+        )
+
+        # Writing out the settings
+        write_yaml(settings.to_json(), jpath(train_feat_out_path, ".success.yaml"))
+        write_yaml(settings.to_json(), jpath(test_feat_out_path, ".success.yaml"))
+        logger.info("All done")
 
 
-def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings):
+def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings, num_threads=3):
     label_path_mapping = _gen_wav_label_path_mapping(label_paths)
     iters = enumerate(
         parallel_generator(
             _all_in_one_extract,
             wav_paths,
-            max_workers=2,
+            max_workers=num_threads,
             use_thread=True,
-            chunk_size=2,
+            chunk_size=num_threads,
             label_path_mapping=label_path_mapping,
             feat_settings=feat_settings
         )
     )
     for idx, ((patch_cqt, m_beat_arr, label_128, label_13), audio_idx) in iters:
         audio = wav_paths[audio_idx]
-        print(f"Progress: {idx+1}/{len(wav_paths)} - {audio}" + " "*6, end="\r")  # noqa: E226
+        # print(f"Progress: {idx+1}/{len(wav_paths)} - {audio}" + " "*6, end="\r")  # noqa: E226
+        logger.info("Progress: %d/%d - %s", idx+1, len(wav_paths), audio)
 
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)

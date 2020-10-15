@@ -106,7 +106,7 @@ class MusicTranscription(BaseTranscription):
             dump_pickle({"pred": pred}, jpath(save_to, "debug_pred.pickle"))
         return midi
 
-    def generate_feature(self, dataset_path, music_settings=None):
+    def generate_feature(self, dataset_path, music_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.
 
         To train the model, the first thing is to pre-process the data into feature
@@ -187,9 +187,9 @@ class MusicTranscription(BaseTranscription):
             dataset_type.title()
         )
         logger.info("Extracting training feature")
-        _parallel_feature_extraction(train_wav_files, train_feat_out_path, settings.feature)
+        _parallel_feature_extraction(train_wav_files, train_feat_out_path, settings.feature, num_threads=num_threads)
         logger.info("Extracting testing feature")
-        _parallel_feature_extraction(test_wav_files, test_feat_out_path, settings.feature)
+        _parallel_feature_extraction(test_wav_files, test_feat_out_path, settings.feature, num_threads=num_threads)
         logger.info("Extraction finished")
 
         # Fetching label files
@@ -316,7 +316,7 @@ class MusicTranscription(BaseTranscription):
         return model_save_path, history
 
 
-def _parallel_feature_extraction(audio_list, out_path, feat_settings):
+def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_threads=4):
     feat_extract_params = {
         "hop": feat_settings.hop_size,
         "win_size": feat_settings.window_size,
@@ -332,9 +332,9 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings):
         parallel_generator(
             extract_cfp_feature,
             audio_list,
-            max_workers=2,
+            max_workers=num_threads,
             use_thread=True,
-            chunk_size=3,
+            chunk_size=num_threads,
             harmonic=feat_settings.harmonic,
             **feat_extract_params
         )

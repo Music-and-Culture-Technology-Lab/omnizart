@@ -1,22 +1,14 @@
 import click
 
+from omnizart.cli.common_options import add_common_options, COMMON_GEN_FEATURE_OPTIONS
 from omnizart.music import app
 from omnizart.setting_loaders import MusicSettings
 
 
 @click.command()
-@click.option(
-    "-d", "--dataset-path", help="Path to the downloaded dataset", type=click.Path(exists=True), required=True
-)
-@click.option(
-    "-o",
-    "--output-path",
-    help="Path for saving the extracted feature. Default to the same folder of the dataset.",
-    type=click.Path(writable=True),
-    default="+"
-)
+@add_common_options(COMMON_GEN_FEATURE_OPTIONS)
 @click.option("-h", "--harmonic", help="Whether to use harmonic version of the feature", is_flag=True)
-def generate_feature(dataset_path, output_path, harmonic):
+def generate_feature(dataset_path, output_path, num_threads, harmonic):
     """Extract the feature of the whole dataset for training.
 
     The command will try to infer the dataset type from the given dataset path.
@@ -31,4 +23,4 @@ def generate_feature(dataset_path, output_path, harmonic):
     settings = MusicSettings()
     settings.feature.harmonic = harmonic
     settings.dataset.feature_save_path = output_path
-    app.generate_feature(dataset_path, settings)
+    app.generate_feature(dataset_path, settings, num_threads=num_threads)
