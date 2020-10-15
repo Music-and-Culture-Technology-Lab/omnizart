@@ -59,7 +59,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
                 chunk_size *= 1.1
             chunk_size = round(chunk_size)
             speed_history.append(chunk_size)
-            speed_history = speed_history[-40:]
+            speed_history = speed_history[-40:]  # Keep only 40 records
             avg_speed = sum(speed_history) / len(speed_history)
             start_t = time.time()
         print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s"+" "*6)  # noqa: E226
