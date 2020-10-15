@@ -1,23 +1,11 @@
-# pylint: disable=C0303,W1401
-
-from functools import partial
-
 import click
 
+from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
 from omnizart.music import app
-
-click.option = partial(click.option, show_default=True)
 
 
 @click.command()
-@click.argument("input_audio", type=click.Path(exists=True))
-@click.option(
-    "-m",
-    "--model-path",
-    help="Path to the pre-trained model for transcription",
-    type=click.Path(exists=True),
-)
-@click.option("-o", "--output", help="Path to output the MIDI file", default="./", type=click.Path(writable=True))
+@add_common_options(COMMON_TRANSCRIBE_OPTIONS)
 def transcribe(input_audio, model_path, output):
     """Transcribe a single audio and output as a MIDI file.
 
