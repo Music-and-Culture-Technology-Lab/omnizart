@@ -9,6 +9,7 @@ Examples
     omnizart --help
     omnizart music --help
 """
+import zipfile
 
 import click
 
@@ -29,8 +30,10 @@ def entry():
 @click.command()
 @click.argument("dataset", type=click.Choice(["Maestro", "MusicNet", "McGill"], case_sensitive=False))
 @click.option(
-    "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True))
-def download_dataset(dataset, output):
+    "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True)
+)
+@click.option("--unzip", help="Whether to unzip the downloaded dataset", is_flag=True)
+def download_dataset(dataset, output, unzip):
     """A quick command for downloading datasets."""
     url = {
         "maestro": dset.MaestroStructure.url,
@@ -40,9 +43,9 @@ def download_dataset(dataset, output):
     ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
     if "drive.google.com" in url:
-        download_large_file_from_google_drive(url, save_path=output, save_name=dataset + ".zip")
+        download_large_file_from_google_drive(url, save_path=output, save_name=dataset + ".zip", unzip=unzip)
     else:
-        download(url, save_path=output)
+        download(url, save_path=output, unzip=unzip)
 
 
 entry.add_command(music)
