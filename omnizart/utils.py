@@ -79,9 +79,7 @@ def dump_pickle(data, save_to):
 
     """
     base_dir = os.path.dirname(save_to)
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-
+    ensure_path_exists(base_dir)
     with open(save_to, "wb") as pkl_file:
         pickle.dump(data, pkl_file)
 
@@ -295,7 +293,7 @@ def ensure_path_exists(path):
         os.makedirs(path)
 
 
-def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_size=None, **kwargs):
+def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_size=None, timeout=300, **kwargs):
     if chunk_size is not None and max_workers > chunk_size:
         logger.warning(
             "Chunk size should larger than the maximum number of workers, or the parallel computation "
@@ -325,7 +323,7 @@ def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_
             future_to_input[future] = idx + start_idx
 
         try:
-            for future in concurrent.futures.as_completed(future_to_input):
+            for future in concurrent.futures.as_completed(future_to_input, timeout=timeout):
                 logger.debug("Yielded %s", func.__name__)
                 yield future.result(), future_to_input[future]
         except KeyboardInterrupt as exp:
