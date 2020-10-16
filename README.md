@@ -37,6 +37,22 @@ omnizart music train-model -d <i>path/to/dataset</i>/train_feature --model-name 
 # Development
 Describes the neccessary background of how to develop this project.
 
+## Download and install
+``` bash
+git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
+
+# The checkpionts are stored using git LFS, and have to explicitly download them.
+git lfs install
+git lfs pull
+
+# Install dependenies. For more different installation approaches, please refer to the official documentation page.
+cd omnizart
+make install
+
+# For developers, you have to install Dev dependencies as well, since they will not be installed by default.
+poetry install
+```
+
 ## Package management
 Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
 
@@ -57,7 +73,7 @@ Uses flake8 and pylint for coding style check.
 
 To check with linters, execute `make check`.
 
-You don't have to achieve a full score on pylint check, just pass 9.5 point still counted as a successful check.
+You don't have to achieve a full score on pylint check, just pass 9.5 points still counted as a successful check.
 
 ### Caution!
 There is convenient make command for formating the code, but it should be used very carefully.
@@ -70,7 +86,32 @@ To format the code with black and yapf, enter `make format`.
 Uses `pytest` for unittesting. Under construction...
 
 ## CI/CD
-Uses github actions for automatic linting, unittesting, document building, and package release. Under construction...
+Uses github actions for automatic linting, unittesting, document building, and package release.
+Currently supports two workflows:
+* General check
+* Documentation page publishing
+
+### General Check
+Everytime you push to the master branch, file a pull request, and merge into master branch, will trigger
+this action. This will do checks like code format, and unittests by leveraging the above mentioned
+tools. If the check fails, you will not be able to merge the feature branch into master branch.
+
+### Documentation Page Publishing
+We use [github page](https://pages.github.com/) to host our documentation, and is separated as an [independent
+repository](https://github.com/Music-and-Culture-Technology-Lab/omnizart-doc). 
+
+**Please do not directly modify the content of the omnizart-doc repository!!**
+
+The only permitted way to update the documentation page is by updating the `build_doc` branch, and
+let the workflow do the rest of things.
+
+Steps to update the documentation page:
+* Clone **this** repo
+* Create a new branch. **DO NOT UPDATE THE `build_doc` BRANCH DIRECTLY!!**
+* File a pull request
+* Merge into master (by admin)
+* Merge into `build_doc` branch (by admin)
+* Push to this repo (by admin)
 
 ## Docker
 Pack everything into a docker file. Under construction...
