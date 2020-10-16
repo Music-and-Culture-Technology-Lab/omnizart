@@ -131,7 +131,7 @@ General:
                 Type: Integer
                 Value: 8
             ValBatchSize:
-                Description: Batchs size of each validation step.
+                Description: Batch size of each validation step.
                 Type: Integer
                 Value: 8
             EarlyStop:
