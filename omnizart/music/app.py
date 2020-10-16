@@ -11,8 +11,6 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 # pylint: disable=C0103,W0621,E0611
 import os
 from os.path import join as jpath
-import glob
-import random
 from datetime import datetime
 
 import h5py

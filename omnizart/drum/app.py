@@ -201,7 +201,7 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings
     for idx, ((patch_cqt, m_beat_arr, label_128, label_13), audio_idx) in iters:
         audio = wav_paths[audio_idx]
         # print(f"Progress: {idx+1}/{len(wav_paths)} - {audio}" + " "*6, end="\r")  # noqa: E226
-        logger.info("Progress: %d/%d - %s", idx+1, len(wav_paths), audio)
+        logger.info("Progress: %d/%d - %s", idx+1, len(wav_paths), audio)  # noqa: E226
 
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)
@@ -238,16 +238,17 @@ def _parallel_feature_extraction_v2(wav_paths, label_paths, out_path, feat_setti
         loop = asyncio.get_event_loop()
         tasks = []
         for chunk in range(num_threads):
-            wav_idx = num_threads*iter_idx + chunk
+            wav_idx = num_threads*iter_idx + chunk  # noqa: E226
             if wav_idx >= len(wav_paths):
                 break
-            logger.info("%s/%s - %s", wav_idx+1, len(wav_paths), wav_paths[wav_idx])
-            task = loop.create_task(_async_all_in_one_extract(
-                wav_paths[wav_idx], label_path_mapping, feat_settings
-            ))
-            task.append(task)
-        
-        group = asyncio.gather(*task, return_exceptions=True)
+            logger.info("%s/%s - %s", wav_idx+1, len(wav_paths), wav_paths[wav_idx])  # noqa: E226
+            tasks.append(
+                loop.create_task(_async_all_in_one_extract(
+                    wav_paths[wav_idx], label_path_mapping, feat_settings
+                ))
+            )
+
+        group = asyncio.gather(*tasks, return_exceptions=True)
         print("Waiting...")
         results = loop.run_until_complete(group)
         for result in results:
@@ -299,12 +300,12 @@ def _loss_func(target, pred, soft_loss_range=20):
         recon_error - soft_loss_range * tf.ones_like(recon_error)
     )
 
-    shape = shape_list(recon_error_soft[:,:,:,:])
+    shape = shape_list(recon_error_soft[:, :, :, :])
     note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
     note_priority_ary_in_expanded = note_priority_arr + tf.zeros(shape, dtype=note_priority_arr.dtype)
     recon_error_soft_priority = tf.multiply(recon_error_soft, note_priority_ary_in_expanded)
     recon_error_soft_flat = tf.reshape(
-        recon_error_soft_priority, 
+        recon_error_soft_priority,
         [-1, tf.keras.backend.prod(recon_error_soft_priority.get_shape()[1:])]
     )
     return tf.reduce_mean(input_tensor=recon_error_soft_flat)

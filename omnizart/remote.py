@@ -1,3 +1,4 @@
+# pylint: disable=R0914,R0915,W0612
 import os
 import sys
 import time
@@ -72,7 +73,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
         with zipfile.ZipFile(out_path) as zip_ref:
             members = zip_ref.infolist()
             for idx, member in enumerate(members):
-                percent_finished = (idx+1) / len(members) * 100
+                percent_finished = (idx+1) / len(members)*100  # noqa: E226
                 sys.stdout.write('\033[2K\033[1G')
                 print(f"Progress: {percent_finished:.2f}% - {member.filename}", end="\r")
                 zip_ref.extract(member, path=save_path)
@@ -83,11 +84,11 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
     if not url.startswith("https://"):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
-        fid = url
+        fid = url  # noqa: F841
         url = f"https://drive.google.com/uc?export=download&id={url}"
     else:
         id_start = url.find("id=") + 3
-        fid = url[id_start:id_start+33]  # noqa: E226
+        fid = url[id_start:id_start+33]  # noqa: E226,F841
 
     cookie_jar = http.cookiejar.MozillaCookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))

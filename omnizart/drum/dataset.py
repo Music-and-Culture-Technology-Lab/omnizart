@@ -1,5 +1,4 @@
 import glob
-import random
 
 import h5py
 import numpy as np
@@ -7,6 +6,10 @@ import tensorflow as tf
 
 
 class FeatureLoader:
+    """Feature loader of Pop dataset.
+
+    The iterator makes sure that every sample in the dataset will be used.
+    """
     def __init__(self, feature_folder=None, feature_files=None, num_samples=100, mini_beat_per_seg=4):
         if feature_files is None:
             assert feature_folder is not None
@@ -26,9 +29,9 @@ class FeatureLoader:
         cur_iid = 0
         for hdf, length in length_map.items():
             end_iid = length // self.mini_beat_per_seg
-            for iid in range(cur_iid, cur_iid+end_iid):
+            for iid in range(cur_iid, cur_iid+end_iid):  # noqa: E226
                 start_idx = self.start_idxs[iid]
-                self.idx_to_hdf_map[start_idx] = (hdf, start_idx-cur_len)
+                self.idx_to_hdf_map[start_idx] = (hdf, start_idx-cur_len)  # noqa: E226
             cur_len += end_iid * self.mini_beat_per_seg
             cur_iid += end_iid
         np.random.shuffle(self.start_idxs)
@@ -43,8 +46,8 @@ class FeatureLoader:
             np.delete(self.start_idxs, 0)
             hdf, slice_idx = self.idx_to_hdf_map[start_idx]
             hdf_ref = self.hdf_refs[hdf]
-            feature = hdf_ref["feature"][slice_idx:slice_idx+self.mini_beat_per_seg]
-            label = hdf_ref["label"][slice_idx:slice_idx+self.mini_beat_per_seg]
+            feature = hdf_ref["feature"][slice_idx:slice_idx+self.mini_beat_per_seg]  # noqa: E226
+            label = hdf_ref["label"][slice_idx:slice_idx+self.mini_beat_per_seg]  # noqa: E226
             yield feature, label
 
 
@@ -58,7 +61,7 @@ def get_dataset(feature_folder=None, feature_files=None, batch_size=8, steps=100
     def gen_wrapper():
         for data in loader:
             yield data
-    
+
     return tf.data.Dataset.from_generator(
         gen_wrapper, output_types=(tf.float32, tf.float32)) \
         .batch(batch_size, drop_remainder=True) \

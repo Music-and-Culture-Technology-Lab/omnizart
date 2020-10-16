@@ -118,6 +118,11 @@ def get_label_conversion_wrapper(feat, empty, label_str, conversion_func):
 
 
 class FeatureLoader:
+    """Feature loader for training ``music`` model.
+
+    Random samples the feature and label pair in the dataset, does not gaurantee that
+    all samples will be used while training.
+    """
     def __init__(
         self,
         label_conversion_func,

@@ -5,7 +5,6 @@ import pretty_midi
 import numpy as np
 import scipy.io.wavfile as wave
 
-from omnizart.feature.beat_for_drum import extract_mini_beat_from_audio_path
 from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.utils import ensure_path_exists
 
@@ -27,14 +26,14 @@ def synth_midi(midi_path, sampling_rate=44100, out_path=TMP_WAV_DIR):
     return midi_path.replace(".mid", ".wav")
 
 
-def extract_label(label_path, m_beat_arr, sampling_rate=22050):
+def extract_label(label_path, m_beat_arr):
     m_beat_range = []
     start = m_beat_arr[0] - (m_beat_arr[1] - m_beat_arr[0]) / 2
     end = m_beat_arr[0] + (m_beat_arr[1] - m_beat_arr[0]) / 2
     m_beat_range.append(start)
     m_beat_range.append(end)
     for idx, beat in enumerate(m_beat_arr[1:-1]):
-        end = beat + (m_beat_arr[idx+1] - beat) / 2
+        end = beat + (m_beat_arr[idx+1] - beat) / 2  # noqa: E226
         m_beat_range.append(end)
     end = m_beat_arr[-1] + (m_beat_arr[-1] - m_beat_arr[-2]) / 2
     m_beat_range.append(end)
@@ -50,13 +49,13 @@ def extract_label(label_path, m_beat_arr, sampling_rate=22050):
     drum_track_ary = np.zeros([len(m_beat_arr), 128])
     for idx, beat in enumerate(m_beat_range[:-1]):
         for note in notes:
-            if beat <= note[0] < m_beat_range[idx+1]:
+            if beat <= note[0] < m_beat_range[idx+1]:  # noqa: E226
                 drum_track_ary[idx, int(note[1])] = 1.0
     return drum_track_ary
 
 
-def extract_label_13_inst(label_path, m_beat_arr, sampling_rate=22050):
-    label = extract_label(label_path, m_beat_arr, sampling_rate=sampling_rate)
+def extract_label_13_inst(label_path, m_beat_arr):
+    label = extract_label(label_path, m_beat_arr)
 
     inst_ary_out = np.zeros([len(label), 13]).astype(np.float32)
     inst_ary_out[:, 0] = np.max(label[:, [33, 35, 36]], axis=1)  # Bass drum

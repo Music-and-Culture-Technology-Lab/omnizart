@@ -9,8 +9,6 @@ Examples
     omnizart --help
     omnizart music --help
 """
-import zipfile
-
 import click
 
 import omnizart.constants.datasets as dset

@@ -298,6 +298,7 @@ class ExtSuStructure(BaseStructure):
 
 
 class McGillBillBoard:
+    """Constant settings of McGill BillBoard dataset."""
     feature_folder = "./McGill-Billboard-Features"
     label_folder = "./McGill-Billboard-MIREX"
     feature_file_name = "bothchroma.csv"
