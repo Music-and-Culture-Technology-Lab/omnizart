@@ -13,7 +13,7 @@ from omnizart.utils import ensure_path_exists
 TMP_WAV_DIR = tempfile.mktemp()
 
 
-def synth_midi(midi_path, sampling_rate=22050, out_path=TMP_WAV_DIR):
+def synth_midi(midi_path, sampling_rate=44100, out_path=TMP_WAV_DIR):
     midi = pretty_midi.PrettyMIDI(midi_path)
     raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=SOUNDFONT_PATH)
     if out_path is not None:
