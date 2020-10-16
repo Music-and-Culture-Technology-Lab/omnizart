@@ -104,8 +104,9 @@ class DrumSettings(Settings):
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
         self.feature = self.DrumFeature()
-        self.dataset = self.Dataset()
+        self.dataset = self.DrumDataset()
         self.model = self.DrumModel()
+        self.training = self.DrumTraining()
 
         super().__init__(conf_path=conf_path)
 
@@ -121,7 +122,7 @@ class DrumSettings(Settings):
             self.mini_beat_per_segment: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class Dataset:
+    class DrumDataset:
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
@@ -131,3 +132,41 @@ class DrumSettings(Settings):
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class DrumTraining:
+        def __init__(self):
+            self.epoch: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.early_stop: int = None
+            self.init_learning_rate: float = None
+            self.res_block_num: int = None
+
+
+@json_serializable(key_path="./General", value_path="./Value")
+class ChordSettings(Settings):
+    default_setting_file: str = "chord.yaml"
+
+    def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
+        self.checkpoint_path: dict = None
+        self.feature = self.ChordFeature()
+        self.dataset = self.ChordDataset()
+
+        super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordFeature():
+        def __init__(self):
+            self.segment_width: int = None
+            self.segment_hop: int = None
+            self.num_steps: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordDataset():
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
