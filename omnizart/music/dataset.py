@@ -139,7 +139,6 @@ class FeatureLoader:
         self.num_samples = num_samples
         self.timesteps = timesteps
         self.channels = channels
-        self.cur_index = 0
 
         self.hdf_refs = {}
         self.pkls = {}

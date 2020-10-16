@@ -1,3 +1,6 @@
+import glob
+import random
+
 import tqdm
 
 
@@ -211,3 +214,12 @@ def train_epochs(
 
     execute_callbacks(callbacks, "on_train_end")
     return history
+
+
+def get_train_val_feat_file_list(feature_folder, split=0.9):
+    feat_files = glob.glob(f"{feature_folder}/*.hdf")
+    sidx = round(len(feat_files) * split)
+    random.shuffle(feat_files)
+    train_files = feat_files[:sidx]
+    val_files = feat_files[sidx:]
+    return train_files, val_files

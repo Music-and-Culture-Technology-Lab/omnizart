@@ -29,7 +29,7 @@ from omnizart.music.labels import (
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription
 from omnizart.utils import get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists
-from omnizart.train import train_epochs
+from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, POP_INSTRUMENT_PROGRAMES
@@ -248,7 +248,7 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
-        train_feat_files, val_feat_files = _get_train_val_feat_file_list(feature_folder, split=split)
+        train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
         train_dataset = get_dataset(
             l_type.get_conversion_func(),
             feature_files=train_feat_files,
@@ -373,15 +373,6 @@ def _resolve_dataset_type(dataset_path):
 
     assert len(set(d_type)) == 1
     return d_type[0]
-
-
-def _get_train_val_feat_file_list(feature_folder, split=0.9):
-    feat_files = glob.glob(f"{feature_folder}/*.hdf")
-    sidx = round(len(feat_files) * split)
-    random.shuffle(feat_files)
-    train_files = feat_files[:sidx]
-    val_files = feat_files[sidx:]
-    return train_files, val_files
 
 
 def model_training_test():
