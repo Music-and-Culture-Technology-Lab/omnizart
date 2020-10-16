@@ -287,7 +287,7 @@ def transpose_residual_block(x, channels, to_down=True, spectral_norm=True, scop
         return out + x
 
 
-def drum_model(out_classes, mini_beat_per_seg, layer_num=3):
+def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
     with tf.name_scope('transcription_model'):
         channels = 64
         spectral_norm = True
@@ -303,13 +303,13 @@ def drum_model(out_classes, mini_beat_per_seg, layer_num=3):
         out = transpose_residual_block(out, channels=channels, spectral_norm=spectral_norm, scope='fd_resbk')
         x_att, _ = cnn_attention(out, channels=channels, scope='self_attn')
 
-        for i in range(layer_num):
+        for i in range(res_block_num):
             if i == 0:
                 # first res layer
                 out_2 = transpose_residual_block(
                     x_att, channels=channels, spectral_norm=spectral_norm, scope=f"md_resbk_{i}"
                 )
-            elif i != layer_num - 1:
+            elif i != res_block_num - 1:
                 # middle res layer
                 out_2 = transpose_residual_block(
                     out_2, channels=channels, spectral_norm=spectral_norm, scope=f"md_resbk_{i}"
