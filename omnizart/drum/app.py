@@ -14,7 +14,6 @@ from omnizart.drum.labels import extract_label_13_inst
 from omnizart.drum.dataset import get_dataset
 from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
-from omnizart.models.utils import shape_list
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import DrumSettings
 from omnizart.train import train_epochs, get_train_val_feat_file_list
@@ -136,12 +135,12 @@ class DrumTranscription(BaseTranscription):
         train_dataset = get_dataset(
             feature_files=train_feat_files,
             batch_size=settings.training.batch_size,
-            steps=settings.trainins.steps
+            steps=settings.training.steps
         )
         val_dataset = get_dataset(
             feature_files=val_feat_files,
             batch_size=settings.training.val_batch_size,
-            steps=settings.trainins.val_steps
+            steps=settings.training.val_steps
         )
 
         if input_model_path is None:
@@ -277,9 +276,7 @@ def _all_in_one_extract(wav_path, label_path_mapping, feat_settings):
     )
 
     label_path = label_path_mapping[os.path.basename(wav_path)]
-    label_128, label_13 = extract_label_13_inst(
-        label_path, m_beat_arr, sampling_rate=feat_settings.sampling_rate
-    )
+    label_128, label_13 = extract_label_13_inst(label_path, m_beat_arr)
     return patch_cqt, m_beat_arr, label_128, label_13
 
 
@@ -300,14 +297,17 @@ def _loss_func(target, pred, soft_loss_range=20):
         recon_error - soft_loss_range * tf.ones_like(recon_error)
     )
 
-    shape = shape_list(recon_error_soft[:, :, :, :])
+    # shape = shape_list(recon_error_soft[:, :, :, :])
+    # note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
+    # note_priority_ary_in_expanded = note_priority_arr + tf.zeros(shape, dtype=note_priority_arr.dtype)
+    # recon_error_soft_priority = tf.multiply(recon_error_soft, note_priority_ary_in_expanded)
+    # recon_error_soft_flat = tf.reshape(
+    #     recon_error_soft_priority,
+    #     [-1, tf.keras.backend.prod(recon_error_soft_priority.get_shape()[1:])]
+    # )
+    recon_error_soft_reduced = tf.reduce_mean(recon_error_soft, axis=[0, 2])
     note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
-    note_priority_ary_in_expanded = note_priority_arr + tf.zeros(shape, dtype=note_priority_arr.dtype)
-    recon_error_soft_priority = tf.multiply(recon_error_soft, note_priority_ary_in_expanded)
-    recon_error_soft_flat = tf.reshape(
-        recon_error_soft_priority,
-        [-1, tf.keras.backend.prod(recon_error_soft_priority.get_shape()[1:])]
-    )
+    recon_error_soft_flat = recon_error_soft_reduced * note_priority_arr
     return tf.reduce_mean(input_tensor=recon_error_soft_flat)
 
 
@@ -315,4 +315,5 @@ if __name__ == "__main__":
     audio_path = "checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
     audio_path = "checkpoints/ytd_audio_00088_TRBHGWP128E0793AD8.mp3.wav"
     app = DrumTranscription()
-    pred = app.transcribe(audio_path)
+    # pred = app.transcribe(audio_path)
+    app.train("/host/home/76_pop_rhythm/drum_train_feature", model_name="test_drum")
