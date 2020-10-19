@@ -224,6 +224,6 @@ def get_dataset(
 
 if __name__ == "__main__":
     l_type = LabelType("note-stream")
-    feat_folder = "/host/home/76_pop_rhythm/train_feature/slice"
-    # loader = FeatureLoader(feature_folder=feat_folder)
-    dataset = get_dataset(l_type.get_conversion_func(), feature_folder=feat_folder)
+    FEAT_FOLDER = "/host/home/76_pop_rhythm/train_feature/slice"
+    # loader = FeatureLoader(feature_folder=FEAT_FOLDER)
+    dataset = get_dataset(l_type.get_conversion_func(), feature_folder=FEAT_FOLDER)
