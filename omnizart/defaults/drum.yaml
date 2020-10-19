@@ -71,27 +71,27 @@ General:
             Epoch:
                 Description: Maximum number of epochs for training.
                 Type: Integer
-                Value: 1000
+                Value: 30
             Steps:
                 Description: Number of training steps for each epoch.
                 Type: Integer
-                Value: 10000
+                Value: 1000
             ValSteps:
                 Description: Number of validation steps after each training epoch.
                 Type: Integer
-                Value: 2000
+                Value: 300
             BatchSize:
                 Description: Batch size of each training step.
                 Type: Integer
-                Value: 128
+                Value: 32
             ValBatchSize:
                 Description: Batch size of each validation step.
                 Type: Integer
-                Value: 128
+                Value: 32
             EarlyStop:
                 Description: Terminate the training if the validation performance doesn't imrove after n epochs.
                 Type: Integer
-                Value: 15
+                Value: 6
             InitLearningRate:
                 Descriptoin: Initial learning rate.
                 Type: Float
