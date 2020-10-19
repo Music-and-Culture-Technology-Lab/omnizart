@@ -1,5 +1,5 @@
 """Various utility functions for this project."""
-# pylint: disable=W0212,R0915
+# pylint: disable=W0212,R0915,W0621
 import os
 import re
 import pickle
