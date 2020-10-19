@@ -8,7 +8,6 @@ from omnizart.cli.music.transcribe import transcribe
 @click.group()
 def music():
     """Transcribe instruments and corresponding pitch in the audio."""
-    pass
 
 
 music.add_command(generate_feature)

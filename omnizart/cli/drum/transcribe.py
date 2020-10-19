@@ -1,3 +1,4 @@
+# pylint: disable=C0303,W1401
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
