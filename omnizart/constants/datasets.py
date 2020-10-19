@@ -14,7 +14,7 @@ class BaseStructure(metaclass=ABCMeta):
     @property
     @classmethod
     def url(cls):
-        dataset = str(cls.__class__).replace('Structure', '')  # noqa: F841
+        dataset = str(cls.__class__).replace('Structure', '')  # noqa: F841 # pylint: disable=W0612
         raise AttributeError("Attribute 'url' not defined for dataset {dataset}")
 
     @property
@@ -81,7 +81,7 @@ class BaseStructure(metaclass=ABCMeta):
         ground-truth files are stored.
         """
 
-    def _get_file_list(self, dataset_path, dirs, ext):
+    def _get_file_list(self, dataset_path, dirs, ext):  # pylint: disable=R0201
         files = []
         for _dir in dirs:
             files += glob.glob(os.path.join(dataset_path, _dir, ext))
@@ -297,7 +297,7 @@ class ExtSuStructure(BaseStructure):
         return self.test_wavs
 
 
-class McGillBillBoard:
+class McGillBillBoard:  # pylint: disable=R0903
     """Constant settings of McGill BillBoard dataset."""
     feature_folder = "./McGill-Billboard-Features"
     label_folder = "./McGill-Billboard-MIREX"
