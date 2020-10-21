@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../../omnizart'))
 # -- Project information -----------------------------------------------------
 
 project = 'omnizart'
-copyright = '2020, BreezeWhite'
-author = 'BreezeWhite'
+copyright = '2020, MCTLab'
+author = 'MCTLab'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
