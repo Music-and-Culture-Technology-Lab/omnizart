@@ -27,6 +27,7 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
 
    music.rst
    drum.rst
+   chord.rst
    feature.rst
    models.rst
    training.rst
