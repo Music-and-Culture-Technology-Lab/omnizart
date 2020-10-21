@@ -85,11 +85,11 @@ check_if_venv_activated() {
 
 
 if [ "$VENV_APPROACH" = "poetry"  ]; then
+    install_with_poetry
     if [ "$USE_VENV" = "true" ]; then
         activate_venv_with_poetry
         check_if_venv_activated
     fi
-    install_with_poetry
 
     echo -e "\nTo activate the environment, run the following command:"
     echo "source \$(dirname \$(poetry run which python))/activate"
