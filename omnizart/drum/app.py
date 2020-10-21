@@ -88,7 +88,7 @@ class DrumTranscription(BaseTranscription):
             the life-cycle of building a model.
         num_threads:
             Number of threads for parallel extracting the features.
-        
+
         See Also
         --------
         omnizart.constants.datasets.PopStructure:

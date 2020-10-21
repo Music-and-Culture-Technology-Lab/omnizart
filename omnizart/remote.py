@@ -49,7 +49,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
         Path to the cookie file. Suitable for stateful download (e.g. Google Drive).
     unzip: bool
         Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
-        the original downloaded file. 
+        the original downloaded file.
     """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
@@ -128,7 +128,7 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
         name from the given url.
     unzip: bool
         Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
-        the original downloaded file. 
+        the original downloaded file.
     """
     if not url.startswith("https://"):
         # The given 'url' is actually a file ID.
