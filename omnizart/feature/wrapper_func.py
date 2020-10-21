@@ -46,8 +46,8 @@ def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
     omnizart.feature.cqt.extract_cqt: Function for extracting CQT feature.
     omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path: Function for extracting mini-beat.
     """
-    cqt_ext = extract_cqt(input_audio)
-    mini_beat_arr = extract_mini_beat_from_audio_path(input_audio)
+    cqt_ext = extract_cqt(input_audio, sampling_rate=sampling_rate, a_hop=hop_size)
+    mini_beat_arr = extract_mini_beat_from_audio_path(input_audio, sampling_rate=sampling_rate)
 
     m_beat_cqt_patch_list = []
     for m_beat_t_cur in mini_beat_arr:

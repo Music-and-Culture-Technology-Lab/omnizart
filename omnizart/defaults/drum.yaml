@@ -18,7 +18,7 @@ General:
             SamplingRate:
                 Description: Adjust input sampling rate to this value.
                 Type: Integer
-                Value: 22050
+                Value: 44100
             PaddingSeconds:
                 Description: Padding length to the begin and the end of the raw audio data.
                 Type: Float
