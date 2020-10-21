@@ -2,6 +2,7 @@ from functools import partial
 
 import click
 
+from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
 from omnizart.music import app
 from omnizart.setting_loaders import MusicSettings
 
@@ -10,31 +11,13 @@ click.option = partial(click.option, show_default=True)
 
 
 @click.command()
-@click.option(
-    "-d",
-    "--feature-path",
-    help="Path to the folder of extracted feature",
-    type=click.Path(exists=True),
-    required=True,
-)
-@click.option(
-    "-m",
-    "--model-name",
-    help="Name for the output model (can be a path)",
-    type=click.Path(writable=True)
-)
+@add_common_options(COMMON_TRAIN_MODEL_OPTIONS)
 @click.option(
     "-y",
     "--model-type",
     help="Type of the neural network model",
     type=click.Choice(["attn", "aspp"]),
     default="attn",
-)
-@click.option(
-    "-i",
-    "--input-model",
-    help="If given, the training will continue to fine-tune on the pre-trained model.",
-    type=click.Path(exists=True, writable=True),
 )
 @click.option(
     "-f",
@@ -59,32 +42,21 @@ click.option = partial(click.option, show_default=True)
     default="smooth",
 )
 @click.option("-t", "--timesteps", help="Time width of each input feature", type=int, default=256)
-@click.option("-e", "--epochs", help="Number of training epochs", type=int, default=20)
-@click.option("-s", "--steps", help="Number of training steps of each epoch", type=int, default=3000)
-@click.option("-vs", "--val-steps", help="Number of validation steps of each epoch", type=int, default=500)
-@click.option("-b", "--batch-size", help="Batch size of each training step", type=int, default=16)
-@click.option("-vb", "--val-batch-size", help="Batch size of each validation step", type=int, default=16)
-@click.option(
-    "--early-stop",
-    help="Stop the training after the given epoch number if the validation accuracy did not improve.",
-    type=int,
-    default=6,
-)
 def train_model(
     feature_path,
     model_name,
-    model_type,
     input_model,
-    feature_type,
-    label_type,
-    loss_function,
-    timesteps,
     epochs,
     steps,
     val_steps,
     batch_size,
     val_batch_size,
     early_stop,
+    model_type,
+    feature_type,
+    label_type,
+    loss_function,
+    timesteps
 ):
     """Train a new model or continue to train on a pre-trained model"""
     settings = MusicSettings()
