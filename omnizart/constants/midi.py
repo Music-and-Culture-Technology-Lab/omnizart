@@ -1,18 +1,5 @@
 """Stores MIDI-related constant variables.
 
-Attributes
-----------
-MIDI_PROGRAM_NAME_MAPPING: Dict
-    Mapping of program number to name.
-LOWEST_MIDI_NOTE: int
-    Lowest note midi number that will be used.
-HIGHEST_MIDI_NOTE: int
-    Highest note midi number that will be used.
-MUSICNET_INSTRUMENT_PROGRAMS: list[int]
-    Program numbers that are used in MusicNet dataset.
-POP_INSTRUMENT_PROGRAMS: list[int]
-    Program numbers that represent different groups of channels used
-    in Pop dataset.
 """
 import os
 
@@ -25,8 +12,8 @@ LOWEST_MIDI_NOTE = note_to_midi("A0")
 HIGHEST_MIDI_NOTE = note_to_midi("C8")
 
 
-# Mappings of MIDI program number and the corresponding name derived from the
-# Wiki page: https://en.wikipedia.org/wiki/General_MIDI
+#: Mappings of MIDI program number and the corresponding name derived from the
+#: Wiki page: https://en.wikipedia.org/wiki/General_MIDI
 MIDI_PROGRAM_NAME_MAPPING = {
     "0": "Acoustic Grand Piano",  # Piano
     "1": "Bright Acoustic Piano",
@@ -158,9 +145,12 @@ MIDI_PROGRAM_NAME_MAPPING = {
     "127": "Gunshot",
 }
 
+#: Program numbers that are used in MusicNet dataset.
 MUSICNET_INSTRUMENT_PROGRAMS = [0, 6, 40, 41, 42, 43, 60, 68, 70, 71, 73]
 
-# Guitar, bass, strings, organ, piano, and others
+#: Program numbers that represent different groups of channels used in Pop dataset.
+#: Guitar, bass, strings, organ, piano, and others
 POP_INSTRUMENT_PROGRAMES = [24, 32, 40, 0, 56]
 
+#: Path to the soundfont.
 SOUNDFONT_PATH = os.path.join(MODULE_PATH, "resource/soundfonts.sf2")

@@ -68,6 +68,33 @@ class DrumTranscription(BaseTranscription):
         return pred
 
     def generate_feature(self, dataset_path, drum_settings=None, num_threads=3):
+        """Extract the feature of the whole dataset.
+
+        Currently only supports Pop dataset. To train the model, you have to prepare the training
+        data first, then process it into feature representations. After downloading the dataset,
+        use this function to do the pre-processing and transform the raw data into features.
+
+        To specify the output path, modify the attribute
+        ``music_settings.dataset.feature_save_path`` to the value you want.
+        It will default to the folder under where the dataset stored, generating
+        two folders: ``train_feature`` and ``test_feature``.
+
+        Parameters
+        ----------
+        dataset_path: Path
+            Path to the downloaded dataset.
+        drum_settings: DrumSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        num_threads:
+            Number of threads for parallel extracting the features.
+        
+        See Also
+        --------
+        omnizart.constants.datasets.PopStructure:
+            The only supported dataset for drum transcription. Records the train/test
+            partition according to the folder.
+        """
         if drum_settings is not None:
             assert isinstance(drum_settings, DrumSettings)
             settings = drum_settings
@@ -116,6 +143,23 @@ class DrumTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, drum_settings=None):
+        """Model training.
+
+        Train a new model or continue to train on a previously trained model.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the folder containing generated feature.
+        model_name: str
+            The name for storing the trained model. If not given, will default to the
+            current timesamp.
+        input_model_path: Path
+            Continue to train on the pre-trained model by specifying the path.
+        drum_settings: DrumSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        """
         if drum_settings is not None:
             assert isinstance(drum_settings, DrumSettings)
             settings = drum_settings
@@ -152,7 +196,8 @@ class DrumTranscription(BaseTranscription):
             )
 
         optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
-        model.compile(optimizer=optimizer, loss=_loss_func, metrics=["accuracy"])
+        # model.compile(optimizer=optimizer, loss=_loss_func, metrics=["accuracy"])
+        model.compile(optimizer=optimizer, loss=tf.keras.losses.BinaryCrossentropy(), metrics=["accuracy"])
 
         logger.info("Resolving model output path")
         if model_name is None:
@@ -314,6 +359,7 @@ def _loss_func(target, pred, soft_loss_range=20):
 if __name__ == "__main__":
     audio_path = "checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
     audio_path = "checkpoints/ytd_audio_00088_TRBHGWP128E0793AD8.mp3.wav"
+    # audio_path = "checkpoints/Warriyo - Mortals (feat. Laura Brehm) [NCS Release].wav"
     app = DrumTranscription()
-    # pred = app.transcribe(audio_path)
-    app.train("/host/home/76_pop_rhythm/drum_train_feature", model_name="test_drum")
+    pred = app.transcribe(audio_path, model_path="/data/omnizart/checkpoints/drum/drum_test_drum")
+    # app.train("/host/home/76_pop_rhythm/drum_train_feature", model_name="test_drum")

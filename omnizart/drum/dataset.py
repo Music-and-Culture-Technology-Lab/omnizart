@@ -29,6 +29,8 @@ class FeatureLoader:
         self.num_samples = num_samples
         self.mini_beat_per_seg = mini_beat_per_seg
 
+        # Initialize indexes index-to-file mapping to ensure all samples
+        # will be visited during training.
         length_map = {hdf: len(hdf) for hdf in self.hdf_refs}
         self.total_length = sum(length_map.values())
         self.start_idxs = np.arange(self.total_length, step=self.mini_beat_per_seg)
@@ -52,6 +54,7 @@ class FeatureLoader:
     def __iter__(self):
         for _ in range(self.num_samples):
             if len(self.start_idxs) == 0:
+                # Shuffle the indexes after visiting all the samples in the dataset.
                 self.start_idxs = np.arange(self.total_length, step=self.mini_beat_per_seg)
                 self.start_idxs = self.start_idxs[:-self.cut_idx]
                 np.random.shuffle(self.start_idxs)
@@ -65,6 +68,8 @@ class FeatureLoader:
             llb = hdf_ref["label"][slice_idx:slice_idx+self.mini_beat_per_seg]  # noqa: E226
             label = np.transpose(llb, axes=[1, 0])  # dim: 13 x mini_beat_per_seg
 
+            # Prepare the 'off' channel. This is neccessary when using BCE as the
+            # loss function that the sum along depth channels should be one.
             off = np.ones(len(label))
             off -= np.sum(label, axis=-1)
             off = off.reshape((len(off), -1))
@@ -73,6 +78,30 @@ class FeatureLoader:
 
 
 def get_dataset(feature_folder=None, feature_files=None, batch_size=8, steps=100):
+    """Get the dataset instance.
+
+    A quick way to get and setup the dataset instance for training/validation.
+
+    Parameters
+    ----------
+    feature_folder: Path
+        Path to the folder containing extracted feature files (*.hdf).
+    feature_files: list[Path]
+        List of paths to the feature files with extension `.hdf`. This parameter
+        gives the ability to have more control on which files to use.
+
+        Either ``feature_folder`` or ``feature_files`` should be specified.
+        If both given, ``feature_files`` will be used.
+    batch_size: int
+        Size of input batch for each training step.
+    steps: int
+        Total steps of each epoch.
+
+    Returns
+    -------
+    dataset: tf.data.Dataset
+        A tensorflow dataset instance with optimized setup.
+    """
     loader = FeatureLoader(
         feature_folder=feature_folder,
         feature_files=feature_files,

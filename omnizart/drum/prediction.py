@@ -1,6 +1,11 @@
 # pylint: disable=E1101
 import numpy as np
 
+from omnizart.utils import get_logger
+
+
+logger = get_logger("Drum Prediction")
+
 
 def create_batches(feature, mini_beat_per_seg, b_size=6):
     """Create a 4D input for model prediction.
@@ -56,13 +61,15 @@ def merge_batches(batch_pred):
     assert len(batch_pred.shape) == 5
     assert batch_pred.shape[-1] == 1
 
+    logger.debug("Batch prediction shape: %s", batch_pred.shape)
     batches, b_size, out_classes, mini_beat_per_seg = batch_pred.shape[:4]
+    #mini_beat_per_seg -= 1  # The first channel of the prediciton is the 'off' channel.
     pred = np.zeros((batches*b_size + mini_beat_per_seg - 1, out_classes))  # noqa: E226
     for b_idx, batch in enumerate(batch_pred):
         for s_idx, step in enumerate(batch):
             start_idx = b_idx*b_size + s_idx  # noqa: E226
             end_idx = start_idx + mini_beat_per_seg
-            pred[start_idx:end_idx] += step.T.squeeze()
+            pred[start_idx:end_idx] += step.T.squeeze()#[1:]
 
     max_len = min(mini_beat_per_seg - 1, len(pred) - mini_beat_per_seg)
     pred[max_len:-max_len] /= max_len + 1

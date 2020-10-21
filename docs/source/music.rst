@@ -1,7 +1,8 @@
 Music Transcription
 ===================
 
-Transcribes notes of each instruments in the music.
+
+.. automodule:: omnizart.music
 
 
 App

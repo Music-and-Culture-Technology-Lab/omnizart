@@ -1,20 +1,14 @@
 """Some constant feature settings.
 
-Attributes
-----------
-FEATURE_NAME_TO_NUMBER
-NOTE_PRIORITY_ARRAY
-ENHARMONIC_TABLE
-CHORD_INT_MAPPING
 """
 
 ## --------------- For Music module --------------- ##
-# Mapping feature name to channel number
+#: Feature name to channel number mapping (for ``music`` module)
 FEATURE_NAME_TO_NUMBER = {"S": 1, "G": 2, "C": 3, "Spec": 1, "GCoS": 2, "Ceps": 3}
 
 
 ## --------------- For Drum module --------------- ##
-# Weighting factor for each drum class.
+#: Weighting factor for different drum notes (for ``drum`` module).
 NOTE_PRIORITY_ARRAY = [
     2.0364304, 1.4848346, 0.5027617, 0.5768271, 2.8335114, 0.733738,
     0.83764803, 0.5139924, 0.4998506, 0.4733462, 0.5940674, 0.7641602,
@@ -23,10 +17,10 @@ NOTE_PRIORITY_ARRAY = [
 
 
 ## --------------- For Chord module --------------- ##
-# Enharmonic table for 'chord' submodule
+#: Table of major chord to corresponding enharmonic chord (for ``chord`` module)
 ENHARMONIC_TABLE = {'Cb': 'B', 'Db': 'C#', 'Eb': 'D#', 'Fb': 'E', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'}
 
-# Chord to integer mapping table for 'chord' submodule
+#: Mapping of chord names to integers (for ``chord`` module).
 CHORD_INT_MAPPING = {
     'C:maj': 0,
     'C#:maj': 1,

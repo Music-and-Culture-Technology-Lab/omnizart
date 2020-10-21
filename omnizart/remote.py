@@ -1,3 +1,9 @@
+"""Functions related to networking.
+
+Containing functions to download files from the internet. Supports
+download *zipped* files from Google Drive.
+
+"""
 # pylint: disable=R0914,R0915,W0612
 import os
 import sys
@@ -6,11 +12,12 @@ import zipfile
 import urllib.request
 import http.cookiejar
 
-
+#: Mapping bytes to human-readable size unit.
 SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "TB")]
 
 
 def format_byte(size, digit=3):
+    """Format the given byte size into human-readable string."""
     rounding = f".{digit}f"
     for idx, (bound, unit) in enumerate(SIZE_MAPPING):
         if size <= bound:
@@ -20,6 +27,30 @@ def format_byte(size, digit=3):
 
 
 def download(url, file_length=None, save_path="./", save_name=None, cookie_file=None, unzip=False):
+    """Download file from the internet.
+
+    Download file from the remote URL, with progress visualization and dynamic downloading
+    rate adjustment. Uses pure python built-in packages, no additional package requirement.
+
+    Parameters
+    ----------
+    url: URL
+        The file download url.
+    file_length: float
+        In bytes. If the length can't be retrieved from the response header, but can be
+        obtained by other approaches, you can explicitly specify the length for progress
+        visualization.
+    save_path: Path
+        The path to store the donwloaded file.
+    save_name: str
+        Explicitly specify the file name to be stored. If not given, default to parse the
+        name from the given url.
+    cookie_file: Path
+        Path to the cookie file. Suitable for stateful download (e.g. Google Drive).
+    unzip: bool
+        Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
+        the original downloaded file. 
+    """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
     print(f"Output path: {out_path}")
@@ -81,6 +112,24 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
 
 
 def download_large_file_from_google_drive(url, save_path="./", save_name=None, unzip=False):
+    """Google Drive file downloader.
+
+    Download function dedicated for Google Drive files. Mainly to deal with download
+    large files and the confirmation page.
+
+    Parameters
+    ----------
+    url: URL
+        Could be a full google drive download url or the file ID.
+    save_path: Path
+        Path to store the downloaded file.
+    save_name: str
+        Explicitly specify the file name to be stored. If not given, default to parse the
+        name from the given url.
+    unzip: bool
+        Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
+        the original downloaded file. 
+    """
     if not url.startswith("https://"):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
@@ -100,6 +149,7 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
         download(url, save_path=save_path, unzip=unzip)
         return
 
+    # Parse the file size from the returned page content.
     page = []
     while True:
         data = resp.read(2**15)

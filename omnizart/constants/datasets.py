@@ -88,15 +88,19 @@ class BaseStructure(metaclass=ABCMeta):
         return files
 
     def get_train_wavs(self, dataset_path="./"):
+        """Get list of complete train wav paths"""
         return self._get_file_list(dataset_path, self.train_wavs, ".wav")
 
     def get_test_wavs(self, dataset_path="./"):
+        """Get list of complete test wav paths"""
         return self._get_file_list(dataset_path, self.test_wavs, ".wav")
 
     def get_train_labels(self, dataset_path="./"):
+        """Get list of complete train label paths"""
         return self._get_file_list(dataset_path, self.train_labels, self.label_ext)
 
     def get_test_labels(self, dataset_path="./"):
+        """Get list of complete test label paths"""
         return self._get_file_list(dataset_path, self.test_labels, self.label_ext)
 
 
@@ -137,6 +141,8 @@ class MapsStructure(BaseStructure):
 
 class MusicNetStructure(BaseStructure):
     """Structure of MusicNet dataset"""
+
+    #: Dataset URL
     url = "https://homes.cs.washington.edu/~thickstn/media/musicnet.tar.gz"
 
     @property
@@ -167,6 +173,8 @@ class MusicNetStructure(BaseStructure):
 
 class MaestroStructure(BaseStructure):
     """Structure of Maestro dataset"""
+
+    #: Dataset URL
     url = "https://storage.googleapis.com/magentadata/datasets/maestro/v2.0.0/maestro-v2.0.0.zip"
 
     @property
@@ -299,12 +307,24 @@ class ExtSuStructure(BaseStructure):
 
 class McGillBillBoard:  # pylint: disable=R0903
     """Constant settings of McGill BillBoard dataset."""
+
+    #: Path to the feature folder relative to dataset
     feature_folder = "./McGill-Billboard-Features"
+
+    #: Path to the label folder relative to dataset
     label_folder = "./McGill-Billboard-MIREX"
+
+    #: Name of feature files
     feature_file_name = "bothchroma.csv"
+
+    #: Name of label files
     label_file_name = "majmin.lab"
+
+    #: Path to the index file relative the dataset
     index_file_path = "./billboard-2.0-index.csv"
 
+    #: Split ID of train/val set.
     train_test_split_id = 1000
 
+    #: Dataset URL
     url = "https://drive.google.com/uc?export=download&id=1_K_Fof4zt1IQvs1aDmf-5wY0wHqgcPlC"

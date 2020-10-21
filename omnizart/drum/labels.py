@@ -13,6 +13,7 @@ TMP_WAV_DIR = tempfile.mktemp()
 
 
 def synth_midi(midi_path, sampling_rate=44100, out_path=TMP_WAV_DIR):
+    """Synthesize MIDI into wav audio."""
     midi = pretty_midi.PrettyMIDI(midi_path)
     raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=SOUNDFONT_PATH)
     if out_path is not None:
@@ -27,6 +28,28 @@ def synth_midi(midi_path, sampling_rate=44100, out_path=TMP_WAV_DIR):
 
 
 def extract_label(label_path, m_beat_arr):
+    """Extract drum label notes.
+
+    Process ground-truth midi into numpy array representation.
+
+    Parameters
+    ----------
+    label_path: Path
+        Path to the midi file.
+    m_beat_arr:
+        Extracted mini-beat array of the coressponding audio piece.
+
+    Returns
+    -------
+    drum_track_ary: numpy.ndarray
+        The extracted label in numpy array. Should have a total of 128 classes
+        of drum notes.
+
+    See Also
+    --------
+    omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path:
+        The function for extracting mini-beat array from the given audio path.
+    """
     m_beat_range = []
     start = m_beat_arr[0] - (m_beat_arr[1] - m_beat_arr[0]) / 2
     end = m_beat_arr[0] + (m_beat_arr[1] - m_beat_arr[0]) / 2
@@ -55,6 +78,30 @@ def extract_label(label_path, m_beat_arr):
 
 
 def extract_label_13_inst(label_path, m_beat_arr):
+    """Extract 13 types of drum label notes.
+
+    Process the MIDI drum notes into numpy array and concludes them
+    into 13 different sub-classes of drum notes.
+
+    Parameters
+    ----------
+    label_path: Path
+        Path to the midi file.
+    m_beat_arr:
+        Extracted mini-beat array of the coressponding audio piece.
+
+    Returns
+    -------
+    drum_track_ary: numpy.ndarray
+        The extracted label in numpy array.
+
+    See Also
+    --------
+    omnizart.drum.labels.extract_label:
+        Complete drum label extraction with 128 output classes.
+    omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path:
+        The function for extracting mini-beat array from the given audio path.
+    """
     label = extract_label(label_path, m_beat_arr)
 
     inst_ary_out = np.zeros([len(label), 13]).astype(np.float32)

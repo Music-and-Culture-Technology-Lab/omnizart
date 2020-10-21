@@ -1,8 +1,8 @@
-"""Transcription model of drum, which leverages spectral normalization.
+"""Transcription model of drum leveraging spectral normalization.
 
 The model was originally developed with tensorflow 1.12.
 We rewrite the model with tensorflow 2.3 module and uses keras to implement most of
-the functionalities for better readaility.
+the functionalities for better readability.
 
 Original Author: I-Chieh, Wei
 Rewrite by: BreezeWhite
@@ -288,6 +288,26 @@ def transpose_residual_block(x, channels, to_down=True, spectral_norm=True, scop
 
 
 def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
+    """Get the drum transcription model.
+
+    Constructs the drum transcription model instance for training/inference.
+
+    Parameters
+    ----------
+    out_classes: int
+        Total output classes, refering to classes of drum types.
+        Currently there are 13 pre-defined drum percussions.
+    mini_beat_per_seg: int
+        Number of mini beats in a segment. Can be understood as the range of time
+        to be considered for training.
+    res_block_num: int
+        Number of residual blocks.
+
+    Returns
+    -------
+    model: tf.keras.Model
+        A tensorflow keras model instance.
+    """
     with tf.name_scope('transcription_model'):
         channels = 64
         spectral_norm = True
@@ -329,10 +349,11 @@ def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
         mix_2 = dense_3 + mix_1*0.25  # noqa: E226
 
         dense_4 = tf.keras.layers.Dense(2**10, activation='elu', name='mdl_nn_mlp_of2')(mix_2)
-        dense_5 = tf.keras.layers.Dense(out_classes * mini_beat_per_seg, activation='tanh',
+        dense_5 = tf.keras.layers.Dense(out_classes * (mini_beat_per_seg + 1), activation='sigmoid',
                                         name='mdl_nn_mlp_of3')(dense_4)
 
-        out = dense_5*70 + 50  # noqa: E226
-        out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg, 1])
+        # out = dense_5*70 + 50  # noqa: E226
+        # out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg, 1])
+        out = tf.reshape(dense_5, shape=[-1, out_classes, mini_beat_per_seg+1, 1])  # noqa: E226
 
         return tf.keras.Model(inputs=input_tensor, outputs=out)

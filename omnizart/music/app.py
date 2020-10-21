@@ -124,11 +124,13 @@ class MusicTranscription(BaseTranscription):
         music_settings: MusicSettings
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
+        num_threads:
+            Number of threads for parallel extracting the features.
 
         See Also
         --------
         omnizart.constants.datasets:
-            Supported dataset that can be applied and the split of training/testing.
+            Supported dataset that can be applied and the split of training/testing pieces.
         """
         if music_settings is not None:
             assert isinstance(music_settings, MusicSettings)
