@@ -62,14 +62,14 @@ def merge_batches(batch_pred):
     assert batch_pred.shape[-1] == 1
 
     logger.debug("Batch prediction shape: %s", batch_pred.shape)
-    batches, b_size, out_classes, mini_beat_per_seg = batch_pred.shape[:4]
-    #mini_beat_per_seg -= 1  # The first channel of the prediciton is the 'off' channel.
+    batch_pred = np.transpose(batch_pred, axes=[0, 1, 3, 2, 4])
+    batches, b_size, mini_beat_per_seg, out_classes = batch_pred.shape[:4]
     pred = np.zeros((batches*b_size + mini_beat_per_seg - 1, out_classes))  # noqa: E226
     for b_idx, batch in enumerate(batch_pred):
         for s_idx, step in enumerate(batch):
             start_idx = b_idx*b_size + s_idx  # noqa: E226
             end_idx = start_idx + mini_beat_per_seg
-            pred[start_idx:end_idx] += step.T.squeeze()#[1:]
+            pred[start_idx:end_idx] += step.squeeze()
 
     max_len = min(mini_beat_per_seg - 1, len(pred) - mini_beat_per_seg)
     pred[max_len:-max_len] /= max_len + 1
@@ -79,7 +79,7 @@ def merge_batches(batch_pred):
     return pred
 
 
-def predict(patch_cqt_feature, model, mini_beat_per_seg, batch_size=6):
+def predict(patch_cqt_feature, model, mini_beat_per_seg, batch_size=32):
     batches, pad_size = create_batches(patch_cqt_feature, mini_beat_per_seg, b_size=batch_size)
     batch_pred = []
     for idx, batch in enumerate(batches):

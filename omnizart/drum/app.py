@@ -12,6 +12,7 @@ from omnizart.feature.wrapper_func import extract_patch_cqt
 from omnizart.drum.prediction import predict
 from omnizart.drum.labels import extract_label_13_inst
 from omnizart.drum.dataset import get_dataset
+from omnizart.drum.inference import inference
 from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
 from omnizart.base import BaseTranscription
@@ -56,7 +57,7 @@ class DrumTranscription(BaseTranscription):
 
         # Extract feature according to model configuration
         logger.info("Extracting feature...")
-        patch_cqt_feature, _ = extract_patch_cqt(input_audio)
+        patch_cqt_feature, mini_beat_arr = extract_patch_cqt(input_audio)
 
         # Load model configurations
         logger.info("Loading model...")
@@ -65,7 +66,11 @@ class DrumTranscription(BaseTranscription):
         logger.info("Predicting...")
         pred = predict(patch_cqt_feature, model, model_settings.feature.mini_beat_per_segment)
         logger.debug("Prediction shape: %s", pred.shape)
-        return pred
+
+        logger.info("Infering MIDI...")
+        midi = inference(pred, mini_beat_arr)
+        logger.info("Finished")
+        return pred, midi
 
     def generate_feature(self, dataset_path, drum_settings=None, num_threads=3):
         """Extract the feature of the whole dataset.
@@ -335,21 +340,13 @@ def _gen_wav_label_path_mapping(label_paths):
 
 
 def _loss_func(target, pred, soft_loss_range=20):
-    recon_error = tf.abs(target - pred)
+    recon_error = tf.abs(target*100 - pred)  # noqa: E226
     recon_error_soft = tf.compat.v1.where(
         recon_error <= soft_loss_range * tf.ones_like(recon_error),
         tf.zeros_like(recon_error),
         recon_error - soft_loss_range * tf.ones_like(recon_error)
     )
 
-    # shape = shape_list(recon_error_soft[:, :, :, :])
-    # note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
-    # note_priority_ary_in_expanded = note_priority_arr + tf.zeros(shape, dtype=note_priority_arr.dtype)
-    # recon_error_soft_priority = tf.multiply(recon_error_soft, note_priority_ary_in_expanded)
-    # recon_error_soft_flat = tf.reshape(
-    #     recon_error_soft_priority,
-    #     [-1, tf.keras.backend.prod(recon_error_soft_priority.get_shape()[1:])]
-    # )
     recon_error_soft_reduced = tf.reduce_mean(recon_error_soft, axis=[0, 2])
     note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
     recon_error_soft_flat = recon_error_soft_reduced * note_priority_arr
@@ -361,5 +358,5 @@ if __name__ == "__main__":
     audio_path = "checkpoints/ytd_audio_00088_TRBHGWP128E0793AD8.mp3.wav"
     # audio_path = "checkpoints/Warriyo - Mortals (feat. Laura Brehm) [NCS Release].wav"
     app = DrumTranscription()
-    pred = app.transcribe(audio_path, model_path="/data/omnizart/checkpoints/drum/drum_test_drum")
+    pred = app.transcribe(audio_path, model_path="/data/omnizart/bootstrap_data/drum/checkpoints/gt_model")
     # app.train("/host/home/76_pop_rhythm/drum_train_feature", model_name="test_drum")
