@@ -71,7 +71,7 @@ General:
             Epoch:
                 Description: Maximum number of epochs for training.
                 Type: Integer
-                Value: 30
+                Value: 50
             Steps:
                 Description: Number of training steps for each epoch.
                 Type: Integer
@@ -79,7 +79,7 @@ General:
             ValSteps:
                 Description: Number of validation steps after each training epoch.
                 Type: Integer
-                Value: 300
+                Value: 100
             BatchSize:
                 Description: Batch size of each training step.
                 Type: Integer
