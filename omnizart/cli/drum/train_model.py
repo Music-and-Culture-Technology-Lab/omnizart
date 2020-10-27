@@ -20,11 +20,18 @@ def train_model(
 ):
     """Train a new model or continue to train on a pre-trained model"""
     settings = DrumSettings()
-    settings.training.epoch = epochs
-    settings.training.steps = steps
-    settings.training.batch_size = batch_size
-    settings.training.val_steps = val_steps
-    settings.training.val_batch_size = val_batch_size
-    settings.training.early_stop = early_stop
+
+    if epochs is not None:
+        settings.training.epoch = epochs
+    if steps is not None:
+        settings.training.steps = steps
+    if batch_size is not None:
+        settings.training.batch_size = batch_size
+    if val_steps is not None:
+        settings.training.val_steps = val_steps
+    if val_batch_size is not None:
+        settings.training.val_batch_size = val_batch_size
+    if early_stop is not None:
+        settings.training.early_stop = early_stop
 
     app.train(feature_path, model_name=model_name, input_model_path=input_model, drum_settings=settings)

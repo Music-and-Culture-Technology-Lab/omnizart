@@ -60,16 +60,27 @@ def train_model(
 ):
     """Train a new model or continue to train on a pre-trained model"""
     settings = MusicSettings()
-    settings.training.channels = feature_type
-    settings.training.label_type = label_type
-    settings.training.loss_function = loss_function
-    settings.training.timesteps = timesteps
-    settings.training.epoch = epochs
-    settings.training.steps = steps
-    settings.training.val_steps = val_steps
-    settings.training.batch_size = batch_size
-    settings.training.val_batch_size = val_batch_size
-    settings.training.early_stop = early_stop
-    settings.model.model_type = model_type
+    if feature_type is not None:
+        settings.training.channels = feature_type
+    if label_type is not None:
+        settings.training.label_type = label_type
+    if loss_function is not None:
+        settings.training.loss_function = loss_function
+    if timesteps is not None:
+        settings.training.timesteps = timesteps
+    if epochs is not None:
+        settings.training.epoch = epochs
+    if steps is not None:
+        settings.training.steps = steps
+    if val_steps is not None:
+        settings.training.val_steps = val_steps
+    if batch_size is not None:
+        settings.training.batch_size = batch_size
+    if val_batch_size is not None:
+        settings.training.val_batch_size = val_batch_size
+    if early_stop is not None:
+        settings.training.early_stop = early_stop
+    if model_type is not None:
+        settings.model.model_type = model_type
 
     app.train(feature_path, model_name=model_name, input_model_path=input_model, music_settings=settings)

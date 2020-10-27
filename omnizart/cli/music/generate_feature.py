@@ -22,5 +22,7 @@ def generate_feature(dataset_path, output_path, num_threads, harmonic):
     """
     settings = MusicSettings()
     settings.feature.harmonic = harmonic
-    settings.dataset.feature_save_path = output_path
+    if output_path is not None:
+        settings.dataset.feature_save_path = output_path
+
     app.generate_feature(dataset_path, settings, num_threads=num_threads)

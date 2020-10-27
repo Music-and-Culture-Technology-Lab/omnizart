@@ -9,5 +9,8 @@ from omnizart.setting_loaders import ChordSettings
 @add_common_options(COMMON_GEN_FEATURE_OPTIONS)
 def generate_feature(dataset_path, output_path, num_threads):
     settings = ChordSettings()
-    settings.dataset.feature_save_path = output_path
+
+    if output_path is not None:
+        settings.dataset.feature_save_path = output_path
+
     app.generate_feature(dataset_path, chord_settings=settings, num_threads=num_threads)
