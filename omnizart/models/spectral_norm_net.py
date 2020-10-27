@@ -33,7 +33,7 @@ class SpectralNormalization(tf.keras.layers.Wrapper):
         self.layer.build(input_shape)
 
         self.w = self.layer.kernel
-        self.w_shape = self.w.shape.as_list()
+        self.w_shape = shape_list(self.w)
 
         self.v = self.add_weight(
             shape=(1, self.w_shape[0] * self.w_shape[1] * self.w_shape[2]),
@@ -287,7 +287,7 @@ def transpose_residual_block(x, channels, to_down=True, spectral_norm=True, scop
         return out + x
 
 
-def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
+def drum_model(out_classes, mini_beat_per_seg, res_block_num=3, channels=64, spectral_norm=True):
     """Get the drum transcription model.
 
     Constructs the drum transcription model instance for training/inference.
@@ -309,10 +309,8 @@ def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
         A tensorflow keras model instance.
     """
     with tf.name_scope('transcription_model'):
-        channels = 64
-        spectral_norm = True
-
-        input_tensor = tf.keras.Input(shape=(120, 120, 4), name="input_tensor")
+        inp_wrap = tf.keras.Input(shape=(120, 120, mini_beat_per_seg), name="input_tensor")
+        input_tensor = inp_wrap * tf.constant(100)
 
         padded_input = tf.pad(input_tensor, [[0, 0], [0, 0], [1, 0], [0, 0]], name='tf_diff2_pady')[:, :, :-1]
         pad_out = input_tensor - padded_input
@@ -349,11 +347,10 @@ def drum_model(out_classes, mini_beat_per_seg, res_block_num=3):
         mix_2 = dense_3 + mix_1*0.25  # noqa: E226
 
         dense_4 = tf.keras.layers.Dense(2**10, activation='elu', name='mdl_nn_mlp_of2')(mix_2)
-        dense_5 = tf.keras.layers.Dense(out_classes * (mini_beat_per_seg + 1), activation='sigmoid',
+        dense_5 = tf.keras.layers.Dense(out_classes * mini_beat_per_seg, activation='tanh',
                                         name='mdl_nn_mlp_of3')(dense_4)
 
-        # out = dense_5*70 + 50  # noqa: E226
-        # out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg, 1])
-        out = tf.reshape(dense_5, shape=[-1, out_classes, mini_beat_per_seg+1, 1])  # noqa: E226
+        out = dense_5*70 + 50  # noqa: E226
+        out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg, 1])
 
-        return tf.keras.Model(inputs=input_tensor, outputs=out)
+        return tf.keras.Model(inputs=inp_wrap, outputs=out)
