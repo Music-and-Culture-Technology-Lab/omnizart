@@ -146,7 +146,7 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
     cookie = resp.getheader("Set-Cookie")
     if cookie is None:
         # Actually a small file, without download confirmation.
-        download(url, save_path=save_path, unzip=unzip)
+        download(url, save_path=save_path, save_name=save_name, unzip=unzip)
         return
 
     # Parse the file size from the returned page content.
@@ -179,5 +179,6 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
 if __name__ == "__main__":
     # URL = "https://drive.google.com/uc?export=download&id=1GVqlEq6we0xS9DoPK3vxCqpF1ZymxuGb"
     URL = "https://drive.google.com/uc?export=download&id=1sjv9mpLFSjFeJsr8vhtqp80DRnOO5ZYJ"
-    download(URL)
+    URL = "https://drive.google.com/uc?export=download&id=1nYq2FB5LQfYJoXyYZl3XcklpJkCOnwhV"
+    # download(URL)
     download_large_file_from_google_drive(URL)
