@@ -36,3 +36,77 @@ General:
                 Description: Path for storing the extracted feature. Default to the path under the dataset folder.
                 Type: String
                 Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: chord
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/chord
+            NumEncAttnBlocks:
+                Description: Number of attention blocks for encoder.
+                Type: Integer
+                Value: 2
+            NumDecAttnBlocks:
+                Description: Number of attention blocks for decoder.
+                Type: Integer
+                Value: 2
+            FreqSize:
+                Description: Available size on the frequency axis to be seen.
+                Type: Integer
+                Value: 24
+            EncInputEmbSize:
+                Description: Embedding size of the encoder's input.
+                Type: Integer
+                Value: 512
+            DecInputEmbSize:
+                Description: Embedding size of the decoder's input.
+                Type: Integer
+                Value: 512
+            DropoutRate:
+                Description: Dropout rate of all dropout layers.
+                Type: Float
+                Value: 0.6
+            AnnealingRate:
+                Description: To be added...
+                Type: Float
+                Value: 1.1
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 10
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 1000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 500
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 32
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 32
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 4
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.0001
+            LearningRateDecay:
+                Description: Decaying rate of learning rate per epoch.
+                Type: Float
+                Value: 0.96

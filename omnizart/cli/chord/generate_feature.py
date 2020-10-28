@@ -8,6 +8,7 @@ from omnizart.setting_loaders import ChordSettings
 @click.command()
 @add_common_options(COMMON_GEN_FEATURE_OPTIONS)
 def generate_feature(dataset_path, output_path, num_threads):
+    """Extract the feature of the whole dataset for training."""
     settings = ChordSettings()
 
     if output_path is not None:
