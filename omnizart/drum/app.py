@@ -17,8 +17,7 @@ from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import DrumSettings
-from omnizart.train import train_epochs, get_train_val_feat_file_list
-from omnizart.callbacks import EarlyStopping, ModelCheckpoint
+from omnizart.train import get_train_val_feat_file_list
 from omnizart.constants.datasets import PopStructure
 from omnizart.constants.feature import NOTE_PRIORITY_ARRAY
 
@@ -69,8 +68,14 @@ class DrumTranscription(BaseTranscription):
 
         logger.info("Infering MIDI...")
         midi = inference(pred, mini_beat_arr)
-        logger.info("Finished")
-        return pred, midi
+
+        if output is not None:
+            save_to = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            midi.write(save_to)
+            logger.info("MIDI file have been written to %s", save_to)
+
+        logger.info("Transcription finished")
+        return midi
 
     def generate_feature(self, dataset_path, drum_settings=None, num_threads=3):
         """Extract the feature of the whole dataset.
@@ -183,11 +188,13 @@ class DrumTranscription(BaseTranscription):
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
         train_dataset = get_dataset(
             feature_files=train_feat_files,
+            epochs=settings.training.epoch,
             batch_size=settings.training.batch_size,
             steps=settings.training.steps
         )
         val_dataset = get_dataset(
             feature_files=val_feat_files,
+            epochs=settings.training.epoch,
             batch_size=settings.training.val_batch_size,
             steps=settings.training.val_steps
         )
@@ -201,8 +208,7 @@ class DrumTranscription(BaseTranscription):
             )
 
         optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
-        # model.compile(optimizer=optimizer, loss=_loss_func, metrics=["accuracy"])
-        model.compile(optimizer=optimizer, loss=tf.keras.losses.BinaryCrossentropy(), metrics=["accuracy"])
+        model.compile(optimizer=optimizer, loss=loss_func, metrics=["accuracy"])
 
         logger.info("Resolving model output path")
         if model_name is None:
@@ -213,23 +219,25 @@ class DrumTranscription(BaseTranscription):
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
+        logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
         callbacks = [
-            EarlyStopping(patience=settings.training.early_stop),
-            ModelCheckpoint(model_save_path, save_weights_only=True)
+            tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
+            tf.keras.callbacks.ModelCheckpoint(jpath(model_save_path, "weights.h5"), save_weights_only=True)
         ]
         logger.info("Callback list: %s", callbacks)
 
         logger.info("Start training")
-        history = train_epochs(
-            model,
+        history = model.fit(
             train_dataset,
-            validate_dataset=val_dataset,
+            validate_data=val_dataset,
             epochs=settings.training.epoch,
-            steps=settings.training.steps,
-            val_steps=settings.training.val_steps,
-            callbacks=callbacks
+            steps_per_epoch=settings.training.steps,
+            validation_steps=settings.training.val_steps,
+            callbacks=callbacks,
+            use_multiprocessing=True,
+            workers=8
         )
         return model_save_path, history
 
@@ -339,24 +347,15 @@ def _gen_wav_label_path_mapping(label_paths):
     return mapping
 
 
-def _loss_func(target, pred, soft_loss_range=20):
+def loss_func(target, pred, soft_loss_range=20):
     recon_error = tf.abs(target*100 - pred)  # noqa: E226
-    recon_error_soft = tf.compat.v1.where(
-        recon_error <= soft_loss_range * tf.ones_like(recon_error),
+    recon_error_soft = tf.where(
+        recon_error <= soft_loss_range,
         tf.zeros_like(recon_error),
-        recon_error - soft_loss_range * tf.ones_like(recon_error)
+        recon_error - soft_loss_range
     )
 
     recon_error_soft_reduced = tf.reduce_mean(recon_error_soft, axis=[0, 2])
     note_priority_arr = tf.constant(NOTE_PRIORITY_ARRAY, dtype=recon_error.dtype)
     recon_error_soft_flat = recon_error_soft_reduced * note_priority_arr
     return tf.reduce_mean(input_tensor=recon_error_soft_flat)
-
-
-if __name__ == "__main__":
-    audio_path = "checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
-    audio_path = "checkpoints/ytd_audio_00088_TRBHGWP128E0793AD8.mp3.wav"
-    # audio_path = "checkpoints/Warriyo - Mortals (feat. Laura Brehm) [NCS Release].wav"
-    app = DrumTranscription()
-    pred = app.transcribe(audio_path, model_path="/data/omnizart/bootstrap_data/drum/checkpoints/gt_model")
-    # app.train("/host/home/76_pop_rhythm/drum_train_feature", model_name="test_drum")

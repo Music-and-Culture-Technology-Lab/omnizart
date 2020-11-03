@@ -23,7 +23,7 @@ class FeatureLoader:
             self.hdf_files = feature_files
 
         if len(self.hdf_files) == 0:
-            logger.warn("Warning! No feature files found in the given path")
+            logger.warning("Warning! No feature files found in the given path")
 
         self.hdf_refs = {hdf: h5py.File(hdf, "r") for hdf in self.hdf_files}
         self.num_samples = num_samples
@@ -31,7 +31,7 @@ class FeatureLoader:
 
         # Initialize indexes index-to-file mapping to ensure all samples
         # will be visited during training.
-        length_map = {hdf: len(hdf) for hdf in self.hdf_refs}
+        length_map = {hdf: len(hdf["feature"]) for hdf in self.hdf_refs}
         self.total_length = sum(length_map.values())
         self.start_idxs = np.arange(self.total_length, step=self.mini_beat_per_seg)
         self.idx_to_hdf_map = {}
@@ -51,6 +51,9 @@ class FeatureLoader:
 
         logger.info("Total samples: %s", len(self.start_idxs))
 
+    def __len__(self):
+        return len(self.start_idxs)
+
     def __iter__(self):
         for _ in range(self.num_samples):
             if len(self.start_idxs) == 0:
@@ -60,7 +63,7 @@ class FeatureLoader:
                 np.random.shuffle(self.start_idxs)
 
             start_idx = self.start_idxs[0]
-            self.start_idxs = np.delete(self.start_idxs, 0)
+            self.start_idxs = self.start_idxs[1:]  # Remove the first element
             hdf, slice_idx = self.idx_to_hdf_map[start_idx]
             hdf_ref = self.hdf_refs[hdf]
             feat = hdf_ref["feature"][slice_idx:slice_idx+self.mini_beat_per_seg]  # noqa: E226
@@ -71,7 +74,7 @@ class FeatureLoader:
             yield feature, label
 
 
-def get_dataset(feature_folder=None, feature_files=None, batch_size=8, steps=100):
+def get_dataset(feature_folder=None, feature_files=None, epochs=20, batch_size=32, steps=100):
     """Get the dataset instance.
 
     A quick way to get and setup the dataset instance for training/validation.
@@ -99,7 +102,7 @@ def get_dataset(feature_folder=None, feature_files=None, batch_size=8, steps=100
     loader = FeatureLoader(
         feature_folder=feature_folder,
         feature_files=feature_files,
-        num_samples=batch_size*steps,  # noqa: E226
+        num_samples=epochs*batch_size*steps,  # noqa: E226
     )
 
     def gen_wrapper():
@@ -107,15 +110,9 @@ def get_dataset(feature_folder=None, feature_files=None, batch_size=8, steps=100
             yield data
 
     return tf.data.Dataset.from_generator(
-        gen_wrapper,
-        output_types=(tf.float32, tf.float32),
-        output_shapes=([120, 120, 4], [4, 13])) \
+            gen_wrapper,
+            output_types=(tf.float32, tf.float32),
+            output_shapes=([120, 120, 4], [4, 13])
+        ) \
         .batch(batch_size, drop_remainder=True) \
         .prefetch(tf.data.experimental.AUTOTUNE)
-
-
-if __name__ == "__main__":
-    feat_files = [
-        "/data/omnizart/bootstrap_data/drum/feature/ytd_audio_00002_TRGDXTK128F14584C1.hdf"
-    ]
-    loader = iter(FeatureLoader(feature_files=feat_files))
