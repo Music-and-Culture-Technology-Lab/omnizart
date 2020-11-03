@@ -121,6 +121,10 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     ----------
     url: URL
         Could be a full google drive download url or the file ID.
+    file_length: float
+        In bytes. If the length can't be retrieved from the response header, but can be
+        obtained by other approaches, you can explicitly specify the length for progress
+        visualization.
     save_path: Path
         Path to store the downloaded file.
     save_name: str
