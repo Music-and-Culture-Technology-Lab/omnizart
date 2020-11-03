@@ -102,6 +102,8 @@ class MusicTranscription(BaseTranscription):
             logger.info("MIDI file has been written to %s", save_to)
         if os.environ["LOG_LEVEL"] == "debug":
             dump_pickle({"pred": pred}, jpath(save_to, "debug_pred.pickle"))
+
+        logger.info("Transcription finished")
         return midi
 
     def generate_feature(self, dataset_path, music_settings=None, num_threads=4):
@@ -295,6 +297,7 @@ class MusicTranscription(BaseTranscription):
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
+        logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
         callbacks = [
