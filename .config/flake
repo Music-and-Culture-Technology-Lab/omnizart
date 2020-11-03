@@ -9,4 +9,5 @@ per-file-ignores =
     omnizart/feature/cfp.py: E226 \
     omnizart/constants/feature.py: E266 \
     omnizart/music/app.py: E402 \
-    omnizart/drum/app.py: E402
+    omnizart/drum/app.py: E402 \
+    omnizart/drum/dataset.py: E126,E121
