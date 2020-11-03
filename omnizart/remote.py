@@ -16,7 +16,7 @@ import http.cookiejar
 SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "TB")]
 
 
-def format_byte(size, digit=3):
+def format_byte(size, digit=2):
     """Format the given byte size into human-readable string."""
     rounding = f".{digit}f"
     for idx, (bound, unit) in enumerate(SIZE_MAPPING):
@@ -111,7 +111,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
             print("")
 
 
-def download_large_file_from_google_drive(url, save_path="./", save_name=None, unzip=False):
+def download_large_file_from_google_drive(url, file_length=None, save_path="./", save_name=None, unzip=False):
     """Google Drive file downloader.
 
     Download function dedicated for Google Drive files. Mainly to deal with download
@@ -146,34 +146,37 @@ def download_large_file_from_google_drive(url, save_path="./", save_name=None, u
     cookie = resp.getheader("Set-Cookie")
     if cookie is None:
         # Actually a small file, without download confirmation.
-        download(url, save_path=save_path, save_name=save_name, unzip=unzip)
+        download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
         return
 
-    # Parse the file size from the returned page content.
-    page = []
-    while True:
-        data = resp.read(2**15)
-        if not data:
-            break
-        page.append(data.decode("UTF-8"))
-    page = "".join(page)
-    hack_idx_start = page.find("(") + 1
-    hack_idx_end = page.find(")")
-    file_size = page[hack_idx_start:hack_idx_end]
+    if file_length is None:
+        # Parse the file size from the returned page content.
+        page = []
+        while True:
+            data = resp.read(2**15)
+            if not data:
+                break
+            page.append(data.decode("UTF-8"))
+        page = "".join(page)
+        hack_idx_start = page.find("(") + 1
+        hack_idx_end = page.find(")")
+        file_size = page[hack_idx_start:hack_idx_end]
 
-    # Parse file size as byte
-    mapping = {"M": 2**20, "G": 2**30}
-    for key, val in mapping.items():
-        idx = file_size.find(key)
-        if idx != -1:
-            size = float(file_size[:idx]) * val
-            break
+        # Parse file size as byte
+        mapping = {"M": 2**20, "G": 2**30}
+        for key, val in mapping.items():
+            idx = file_size.find(key)
+            if idx != -1:
+                file_length = float(file_size[:idx]) * val
+                break
 
     cols = cookie.split("; ")
     warn_col = [col for col in cols if "download_warning" in col][0]
     confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
-    download(url, file_length=size, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip)
+    download(
+        url, file_length=file_length, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip
+    )
 
 
 if __name__ == "__main__":

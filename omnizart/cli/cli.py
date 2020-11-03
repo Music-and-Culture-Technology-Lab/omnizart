@@ -9,9 +9,12 @@ Examples
     omnizart --help
     omnizart music --help
 """
+import os
+
 import click
 
 import omnizart.constants.datasets as dset
+from omnizart import MODULE_PATH
 from omnizart.remote import download, download_large_file_from_google_drive
 from omnizart.utils import ensure_path_exists
 from omnizart.cli.music import music
@@ -47,12 +50,45 @@ def download_dataset(dataset, output, unzip):
         download(url, save_path=output, unzip=unzip)
 
 
+@click.command()
+def download_checkpoints():
+    """Downlaod the archived checkpoints of different models."""
+    CHECKPOINTS = {
+        "chord_v1": {
+            "fid": "1QX5bBoYzZyC2fvK26YEtF_Hqt3DzhiHk",
+            "save_as": "checkpoints/chord/chord_v1/weights.data-00000-of-00001",
+            "file_length": 132717707
+        },
+        "drum_keras": {
+            "fid": "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
+            "save_as": "checkpoints/drum/drum_keras/weights.h5",
+            "file_length": 31204608
+        },
+        "music_pop": {
+            "fid": "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
+            "save_as": "checkpoints/music/music_pop/weights.h5",
+            "file_length": 31892440
+        },
+        "music_piano": {
+            "fid": "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
+            "save_as": "checkpoints/music/music_piano/weights.h5",
+            "file_length": 50738464
+        }
+    }
+
+    for checkpoint, info in CHECKPOINTS.items():
+        print(f"Downloading checkpoints: {checkpoint}")
+        save_name = os.path.basename(info["save_as"])
+        save_path = os.path.dirname(info["save_as"])
+        save_path = os.path.join(MODULE_PATH, save_path)
+        download_large_file_from_google_drive(
+            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name
+        )
+
+
 entry.add_command(music)
 entry.add_command(drum)
 entry.add_command(chord)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)
-
-
-if __name__ == "__main__":
-    entry()
+entry.add_command(download_checkpoints)
