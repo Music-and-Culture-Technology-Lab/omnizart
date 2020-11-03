@@ -40,22 +40,7 @@ activate_venv_with_venv() {
     source .venv/bin/activate
 }
 
-pre_install() {
-    # Need to upgrade pip first, or latter installation may fail.
-    pip install --upgrade pip
-
-    # Some packages have some problem installing with poetry.
-    # Thus manually install them here.
-    pip install setuptools==50.0.3
-}
-
 install_with_poetry() {
-    pre_install
-    if ! hash poetry 2>/dev/null; then
-        echo "Installing poetry..."
-        pip install poetry
-    fi
-    
     if [ "$USE_VENV" = "false" ]; then
         poetry config virtualenvs.create false
     fi
@@ -63,8 +48,6 @@ install_with_poetry() {
 }
 
 install_with_pip() {
-    pre_install
-    
     # Install some tricky packages that cannot be resolved by setup.py
     # and requirements.txt.
     pip install madmom --use-feature=2020-resolver
@@ -84,26 +67,37 @@ check_if_venv_activated() {
 }
 
 
+# ------------ Start Installation ------------ #
+# Need to upgrade pip first, or latter installation may fail.
+pip install --upgrade pip
+
+# Some packages have some problem installing with poetry.
+# Thus manually install them here.
+pip install --upgrade setuptools
+
 if [ "$VENV_APPROACH" = "poetry"  ]; then
-    install_with_poetry
-    if [ "$USE_VENV" = "true" ]; then
-        activate_venv_with_poetry
-        check_if_venv_activated
+    # Check if poetry is installed
+    if ! hash poetry 2>/dev/null; then
+        echo "Installing poetry..."
+        pip install poetry
     fi
 
-    echo -e "\nTo activate the environment, run the following command:"
-    echo "source \$(dirname \$(poetry run which python))/activate"
+    if [ "$USE_VENV" = "true" ]; then
+        activate_venv_with_venv
+        check_if_venv_activated
+    fi
+    install_with_poetry
 elif [ "$VENV_APPROACH" = "venv" ]; then
     if [ "$USE_VENV" = "venv" ]; then
         activate_venv_with_venv
         check_if_venv_activated
     fi
     install_with_pip
-
-    echo -e "\nTo activate the environment, run the following command:"
-    echo "source .venv/bin/activate"
 else
     >$2 echo "Unknown virtualenv method: $VENV_APPROACH"
     exit 1
 fi
 
+omnizart download-checkpoints
+
+echo -e "\nTo activate the environment, run the following command:\n source .venv/bin/activate"
