@@ -14,6 +14,8 @@ General:
         SubType: [String, String]
         Value:
             Piano: ./checkpoints/music/music_piano
+            Pop: ./checkpoints/music/music_pop
+            Stream: ./checkpoints/music/music_note_stream
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -82,6 +84,11 @@ General:
                 Description: Path to save the trained model.
                 Type: String
                 Value: ./checkpoints/music
+            ModelType:
+                Description: Default model type to be used for training
+                Type: String
+                Value: attn
+                Choices: ["aspp", "attn"]
     Inference:
         Description: Default settings when infering notes.
         Settings:
