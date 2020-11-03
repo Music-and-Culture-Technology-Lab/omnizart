@@ -328,3 +328,10 @@ class McGillBillBoard:  # pylint: disable=R0903
 
     #: Dataset URL
     url = "https://drive.google.com/uc?export=download&id=1_K_Fof4zt1IQvs1aDmf-5wY0wHqgcPlC"
+
+
+class BeethovenSonatas:  # pylint: disable=R0903
+    """Constant settings of BPS-FH dataset"""
+
+    #: Hosted dataset download url.
+    url = "https://drive.google.com/uc?export=download&id=1nYq2FB5LQfYJoXyYZl3XcklpJkCOnwhV"
