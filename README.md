@@ -6,6 +6,8 @@
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
+Comprehensive usage and API references can be found from the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
+
 # About
 [Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leveraging cutting-edge AI techiniques.
 
@@ -13,14 +15,19 @@ Combines all the hard works developed by everyone in MCTLab into a single comman
 | Commands | transcribe         | train              | evaluate | Description                       |
 |----------|--------------------|--------------------|----------|-----------------------------------|
 | music    | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes notes of instruments. |
-| drum     |                    |                    |          | Transcribes drum tracks.          |
+| drum     | :heavy_check_mark: | :interrobang:      |          | Transcribes drum tracks.          |
 | vocal    |                    |                    |          | Transcribes pitch of vocal.       |
-| chord    |                    |                    |          | Transcribes chord progression.    |
+| chord    | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes chord progression.    |
 | beat     |                    |                    |          | Transcribes beat position.        |
+
+**NOTES** Though the implementation of training the drum model is 90% complete, but there still exists some
+invisible bugs that cause the training fails to converge compared to the author's original implmentation.
 
 Example usage
 <pre>
-omnizart transcribe music <i>path/to/audio</i> --model-path <i>path/to/model</i>
+omnizart transcribe music <i>path/to/audio</i>
+omnizart transcribe chord <i>path/to/audio</i>
+omnizart transcribe drum <i>path/to/audio</i>
 </pre>
 
 For training a new model, download the dataset first and follow steps described below.
