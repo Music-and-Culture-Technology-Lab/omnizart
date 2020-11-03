@@ -1,3 +1,0 @@
-*.h5 filter=lfs diff=lfs merge=lfs -text
-*.hdf filter=lfs diff=lfs merge=lfs -text
-tests/resource/drum_test_data.pickle !text !filter !merge !diff
