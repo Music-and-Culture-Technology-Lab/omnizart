@@ -47,9 +47,13 @@ class MusicTranscription(BaseTranscription):
         super().__init__(MusicSettings, conf_path=conf_path)
         self.mode_inst_mapping = {
             "Piano": MUSICNET_INSTRUMENT_PROGRAMS,
+            "Stream": MUSICNET_INSTRUMENT_PROGRAMS,
             "Pop": POP_INSTRUMENT_PROGRAMES
         }
-        self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
+        self.custom_objects = {
+            "MultiHeadAttention": MultiHeadAttention,
+            "multihead_attention": MultiHeadAttention
+        }
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe notes and instruments of the given audio.
@@ -100,7 +104,7 @@ class MusicTranscription(BaseTranscription):
             save_to = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
             midi.write(save_to)
             logger.info("MIDI file has been written to %s", save_to)
-        if os.environ["LOG_LEVEL"] == "debug":
+        if os.environ.get("LOG_LEVEL", "") == "debug":
             dump_pickle({"pred": pred}, jpath(save_to, "debug_pred.pickle"))
 
         logger.info("Transcription finished")
@@ -359,6 +363,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
             try:
                 with h5py.File(out_hdf, "w") as out_f:
                     out_f.create_dataset("feature", data=feature)
+                    saved = True
             except OSError as exp:
                 logger.warning("OSError occurred, retrying %d times. Reason: %s", retry + 1, str(exp))
         if not saved:
