@@ -5,6 +5,7 @@ from omnizart.feature.cfp import extract_cfp
 from omnizart.feature.hcfp import extract_hcfp
 from omnizart.feature.cqt import extract_cqt
 from omnizart.feature.beat_for_drum import extract_mini_beat_from_audio_path
+from omnizart.feature.chroma import extract_chroma
 
 
 def extract_cfp_feature(audio_path, harmonic=False, harmonic_num=6, **kwargs):
@@ -24,7 +25,7 @@ def get_frame_by_time(time_sec, sampling_rate=44100, hop_size=256):
     return int(round(time_sec * sampling_rate / hop_size))
 
 
-def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
+def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
     """Extract patched CQT feature.
 
     Leverages mini-beat information to determine the bound of each
@@ -32,7 +33,7 @@ def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
 
     Parameters
     ----------
-    input_audio: Path
+    audio_path: Path
         Path to the wav file.
 
     Returns
@@ -46,8 +47,8 @@ def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
     omnizart.feature.cqt.extract_cqt: Function for extracting CQT feature.
     omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path: Function for extracting mini-beat.
     """
-    cqt_ext = extract_cqt(input_audio, sampling_rate=sampling_rate, a_hop=hop_size)
-    mini_beat_arr = extract_mini_beat_from_audio_path(input_audio, sampling_rate=sampling_rate)
+    cqt_ext = extract_cqt(audio_path, sampling_rate=sampling_rate, a_hop=hop_size)
+    mini_beat_arr = extract_mini_beat_from_audio_path(audio_path, sampling_rate=sampling_rate)
 
     m_beat_cqt_patch_list = []
     for m_beat_t_cur in mini_beat_arr:
@@ -69,3 +70,27 @@ def extract_patch_cqt(input_audio, sampling_rate=44100, hop_size=256):
 
     # convert cqt patch into cqt array
     return np.array(m_beat_cqt_patch_list), mini_beat_arr
+
+
+def extract_chord_chroma(audio_path, segment_width=21, segment_hop=5, num_steps=100):
+    _, chroma = extract_chroma(audio_path)
+
+    pad_size = segment_width // 2
+    chroma_pad = np.pad(chroma, ((pad_size, pad_size), (0, 0)), constant_values=0)
+    segments = np.array([
+        chroma_pad[i-pad_size:i+pad_size+1] for i in range(pad_size, pad_size+len(chroma), segment_hop)  # noqa:E226
+    ])
+    segments = segments.reshape([-1, segment_width * chroma.shape[1]])
+
+    pad_size = 0 if len(segments)/num_steps == 0 else num_steps - len(segments)%num_steps  # noqa:E226,E228
+    if pad_size != 0:
+        segments = np.pad(segments, ((0, pad_size), (0, 0)), "constant", constant_values=0)
+
+    feat_size = segments.shape[1]
+    seq_hop = num_steps // 2
+    num_seqs = int((len(segments) - num_steps) / seq_hop) + 1
+    st0, st1 = segments.strides
+    out = np.lib.stride_tricks.as_strided(
+        segments, shape=(num_seqs, num_steps, feat_size), strides=(st0 * seq_hop, st0, st1)
+    )
+    return out
