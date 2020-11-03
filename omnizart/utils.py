@@ -11,6 +11,10 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import yaml
 import librosa
 import jsonschema
+import pretty_midi
+import scipy.io.wavfile as wave
+
+from omnizart.constants.midi import SOUNDFONT_PATH
 
 
 def get_logger(name=None, level="warn"):
@@ -335,3 +339,18 @@ def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_
             executor.shutdown()
             raise exp
     executor.shutdown()
+
+
+def synth_midi(midi_path, sampling_rate=44100, out_path=None):
+    """Synthesize MIDI into wav audio."""
+    midi = pretty_midi.PrettyMIDI(midi_path)
+    raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=SOUNDFONT_PATH)
+    if out_path is not None:
+        filename = os.path.basename(midi_path).replace(".mid", ".wav")
+        ensure_path_exists(out_path)
+        out_path = os.path.join(out_path, filename)
+        wave.write(out_path, sampling_rate, raw_wav)
+        return out_path
+
+    wave.write(midi_path.replace(".mid", ".wav"), sampling_rate, raw_wav)
+    return midi_path.replace(".mid", ".wav")
