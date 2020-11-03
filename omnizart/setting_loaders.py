@@ -155,6 +155,8 @@ class ChordSettings(Settings):
         self.checkpoint_path: dict = None
         self.feature = self.ChordFeature()
         self.dataset = self.ChordDataset()
+        self.model = self.ChordModel()
+        self.training = self.ChordTraining()
 
         super().__init__(conf_path=conf_path)
 
@@ -170,3 +172,28 @@ class ChordSettings(Settings):
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordModel():
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
+            self.num_enc_attn_blocks: int = None
+            self.num_dec_attn_blocks: int = None
+            self.freq_size: int = None
+            self.enc_input_emb_size: int = None
+            self.dec_input_emb_size: int = None
+            self.dropout_rate: float = None
+            self.annealing_rate: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordTraining():
+        def __init__(self):
+            self.epoch: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.early_stop: int = None
+            self.init_learning_rate: float = None
+            self.learning_rate_decay: float = None
