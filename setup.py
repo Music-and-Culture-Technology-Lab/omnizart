@@ -3,7 +3,9 @@ from setuptools import setup
 
 packages = \
 ['omnizart',
+ 'omnizart.chord',
  'omnizart.cli',
+ 'omnizart.cli.chord',
  'omnizart.cli.drum',
  'omnizart.cli.music',
  'omnizart.constants',
@@ -15,12 +17,10 @@ packages = \
 
 package_data = \
 {'': ['*'],
- 'omnizart': ['checkpoints/drum/drum_1p5/*',
-              'checkpoints/drum/drum_2p5/*',
-              'checkpoints/drum/drum_final/*',
-              'checkpoints/music/music_piano/*',
+ 'omnizart': ['checkpoints/music/music_piano/*',
               'defaults/*',
-              'resource/*']}
+              'resource/*',
+              'resource/vamp/*']}
 
 install_requires = \
 ['click>=7.1.2,<8.0.0',
@@ -33,7 +33,8 @@ install_requires = \
  'pyfluidsynth>=1.2.5,<2.0.0',
  'pyyaml>=5.3.1,<6.0.0',
  'tensorflow>=2.3.0,<3.0.0',
- 'tqdm>=4.49.0,<5.0.0']
+ 'tqdm>=4.49.0,<5.0.0',
+ 'vamp>=1.1.0,<2.0.0']
 
 entry_points = \
 {'console_scripts': ['omnizart = omnizart.cli.cli:entry']}

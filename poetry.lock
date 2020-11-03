@@ -1212,6 +1212,14 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [[package]]
+category = "main"
+description = "Use Vamp plugins for audio feature analysis."
+name = "vamp"
+optional = false
+python-versions = "*"
+version = "1.1.0"
+
+[[package]]
 category = "dev"
 description = "Measures the displayed width of unicode strings in a terminal"
 name = "wcwidth"
@@ -1272,7 +1280,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "c85e5a911c52633fb3a50294cc7919c77f550091db168c0bac4ac0bcb6e07191"
+content-hash = "cf00416662c2cb8df43f5d08a292fb4fa548b6b44387981e28c46929177beb00"
 lock-version = "1.0"
 python-versions = "^3.6"
 
@@ -2091,6 +2099,11 @@ typed-ast = [
 urllib3 = [
     {file = "urllib3-1.25.10-py2.py3-none-any.whl", hash = "sha256:e7983572181f5e1522d9c98453462384ee92a0be7fac5f1413a1e35c56cc0461"},
     {file = "urllib3-1.25.10.tar.gz", hash = "sha256:91056c15fa70756691db97756772bb1eb9678fa585d9184f24534b100dc60f4a"},
+]
+vamp = [
+    {file = "vamp-1.1.0-cp27-none-macosx_10_10_x86_64.whl", hash = "sha256:fadca706892260c283729be2ce714848bca9ee575fde46e4c1190e8d04cc13c6"},
+    {file = "vamp-1.1.0-cp27-none-win32.whl", hash = "sha256:e6c0a1dd325f934f26ea7b2c5dc2d3759cd08d295004a8951a4ddc32955b9e35"},
+    {file = "vamp-1.1.0.tar.gz", hash = "sha256:d40e0916e958e2806d37920f903c2518cc46959a4f21e020737b6a48f6e7e82d"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
