@@ -9,6 +9,7 @@ Rewrite in tensorflow 2.0.
 import functools
 import operator
 
+import numpy as np
 import tensorflow as tf
 
 from omnizart.models.utils import shape_list
@@ -309,9 +310,6 @@ def dot_product_attention(
         mixed precision.
     weight_dtype:
         The dtype weights are stored in when using mixed precision
-    hard_attention_k: int
-        If > 0 triggers hard attention (picking top-k)
-        hard_attention_k <= 0.
 
     Returns
     -------
@@ -396,3 +394,148 @@ def local_attention_2d(q, k, v, query_shape=(8, 16), memory_flange=(8, 16), name
         # Remove the padding if introduced.
         output = tf.slice(output, [0, 0, 0, 0, 0], [-1, -1, v_shape[2], v_shape[3], -1])
         return output
+
+
+def positional_encoding(batch_size, timesteps, n_units=512, zero_pad=False, scale=False):
+    pos_indice = tf.tile(tf.expand_dims(tf.range(timesteps), 0), [batch_size, 1])
+
+    # First part of the PE function: sin and cos argument
+    pos_enc = np.array([
+        [pos / np.power(10000, 2*i/n_units) for i in np.arange(n_units, dtype=np.float32)]  # noqa: E226
+        for pos in np.arange(timesteps, dtype=np.float32)
+    ])
+
+    # Second part, apply the cosine to even columns and sin to odds.
+    pos_enc[:, 0::2] = np.sin(pos_enc[:, 0::2])
+    pos_enc[:, 1::2] = np.cos(pos_enc[:, 1::2])
+
+    # Convert to tensor
+    pos_enc = tf.convert_to_tensor(pos_enc, dtype=tf.float32)
+
+    if zero_pad:
+        pos_enc = tf.concat([tf.zeros(shape=[1, n_units]), pos_enc[1:, :]], 0)
+    outputs = tf.nn.embedding_lookup(pos_enc, pos_indice)
+
+    if scale:
+        outputs = outputs * n_units**0.5
+
+    return outputs
+
+
+def relative_positional_encoding(n_steps, n_units=512, max_dist=2):
+    n_vectors = 2 * max_dist + 1
+    center = n_vectors // 2
+    pos_enc_initializer = tf.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform")
+    pos_enc = pos_enc_initializer(shape=(n_vectors, n_units))
+
+    num_left = [min(max_dist, i) for i in range(n_steps)]
+    num_right = num_left[::-1]
+    orig = tf.expand_dims(pos_enc[center], 0)
+    pos_enc_pad = []
+    for idx, n_left, n_right in zip(range(n_steps), num_left, num_right):
+        left = pos_enc[(center - n_left):center]
+        right = pos_enc[(center + 1):(center + n_right + 1)]
+        mix = tf.concat([left, orig, right], 0)
+
+        n_left_pad = idx - n_left
+        n_right_pad = n_steps - idx - n_right - 1
+        if n_left_pad > 0:
+            mix = tf.concat([tf.reshape(tf.tile(mix[0], [n_left_pad]), [n_left_pad, n_units]), mix], 0)
+        if n_right_pad > 0:
+            mix = tf.concat([mix, tf.reshape(tf.tile(mix[-1], [n_right_pad]), [n_right_pad, n_units])], 0)
+        pos_enc_pad.append(mix)
+    return tf.stack(pos_enc_pad)  # [n_steps, n_steps, n_units]
+
+
+class MultiHeadAttention(tf.keras.layers.Layer):
+    """Multi-head attention keras layer wrapper"""
+    def __init__(
+        self,
+        n_units=None,
+        n_heads=8,
+        dropout_rate=0,
+        activation_func="relu",
+        causal=False,
+        relative_position=False,
+        max_dist=16,
+        self_mask=False
+    ):
+
+        super().__init__()
+
+        self.n_units = n_units
+        self.n_heads = n_heads
+        self.causal = causal
+        self.dropout_rate = dropout_rate
+        self.activation_func = activation_func
+        self.relative_position = relative_position
+        self.max_dist = max_dist
+        self.self_mask = self_mask
+
+        self.q_emb_dense = tf.keras.layers.Dense(n_units, activation=activation_func)
+        self.k_emb_dense = tf.keras.layers.Dense(n_units, activation=activation_func)
+        self.v_emb_dense = tf.keras.layers.Dense(n_units, activation=activation_func)
+        self.out_dense = tf.keras.layers.Dense(n_units, activation=activation_func)
+        self.dropout = tf.keras.layers.Dropout(dropout_rate)
+        self.layer_norm = tf.keras.layers.LayerNormalization()
+
+    def call(self, q, k, v):  # pylint: disable=W0221
+        q_emb = self.q_emb_dense(q)
+        k_emb = self.k_emb_dense(k)
+        v_emb = self.v_emb_dense(v)
+
+        q_heads = tf.concat(tf.split(q_emb, self.n_heads, 2), 0)
+        k_heads = tf.concat(tf.split(k_emb, self.n_heads, 2), 0)
+        v_heads = tf.concat(tf.split(v_emb, self.n_heads, 2), 0)
+
+        attn_weights = tf.matmul(q_heads, tf.transpose(k_heads, perm=[0, 2, 1]))
+        if self.relative_position:
+            tk, dk = shape_list(k_heads)[1:]
+            rel_pos_enc_k = relative_positional_encoding(n_steps=tk, n_units=dk, max_dist=self.max_dist)
+            rel_pos_enc_k = tf.matmul(tf.transpose(a=q_heads, perm=[1, 0, 2]), rel_pos_enc_k, transpose_b=True)
+            rel_pos_enc_k = tf.transpose(a=rel_pos_enc_k, perm=[1, 0, 2])
+            attn_weights += rel_pos_enc_k
+
+        scaled_attn_weights = attn_weights / shape_list(k_heads)[-1]**0.5
+        if self.causal:
+            diag_vals = tf.ones_like(scaled_attn_weights[0])
+            tril_mask = tf.linalg.LinearOperatorLowerTriangular(diag_vals).to_dense()
+            tril_paddings = tf.ones_like(tril_mask) * (-2**32 + 1)
+            tril_masking = lambda x: tf.where(tril_mask == 0, tril_paddings, x)
+            scaled_attn_weights = tf.map_fn(tril_masking, scaled_attn_weights)
+
+        if self.self_mask:
+            diag = tf.zeros_like(scaled_attn_weights[:, :, 0])
+            scaled_attn_weights = tf.linalg.set_diag(input=scaled_attn_weights, diagonal=diag)
+
+        exp_attn_weights = tf.nn.softmax(scaled_attn_weights)
+        exp_attn_weights = self.dropout(exp_attn_weights)
+
+        outputs = tf.matmul(exp_attn_weights, v_heads)
+        if self.relative_position:
+            tv, dv = shape_list(v_heads)[1:]
+            rel_pos_enc_v = relative_positional_encoding(n_steps=tv, n_units=dv, max_dist=self.max_dist)
+            rel_pos_enc_v = tf.matmul(tf.transpose(a=exp_attn_weights, perm=[1, 0, 2]), rel_pos_enc_v)
+            rel_pos_enc_v = tf.transpose(a=rel_pos_enc_v, perm=[1, 0, 2])
+            outputs += rel_pos_enc_v
+
+        outputs = tf.concat(tf.split(outputs, self.n_heads, 0), 2)  # Restore shape
+        outputs = self.out_dense(outputs)
+        outputs += q  # Residual connection
+        return self.layer_norm(outputs)
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                "n_heads": self.n_heads,
+                "n_units": self.n_units,
+                "dropout_rate": self.dropout_rate,
+                "activation_func": self.activation_func,
+                "causal": self.causal,
+                "relative_position": self.relative_position,
+                "max_dist": self.max_dist,
+                "self_mask": self.self_mask
+            }
+        )
+        return config

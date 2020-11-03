@@ -351,6 +351,6 @@ def drum_model(out_classes, mini_beat_per_seg, res_block_num=3, channels=64, spe
                                         name='mdl_nn_mlp_of3')(dense_4)
 
         out = dense_5*70 + 50  # noqa: E226
-        out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg, 1])
+        out = tf.reshape(out, shape=[-1, out_classes, mini_beat_per_seg])
 
         return tf.keras.Model(inputs=inp_wrap, outputs=out)
