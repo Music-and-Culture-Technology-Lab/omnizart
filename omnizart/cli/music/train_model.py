@@ -35,7 +35,7 @@ click.option = partial(click.option, show_default=True)
     default="note-stream",
 )
 @click.option(
-    "-s",
+    "-n",
     "--loss-function",
     help="Detemine which loss function to use",
     type=click.Choice(["focal", "smooth", "bce"]),
