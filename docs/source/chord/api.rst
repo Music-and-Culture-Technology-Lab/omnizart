@@ -21,21 +21,16 @@ Feature
 
 Dataset
 #######
-
-
-Inference
-#########
-
-
-Labels
-######
-.. automodule:: omnizart.chord.labels
+.. automodule:: omnizart.chord.dataset
     :members:
     :undoc-members:
 
 
-Prediction
-##########
+Inference
+#########
+.. automodule:: omnizart.chord.inference
+    :members:
+    :undoc-members:
 
 
 Settings

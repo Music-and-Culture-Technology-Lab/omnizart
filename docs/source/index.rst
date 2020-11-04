@@ -17,17 +17,19 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    :caption: Contents
 
    quick-start.rst
-   cli.rst
-   
-   
+   tutorial.rst
+   music/cli.rst
+   drum/cli.rst
+   chord/cli.rst
+
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
 
-   music.rst
-   drum.rst
-   chord.rst
+   music/api.rst
+   drum/api.rst
+   chord/api.rst
    feature.rst
    models.rst
    training.rst

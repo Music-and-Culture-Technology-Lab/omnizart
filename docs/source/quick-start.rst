@@ -27,7 +27,6 @@ approach, please refer to the following section.
     make install
 
 
-
 The second way is by using the provided shell script to install, which
 is almost identical to execute ``make install`` command, except you
 can specify more settings for the installtoin including to install
@@ -59,9 +58,15 @@ tool for the dependency management.
 
     # Under the `omnizart` folder
     pip install --upgrade pip
-    pip install setuptools==50.0.3
+    pip install --upgrade setuptools
     pip install poetry
     poetry install
+
+    # Activate the virtual environment and download the checkpoints
+    poetry shell
+    source $(dirname $(poetry run which python))/activate
+    omnizart download-checkpoints
+
 
 
 The last and the most unstable, conventional way for installation
@@ -71,16 +76,19 @@ is by using the ``setup.py`` and ``requirements.txt`` files.
 
     # Under the `omnizart` folder
     pip install --upgrade pip
-    pip install setuptools==50.0.3
+    pip install --upgrade setuptools
 
     # May encounter problems when installing the dependency 'madmom'
     python setup.py install
+
+    # Download the checkpoints
+    omnizart download-checkpoints
 
 
 Transcribe a pop song
 #####################
 
-Transcribes a song into a MIDI file and a CSV file with more complete
+Transcribes a song into a MIDI file and a CSV file that contains more complete
 and representative information.
 
 .. code-block:: bash
