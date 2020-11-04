@@ -16,11 +16,14 @@ Columns in the file are:
 References
 ##########
 
-The related publications and techinical details can be found in [1]_
+The related publications and techinical details can be found in [1]_ and [2]_
 
 .. [1] Tsung-Ping Chen and Li Su, "Harmony Transformer: Incorporating Chord
    Segmentation Into Harmony Recognition," International Society of
    Music Information Retrieval Conference (ISMIR), 2019.
+.. [2] Tsung-Ping Chen and Li Su, “Functional Harmony Recognition with
+   Multi-task Recurrent Neural Networks,” International Society of Music Information
+   Retrieval Conference (ISMIR), September 2018
 """
 
 from omnizart.chord.app import ChordTranscription
