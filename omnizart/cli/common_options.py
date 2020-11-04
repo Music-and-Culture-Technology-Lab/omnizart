@@ -14,8 +14,7 @@ COMMON_TRANSCRIBE_OPTIONS = [
     click.option(
         "-m",
         "--model-path",
-        help="Path to the pre-trained model for transcription",
-        type=click.Path(exists=True),
+        help="Path to the pre-trained model or the supported transcription mode."
     ),
     click.option(
         "-o",
