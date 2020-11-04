@@ -46,7 +46,7 @@ jobs:
       run: |
         sudo apt-get install libsndfile1
         ./scripts/install.sh
-        pip install sphinx sphinx-press-theme numpydoc
+        pip install sphinx sphinx-press-theme sphinx-click numpydoc
     - name: Build html
       env:
         PYTHONPATH: ../
