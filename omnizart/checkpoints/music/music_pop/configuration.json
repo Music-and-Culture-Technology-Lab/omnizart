@@ -1,0 +1,28 @@
+{
+  "model_name": "Pop-Attn-Note",
+  "model_type": "attn",
+  "model_params": 7921261,
+  "output_classes": 13,
+  "label_type": "multi_pop_note",
+  "timesteps": 256,
+  "frame_threshold": 0.5,
+  "instrument_threshold": 1.1,
+  "onset_threshold": 6,
+  "duration_threshold": 0,
+  "feature_type": "CFP",
+  "input_channels": [
+    1,
+    2,
+    3
+  ],
+  "training_settings": {
+    "dataset": "Rhythm",
+    "epochs": 20,
+    "steps": 3000,
+    "train_batch_size": 8,
+    "val_batch_size": 8,
+    "loss_function": "smooth",
+    "early_stop": 6
+  },
+  "description": "Information about this model\n            Model name: Pop-Attn-Note\n            Input feature type: CFP\n            Input channels: [1, 2, 3]\n            Timesteps: 256\n            Label type: multi_pop_note\n            Total parameters: 7921261\n            Thresholds:\n                Instrument: 1.1\n                Frame: 0.5\n                Onset: 6\n                Duration: 0\n            Training settings:\n                Previously trained on Rhythm\n                Maximum epochs: 20\n                Steps per epoch: 3000\n                Training batch size: 8\n                Validation batch size: 8\n                Loss function type: smooth\n                Early stopping: 6\n        "
+}

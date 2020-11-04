@@ -1,0 +1,58 @@
+General:
+  CheckpointPath:
+    Value:
+      ChordV1: ./checkpoints/chord/chord_v1
+  Dataset:
+    Settings:
+      FeatureSavePath:
+        Value: +
+      SavePath:
+        Value: ./
+  Feature:
+    Settings:
+      NumSteps:
+        Value: 100
+      SegmentHop:
+        Value: 5
+      SegmentWidth:
+        Value: 21
+  Model:
+    Settings:
+      AnnealingRate:
+        Value: 1.1
+      DecInputEmbSize:
+        Value: 512
+      DropoutRate:
+        Value: 0.6
+      EncInputEmbSize:
+        Value: 512
+      FreqSize:
+        Value: 24
+      NumDecAttnBlocks:
+        Value: 2
+      NumEncAttnBlocks:
+        Value: 2
+      SavePath:
+        Value: ./checkpoints/chord
+      SavePrefix:
+        Value: chord
+  Training:
+    Settings:
+      BatchSize:
+        Value: 32
+      EarlyStop:
+        Value: 4
+      Epoch:
+        Value: 10
+      InitLearningRate:
+        Value: 0.0001
+      LearningRateDecay:
+        Value: 0.96
+      Steps:
+        Value: 1000
+      ValBatchSize:
+        Value: 32
+      ValSteps:
+        Value: 500
+  TranscriptionMode:
+    Value: ChordV1

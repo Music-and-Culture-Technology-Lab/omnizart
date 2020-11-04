@@ -1,0 +1,100 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart transribe drum` command.
+        Type: String
+        Value: keras
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            keras: ./checkpoints/drum/drum_keras
+    Feature:
+        Description: Default settings of feature extraction for drum transcription.
+        Settings:
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 44100
+            PaddingSeconds:
+                Description: Padding length to the begin and the end of the raw audio data.
+                Type: Float
+                Value: 1.0
+            LowestNote:
+                Description: Lowest MIDI note number to be considered.
+                Type: Integer
+                Value: 16
+            NumberOfNotes:
+                Description: Number of total notes to extract.
+                Type: Integer
+                Value: 120
+            HopSize:
+                Description: Hop size for computing CQT feature.
+                Type: Integer
+                Value: 256
+            MiniBeatPerBar:
+                Description: Number of mini beats in a single 4/4 measure.
+                Type: Integer
+                Value: 32
+            MiniBeatPerSegment:
+                Description: Number of mini beats in a single 4/4 measure.
+                Type: Integer
+                Value: 4
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: drum
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/drum
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 50
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 1000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 100
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 32
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 32
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 6
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.00002
+            ResBlockNum:
+                Description: Number of residual blocks.
+                Type: Integer
+                Value: 3
