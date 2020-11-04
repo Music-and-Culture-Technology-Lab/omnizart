@@ -6,7 +6,7 @@ authors = ["BreezeWhite <freedombluewater@gmail.com>"]
 license = "MIT"
 homepage = "https://sites.google.com/view/mctl/home"
 keywords = ["automatic music transcription", "drum transcription", "vocal transcription", "beat tracking"]
-exclude = ["bootstrap_data"]
+exclude = ["weights*"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
