@@ -5,7 +5,6 @@
 *.sh~
 
 # Audio files
-*.mid
 *.wav
 *.mp3
 
@@ -21,6 +20,10 @@ htmlcov/
 .coverage
 .cookie
 
+# Transcription results
+*.mid
+*.csv
+
 # Built files
 dist/
 omnizart.egg-info/
@@ -30,3 +33,4 @@ build/
 # Other files
 checkpoints/
 test.sh
+soundfont.sf2
