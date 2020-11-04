@@ -17,7 +17,15 @@ packages = \
 
 package_data = \
 {'': ['*'],
- 'omnizart': ['checkpoints/music/music_piano/*',
+ 'omnizart': ['checkpoints/music/music_piano/arch.yaml',
+              'checkpoints/music/music_piano/arch.yaml',
+              'checkpoints/music/music_piano/arch.yaml',
+              'checkpoints/music/music_piano/configuration.json',
+              'checkpoints/music/music_piano/configuration.json',
+              'checkpoints/music/music_piano/configuration.json',
+              'checkpoints/music/music_piano/configurations.yaml',
+              'checkpoints/music/music_piano/configurations.yaml',
+              'checkpoints/music/music_piano/configurations.yaml',
               'defaults/*',
               'resource/*',
               'resource/vamp/*']}
