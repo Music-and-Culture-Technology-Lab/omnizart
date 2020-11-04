@@ -247,6 +247,10 @@ class PopStructure(BaseStructure):
 
 class ExtSuStructure(BaseStructure):
     """Structure of Extended-Su dataset"""
+
+    #: Dataset URL
+    url = "https://drive.google.com/uc?export=download&id=1Miw9G2O1Y8g253RQ2uQ4udM5XMKB-9p8"
+
     @property
     def label_ext(self):
         """"""
