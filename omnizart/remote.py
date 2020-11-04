@@ -12,6 +12,9 @@ import zipfile
 import urllib.request
 import http.cookiejar
 
+from omnizart.utils import ensure_path_exists
+
+
 #: Mapping bytes to human-readable size unit.
 SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "TB")]
 
@@ -53,6 +56,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
     """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
+    ensure_path_exists(os.path.dirname(out_path))
     print(f"Output path: {out_path}")
 
     total_size = 0
