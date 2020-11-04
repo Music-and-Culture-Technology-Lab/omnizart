@@ -50,10 +50,7 @@ class MusicTranscription(BaseTranscription):
             "Stream": MUSICNET_INSTRUMENT_PROGRAMS,
             "Pop": POP_INSTRUMENT_PROGRAMES
         }
-        self.custom_objects = {
-            "MultiHeadAttention": MultiHeadAttention,
-            "multihead_attention": MultiHeadAttention
-        }
+        self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe notes and instruments of the given audio.
@@ -101,7 +98,9 @@ class MusicTranscription(BaseTranscription):
         )
 
         if output is not None:
-            save_to = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            save_to = output
+            if os.path.isdir(save_to):
+                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
             midi.write(save_to)
             logger.info("MIDI file has been written to %s", save_to)
         if os.environ.get("LOG_LEVEL", "") == "debug":

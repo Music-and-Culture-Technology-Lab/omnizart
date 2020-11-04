@@ -56,7 +56,9 @@ class ChordTranscription(BaseTranscription):
         midi, info = inference(chord, t_unit)
 
         if output is not None:
-            save_to = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            save_to = output
+            if os.path.isdir(save_to):
+                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
             midi.write(save_to)
             write_csv(info, output=save_to.replace(".mid", ".csv"))
             logger.info("MIDI and CSV file have been written to %s", save_to)
