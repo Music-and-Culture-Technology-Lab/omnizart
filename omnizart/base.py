@@ -32,7 +32,12 @@ class BaseTranscription(metaclass=ABCMeta):
         return model, settings
 
     def _resolve_model_path(self, model_path=None):
-        if model_path is None:
+        if model_path in self.settings.checkpoint_path:
+            # The given model_path is actually the 'mode'.
+            default_path = self.settings.checkpoint_path[model_path]
+            model_path = os.path.join(MODULE_PATH, default_path)
+            logger.info("Using built-in model %s for transcription.", model_path)
+        elif model_path is None:
             default_path = self.settings.checkpoint_path[self.settings.transcription_mode]
             model_path = os.path.join(MODULE_PATH, default_path)
             logger.info("Using built-in model %s for transcription.", model_path)
