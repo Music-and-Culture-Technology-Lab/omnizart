@@ -6,7 +6,7 @@
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
-Comprehensive usage and API references can be found from the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
+Comprehensive usage and API references can be found in the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
 
 # About
 [Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leveraging cutting-edge AI techiniques.
@@ -48,13 +48,13 @@ Describes the neccessary background of how to develop this project.
 ``` bash
 git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
 
-# The checkpionts are stored using git LFS, and have to explicitly download them.
-git lfs install
-git lfs pull
-
 # Install dependenies. For more different installation approaches, please refer to the official documentation page.
 cd omnizart
 make install
+
+# After installation, download the archived checkpionts by executing the following command.
+# The checkpoints will be stored under omnizart/checkpoints
+omnizart download-checkpoints
 
 # For developers, you have to install Dev dependencies as well, since they will not be installed by default.
 poetry install
@@ -62,6 +62,7 @@ poetry install
 
 ## Package management
 Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
+We still provide the above two files for convenience. You can also generate them by executing ``make export``.
 
 ## Documentation
 Automatically generate documents from inline docstrings of module, class, and function. 
@@ -80,7 +81,7 @@ Uses flake8 and pylint for coding style check.
 
 To check with linters, execute `make check`.
 
-You don't have to achieve a full score on pylint check, just pass 9.5 points still counted as a successful check.
+You don't have to achieve a perfect score on pylint check, just pass 9.5 points still counted as a successful check.
 
 ### Caution!
 There is convenient make command for formating the code, but it should be used very carefully.
