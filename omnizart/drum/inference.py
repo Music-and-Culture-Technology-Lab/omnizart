@@ -19,7 +19,6 @@ def inference(pred, m_beat_arr, bass_drum_th=0.85, snare_th=1.2, hihat_th=0.17):
     bass_drum_act, _ = find_peaks(norm(insts[:, 0]), height=bass_drum_th, distance=1)
     snare_act, _ = find_peaks(norm(insts[:, 1]), height=snare_th, distance=1)
     hihat_act, _ = find_peaks(norm(insts[:, 2]), height=hihat_th, distance=1)
-    print(len(bass_drum_act), len(snare_act), len(hihat_act))
 
     drum_inst = pretty_midi.Instrument(program=1, is_drum=True, name="drums")
 

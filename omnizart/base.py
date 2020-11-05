@@ -27,7 +27,15 @@ class BaseTranscription(metaclass=ABCMeta):
     def _load_model(self, model_path=None, custom_objects=None):
         arch_path, weight_path, conf_path = self._resolve_model_path(model_path)
         model = self._get_model_from_yaml(arch_path, custom_objects=custom_objects)
-        model.load_weights(weight_path)
+
+        try:
+            model.load_weights(weight_path)
+        except OSError:
+            raise FileNotFoundError(
+                f"Weight file not found: {weight_path}. Perhaps not yet downloaded?\n"
+                "Try execute 'omnizart download-checkpoints'"
+            )
+
         settings = self.setting_class(conf_path=conf_path)
         return model, settings
 

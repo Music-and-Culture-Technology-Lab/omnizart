@@ -43,9 +43,14 @@ class DrumTranscription(BaseTranscription):
         input_audio: Path
             Path to the raw audio file (.wav).
         model_path: Path
-            Path to the trained model.
+            Path to the trained model or the supported transcription mode.
         output: Path (optional)
-            Path for writing out the transcribed MIDI file. Default to current path.
+            Path for writing out the transcribed MIDI file. Default to the current path.
+
+        Returns
+        -------
+        midi: pretty_midi.PrettyMIDI
+            The transcribed drum notes.
 
         See Also
         --------
@@ -67,7 +72,13 @@ class DrumTranscription(BaseTranscription):
         logger.debug("Prediction shape: %s", pred.shape)
 
         logger.info("Infering MIDI...")
-        midi = inference(pred, mini_beat_arr)
+        midi = inference(
+            pred,
+            mini_beat_arr,
+            bass_drum_th=model_settings.inference.bass_drum_th,
+            snare_th=model_settings.inference.snare_th,
+            hihat_th=model_settings.inference.hihat_th
+        )
 
         if output is not None:
             save_to = output
@@ -277,6 +288,7 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings
                     out_f.create_dataset("label", data=label_13, compression="gzip", compression_opts=3)
                     out_f.create_dataset("label_128", data=label_128, compression="gzip", compression_opts=3)
                     out_f.create_dataset("cqt_mini_beat_arr", data=m_beat_arr, compression="gzip", compression_opts=3)
+                    saved = True
             except OSError as exp:
                 logger.warning("OSError occurred, retrying %d times. Reason: %s", retry + 1, str(exp))
                 time.sleep(0.5 * 2**retry)
