@@ -106,6 +106,7 @@ class DrumSettings(Settings):
         self.feature = self.DrumFeature()
         self.dataset = self.DrumDataset()
         self.model = self.DrumModel()
+        self.inference = self.DrumInference()
         self.training = self.DrumTraining()
 
         super().__init__(conf_path=conf_path)
@@ -132,6 +133,13 @@ class DrumSettings(Settings):
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class DrumInference:
+        def __init__(self):
+            self.bass_drum_th: float = None
+            self.snare_th: float = None
+            self.hihat_th: float = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class DrumTraining:

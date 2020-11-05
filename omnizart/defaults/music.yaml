@@ -7,7 +7,7 @@ General:
     TranscriptionMode:
         Description: Mode of transcription by executing the `omnizart transribe music` command.
         Type: String 
-        Value: Stream
+        Value: Piano
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
