@@ -18,6 +18,13 @@ Dataset
     :members:
 
 
+Inference
+#########
+.. automodule:: omnizart.drum.inference
+    :members:
+    :undoc-members:
+
+
 Labels
 ######
 .. automodule:: omnizart.drum.labels
@@ -43,5 +50,5 @@ is also a path transformation process when applying the settings into the
 the coressponding attribute will be *DrumSettings.training.batch_size*.
 The level of */Settings* is removed among all fields.
 
-.. literalinclude:: ../../omnizart/defaults/drum.yaml
+.. literalinclude:: ../../../omnizart/defaults/drum.yaml
     :language: yaml

@@ -63,10 +63,15 @@ class MusicTranscription(BaseTranscription):
         input_audio: Path
             Path to the wav audio file.
         model_path: Path
-            Path to the trained model. Should be the folder that contains `arch.yaml`, `weights.h5`, and
-            `configuration.yaml`.
+            Path to the trained model or the transcription mode. If given a path, should be
+            the folder that contains `arch.yaml`, `weights.h5`, and `configuration.yaml`.
         output: Path (optional)
             Path for writing out the transcribed MIDI file. Default to current path.
+
+        Returns
+        -------
+        midi: pretty_midi.PrettyMIDI
+            The transcribed notes of different instruments.
 
         See Also
         --------

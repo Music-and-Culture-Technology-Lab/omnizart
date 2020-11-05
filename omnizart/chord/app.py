@@ -27,6 +27,33 @@ class ChordTranscription(BaseTranscription):
         super().__init__(ChordSettings, conf_path=conf_path)
 
     def transcribe(self, input_audio, model_path=None, output="./"):
+        """Transcribe chords in the audio.
+
+        This function transcribes chord progression in the audio and will outputs MIDI
+        and CSV files. The MIDI file is provided for quick validation by directly listen
+        to the chords. The complete transcription results are listed in the CSV file,
+        which contains the chord's name and the start and end time.
+
+        Parameters
+        ----------
+        input_audio: Path
+            Path to the raw audio file (.wav).
+        model_path: Path
+            Path to the trained model or the supported transcription mode.
+        output: Path (optional)
+            Path for writing out the transcribed MIDI file. Default to the current path.
+
+        Returns
+        -------
+        midi: pretty_midi.PrettyMIDI
+            Transcribed chord progression with default chord-to-notes mappings.
+
+        See Also
+        --------
+        omnizart.cli.chord.transcribe: CLI entry point of this function.
+        omnizart.chord.inference: Records the default chord-to-notes mappings.
+        """
+
         logger.info("Extracting feature")
         t_unit, chroma = extract_chroma(input_audio)
 
@@ -140,6 +167,25 @@ class ChordTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, chord_settings=None):
+        """Model training.
+
+        Train a new music model or continue to train on a pre-trained model.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the generated feature.
+        model_name: str
+            The name of the trained model. If not given, will default to the
+            current timestamp.
+        input_model_path: Path
+            Specify the path to the pre-trained model if you want to continue
+            to fine-tune on the model.
+        chord_settings: ChordSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        """
+
         if chord_settings is not None:
             assert isinstance(chord_settings, ChordSettings)
             settings = chord_settings
@@ -220,6 +266,7 @@ class ChordTranscription(BaseTranscription):
 
     def _load_model(self, model_path=None, custom_objects=None):
         _, weight_path, conf_path = self._resolve_model_path(model_path)
+        weight_path = weight_path.replace(".h5", "")
         settings = self.setting_class(conf_path=conf_path)
         model = ChordModel(
             num_enc_attn_blocks=settings.model.num_enc_attn_blocks,
@@ -232,7 +279,15 @@ class ChordTranscription(BaseTranscription):
             dropout_rate=settings.model.dropout_rate,
             annealing_rate=settings.model.annealing_rate
         )
-        model.load_weights(weight_path.replace(".h5", "")).expect_partial()
+
+        try:
+            model.load_weights(weight_path).expect_partial()
+        except tf.python.framework.errors_impl.OpError:
+            raise FileNotFoundError(
+                f"Weight file not found: {weight_path}. Perhaps not yet downloaded?\n"
+                "Try execute 'omnizart download-checkpoints'"
+            )
+
         return model, settings
 
 

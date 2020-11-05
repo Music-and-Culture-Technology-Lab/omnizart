@@ -44,5 +44,5 @@ is also a path transformation process when applying the settings into the
 the coressponding attribute will be *ChordSettings.training.batch_size*.
 The level of */Settings* is removed among all fields.
 
-.. literalinclude:: ../../omnizart/defaults/chord.yaml
+.. literalinclude:: ../../../omnizart/defaults/chord.yaml
     :language: yaml

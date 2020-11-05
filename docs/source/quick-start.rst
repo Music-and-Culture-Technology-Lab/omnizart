@@ -11,6 +11,9 @@ Using pip
 
     pip install omnizart
 
+    # Download the checkpoints after pip install
+    omnizart download-checkpoints
+
 
 From source
 ***********

@@ -21,7 +21,7 @@ Comprehensive usage and API references can be found in the [official documentati
 | beat     |                    |                    |          | Transcribes beat position.        |
 
 **NOTES** Though the implementation of training the drum model is 90% complete, but there still exists some
-invisible bugs that cause the training fails to converge compared to the author's original implmentation.
+invisible bugs that cause the training fails to converge compared to the author's original implementation.
 
 Example usage
 <pre>

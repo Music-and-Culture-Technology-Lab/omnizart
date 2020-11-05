@@ -54,5 +54,5 @@ is also a path transformation process when applying the settings into the
 the coressponding attribute will be *MusicSettings.training.batch_size*.
 The level of */Settings* is removed among all fields.
 
-.. literalinclude:: ../../omnizart/defaults/music.yaml
+.. literalinclude:: ../../../omnizart/defaults/music.yaml
     :language: yaml
