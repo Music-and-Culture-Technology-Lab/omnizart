@@ -63,6 +63,21 @@ General:
                 Description: Path to save the trained model.
                 Type: String
                 Value: ./checkpoints/drum
+    Inference:
+        Description: Default settings when infereing notes.
+        Settings:
+            BassDrumTh:
+                Description: Threshold for the bass drum.
+                Type: Float
+                Value: 0.85
+            SnareTh:
+                Description: Threshold for the snare.
+                Type: Float
+                Value: 1.2
+            HihatTh:
+                Description: Threshold for the hihat.
+                Type: Float
+                Value: 0.17
     Training:
         Description: Hyper parameters for training
         Settings:

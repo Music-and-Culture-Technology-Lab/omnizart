@@ -1,5 +1,5 @@
 backend: tensorflow
-class_name: Model
+class_name: Functional
 config:
   input_layers:
   - - input_score_48
@@ -11,10 +11,11 @@ config:
       batch_input_shape: !!python/tuple
       - null
       - 256
-      - 384
-      - 3
+      - 352
+      - 2
       dtype: float32
       name: input_score_48
+      ragged: false
       sparse: false
     inbound_nodes: []
     name: input_score_48
@@ -31,20 +32,19 @@ config:
       dilation_rate: &id002 !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 32
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
       kernel_size: !!python/tuple
       - 7
       - 7
-      name: conv2d_1
+      name: conv2d
       padding: same
       strides: !!python/tuple
       - 1
@@ -56,10 +56,108 @@ config:
         - 0
         - 0
         - {}
+    name: conv2d
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation
+      trainable: true
+    inbound_nodes:
+    - - - conv2d
+        - 0
+        - 0
+        - {}
+    name: activation
+  - class_name: BatchNormalization
+    config:
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
+      beta_constraint: null
+      beta_initializer:
+        class_name: Zeros
+        config: {}
+      beta_regularizer: null
+      center: true
+      dtype: float32
+      epsilon: 0.001
+      gamma_constraint: null
+      gamma_initializer:
+        class_name: Ones
+        config: {}
+      gamma_regularizer: null
+      momentum: 0.99
+      moving_mean_initializer:
+        class_name: Zeros
+        config: {}
+      moving_variance_initializer:
+        class_name: Ones
+        config: {}
+      name: batch_normalization
+      scale: true
+      trainable: true
+    inbound_nodes:
+    - - - activation
+        - 0
+        - 0
+        - {}
+    name: batch_normalization
+  - class_name: Dropout
+    config:
+      dtype: float32
+      name: dropout
+      noise_shape: null
+      rate: 0.4
+      seed: null
+      trainable: true
+    inbound_nodes:
+    - - - batch_normalization
+        - 0
+        - 0
+        - {}
+    name: dropout
+  - class_name: Conv2D
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: !!python/tuple
+      - 1
+      - 1
+      dtype: float32
+      filters: 32
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: &id001 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_1
+      padding: same
+      strides: &id003 !!python/tuple
+      - 2
+      - 2
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - dropout
+        - 0
+        - 0
+        - {}
     name: conv2d_1
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_1
       trainable: true
     inbound_nodes:
@@ -70,13 +168,15 @@ config:
     name: activation_1
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -101,6 +201,7 @@ config:
     name: batch_normalization_1
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_1
       noise_shape: null
       rate: 0.4
@@ -125,24 +226,21 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 32
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id001 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id001
       name: conv2d_2
       padding: same
-      strides: &id003 !!python/tuple
-      - 2
-      - 2
+      strides: &id006 !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -151,26 +249,78 @@ config:
         - 0
         - {}
     name: conv2d_2
-  - class_name: Activation
+  - class_name: Conv2D
     config:
-      activation: relu
-      name: activation_2
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 32
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: &id009 !!python/tuple
+      - 1
+      - 1
+      name: conv2d_3
+      padding: same
+      strides: *id003
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - conv2d
+        - 0
+        - 0
+        - {}
+    name: conv2d_3
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add
       trainable: true
     inbound_nodes:
     - - - conv2d_2
+        - 0
+        - 0
+        - &id004 {}
+      - - conv2d_3
+        - 0
+        - 0
+        - *id004
+    name: add
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_2
+      trainable: true
+    inbound_nodes:
+    - - - add
         - 0
         - 0
         - {}
     name: activation_2
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -195,6 +345,7 @@ config:
     name: batch_normalization_2
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_2
       noise_shape: null
       rate: 0.4
@@ -219,20 +370,21 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 32
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id001
-      name: conv2d_3
+      kernel_size: &id005 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_4
       padding: same
-      strides: &id006 !!python/tuple
+      strides: !!python/tuple
       - 1
       - 1
       trainable: true
@@ -242,76 +394,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_3
-  - class_name: Conv2D
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id002
-      filters: 32
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: &id009 !!python/tuple
-      - 1
-      - 1
-      name: conv2d_4
-      padding: same
-      strides: *id003
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - conv2d_1
-        - 0
-        - 0
-        - {}
     name: conv2d_4
-  - class_name: Add
-    config:
-      name: add_1
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_3
-        - 0
-        - 0
-        - &id004 {}
-      - - conv2d_4
-        - 0
-        - 0
-        - *id004
-    name: add_1
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_3
       trainable: true
     inbound_nodes:
-    - - - add_1
+    - - - conv2d_4
         - 0
         - 0
         - {}
     name: activation_3
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -336,6 +442,7 @@ config:
     name: batch_normalization_3
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_3
       noise_shape: null
       rate: 0.4
@@ -360,24 +467,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 32
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id005 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id005
       name: conv2d_5
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -386,26 +488,44 @@ config:
         - 0
         - {}
     name: conv2d_5
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_4
+      dtype: float32
+      name: add_1
       trainable: true
     inbound_nodes:
     - - - conv2d_5
+        - 0
+        - 0
+        - &id007 {}
+      - - add
+        - 0
+        - 0
+        - *id007
+    name: add_1
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_4
+      trainable: true
+    inbound_nodes:
+    - - - add_1
         - 0
         - 0
         - {}
     name: activation_4
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -430,6 +550,7 @@ config:
     name: batch_normalization_4
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_4
       noise_shape: null
       rate: 0.4
@@ -454,20 +575,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
-      filters: 32
+      dtype: float32
+      filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id005
+      kernel_size: &id008 !!python/tuple
+      - 3
+      - 3
       name: conv2d_6
       padding: same
-      strides: *id006
+      strides: &id010 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -476,40 +600,29 @@ config:
         - 0
         - {}
     name: conv2d_6
-  - class_name: Add
-    config:
-      name: add_2
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_6
-        - 0
-        - 0
-        - &id007 {}
-      - - add_1
-        - 0
-        - 0
-        - *id007
-    name: add_2
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_5
       trainable: true
     inbound_nodes:
-    - - - add_2
+    - - - conv2d_6
         - 0
         - 0
         - {}
     name: activation_5
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -534,6 +647,7 @@ config:
     name: batch_normalization_5
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_5
       noise_shape: null
       rate: 0.4
@@ -558,24 +672,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id008 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id008
       name: conv2d_7
       padding: same
-      strides: &id010 !!python/tuple
-      - 2
-      - 2
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -584,26 +693,76 @@ config:
         - 0
         - {}
     name: conv2d_7
-  - class_name: Activation
+  - class_name: Conv2D
     config:
-      activation: relu
-      name: activation_6
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id009
+      name: conv2d_8
+      padding: same
+      strides: *id010
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_1
+        - 0
+        - 0
+        - {}
+    name: conv2d_8
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_2
       trainable: true
     inbound_nodes:
     - - - conv2d_7
+        - 0
+        - 0
+        - &id011 {}
+      - - conv2d_8
+        - 0
+        - 0
+        - *id011
+    name: add_2
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_6
+      trainable: true
+    inbound_nodes:
+    - - - add_2
         - 0
         - 0
         - {}
     name: activation_6
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -628,6 +787,7 @@ config:
     name: batch_normalization_6
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_6
       noise_shape: null
       rate: 0.4
@@ -652,20 +812,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id008
-      name: conv2d_8
+      kernel_size: &id012 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_9
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -673,74 +836,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_8
-  - class_name: Conv2D
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id002
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id009
-      name: conv2d_9
-      padding: same
-      strides: *id010
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_2
-        - 0
-        - 0
-        - {}
     name: conv2d_9
-  - class_name: Add
-    config:
-      name: add_3
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_8
-        - 0
-        - 0
-        - &id011 {}
-      - - conv2d_9
-        - 0
-        - 0
-        - *id011
-    name: add_3
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_7
       trainable: true
     inbound_nodes:
-    - - - add_3
+    - - - conv2d_9
         - 0
         - 0
         - {}
     name: activation_7
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -765,6 +884,7 @@ config:
     name: batch_normalization_7
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_7
       noise_shape: null
       rate: 0.4
@@ -789,24 +909,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id012 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id012
       name: conv2d_10
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -815,26 +930,44 @@ config:
         - 0
         - {}
     name: conv2d_10
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_8
+      dtype: float32
+      name: add_3
       trainable: true
     inbound_nodes:
     - - - conv2d_10
+        - 0
+        - 0
+        - &id013 {}
+      - - add_2
+        - 0
+        - 0
+        - *id013
+    name: add_3
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_8
+      trainable: true
+    inbound_nodes:
+    - - - add_3
         - 0
         - 0
         - {}
     name: activation_8
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -859,6 +992,7 @@ config:
     name: batch_normalization_8
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_8
       noise_shape: null
       rate: 0.4
@@ -883,20 +1017,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id012
+      kernel_size: &id014 !!python/tuple
+      - 3
+      - 3
       name: conv2d_11
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -905,40 +1042,29 @@ config:
         - 0
         - {}
     name: conv2d_11
-  - class_name: Add
-    config:
-      name: add_4
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_11
-        - 0
-        - 0
-        - &id013 {}
-      - - add_3
-        - 0
-        - 0
-        - *id013
-    name: add_4
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_9
       trainable: true
     inbound_nodes:
-    - - - add_4
+    - - - conv2d_11
         - 0
         - 0
         - {}
     name: activation_9
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -963,6 +1089,7 @@ config:
     name: batch_normalization_9
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_9
       noise_shape: null
       rate: 0.4
@@ -987,24 +1114,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id014 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id014
       name: conv2d_12
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1013,26 +1135,44 @@ config:
         - 0
         - {}
     name: conv2d_12
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_10
+      dtype: float32
+      name: add_4
       trainable: true
     inbound_nodes:
     - - - conv2d_12
+        - 0
+        - 0
+        - &id015 {}
+      - - add_3
+        - 0
+        - 0
+        - *id015
+    name: add_4
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_10
+      trainable: true
+    inbound_nodes:
+    - - - add_4
         - 0
         - 0
         - {}
     name: activation_10
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1057,6 +1197,7 @@ config:
     name: batch_normalization_10
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_10
       noise_shape: null
       rate: 0.4
@@ -1081,20 +1222,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
-      filters: 64
+      dtype: float32
+      filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id014
+      kernel_size: &id016 !!python/tuple
+      - 3
+      - 3
       name: conv2d_13
       padding: same
-      strides: *id006
+      strides: &id017 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1103,40 +1247,29 @@ config:
         - 0
         - {}
     name: conv2d_13
-  - class_name: Add
-    config:
-      name: add_5
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_13
-        - 0
-        - 0
-        - &id015 {}
-      - - add_4
-        - 0
-        - 0
-        - *id015
-    name: add_5
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_11
       trainable: true
     inbound_nodes:
-    - - - add_5
+    - - - conv2d_13
         - 0
         - 0
         - {}
     name: activation_11
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1161,6 +1294,7 @@ config:
     name: batch_normalization_11
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_11
       noise_shape: null
       rate: 0.4
@@ -1185,24 +1319,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id016 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id016
       name: conv2d_14
       padding: same
-      strides: &id017 !!python/tuple
-      - 2
-      - 2
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1211,26 +1340,76 @@ config:
         - 0
         - {}
     name: conv2d_14
-  - class_name: Activation
+  - class_name: Conv2D
     config:
-      activation: relu
-      name: activation_12
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 128
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id009
+      name: conv2d_15
+      padding: same
+      strides: *id017
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_4
+        - 0
+        - 0
+        - {}
+    name: conv2d_15
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_5
       trainable: true
     inbound_nodes:
     - - - conv2d_14
+        - 0
+        - 0
+        - &id018 {}
+      - - conv2d_15
+        - 0
+        - 0
+        - *id018
+    name: add_5
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_12
+      trainable: true
+    inbound_nodes:
+    - - - add_5
         - 0
         - 0
         - {}
     name: activation_12
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1255,6 +1434,7 @@ config:
     name: batch_normalization_12
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_12
       noise_shape: null
       rate: 0.4
@@ -1279,20 +1459,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id016
-      name: conv2d_15
+      kernel_size: &id019 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_16
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1300,74 +1483,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_15
-  - class_name: Conv2D
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id002
-      filters: 128
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id009
-      name: conv2d_16
-      padding: same
-      strides: *id017
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_5
-        - 0
-        - 0
-        - {}
     name: conv2d_16
-  - class_name: Add
-    config:
-      name: add_6
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_15
-        - 0
-        - 0
-        - &id018 {}
-      - - conv2d_16
-        - 0
-        - 0
-        - *id018
-    name: add_6
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_13
       trainable: true
     inbound_nodes:
-    - - - add_6
+    - - - conv2d_16
         - 0
         - 0
         - {}
     name: activation_13
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1392,6 +1531,7 @@ config:
     name: batch_normalization_13
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_13
       noise_shape: null
       rate: 0.4
@@ -1416,24 +1556,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id019 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id019
       name: conv2d_17
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1442,26 +1577,44 @@ config:
         - 0
         - {}
     name: conv2d_17
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_14
+      dtype: float32
+      name: add_6
       trainable: true
     inbound_nodes:
     - - - conv2d_17
+        - 0
+        - 0
+        - &id020 {}
+      - - add_5
+        - 0
+        - 0
+        - *id020
+    name: add_6
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_14
+      trainable: true
+    inbound_nodes:
+    - - - add_6
         - 0
         - 0
         - {}
     name: activation_14
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1486,6 +1639,7 @@ config:
     name: batch_normalization_14
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_14
       noise_shape: null
       rate: 0.4
@@ -1510,20 +1664,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id019
+      kernel_size: &id021 !!python/tuple
+      - 3
+      - 3
       name: conv2d_18
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1532,40 +1689,29 @@ config:
         - 0
         - {}
     name: conv2d_18
-  - class_name: Add
-    config:
-      name: add_7
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_18
-        - 0
-        - 0
-        - &id020 {}
-      - - add_6
-        - 0
-        - 0
-        - *id020
-    name: add_7
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_15
       trainable: true
     inbound_nodes:
-    - - - add_7
+    - - - conv2d_18
         - 0
         - 0
         - {}
     name: activation_15
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1590,6 +1736,7 @@ config:
     name: batch_normalization_15
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_15
       noise_shape: null
       rate: 0.4
@@ -1614,24 +1761,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id021 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id021
       name: conv2d_19
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1640,26 +1782,44 @@ config:
         - 0
         - {}
     name: conv2d_19
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_16
+      dtype: float32
+      name: add_7
       trainable: true
     inbound_nodes:
     - - - conv2d_19
+        - 0
+        - 0
+        - &id022 {}
+      - - add_6
+        - 0
+        - 0
+        - *id022
+    name: add_7
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_16
+      trainable: true
+    inbound_nodes:
+    - - - add_7
         - 0
         - 0
         - {}
     name: activation_16
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1684,6 +1844,7 @@ config:
     name: batch_normalization_16
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_16
       noise_shape: null
       rate: 0.4
@@ -1708,20 +1869,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id021
+      kernel_size: &id023 !!python/tuple
+      - 3
+      - 3
       name: conv2d_20
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1730,40 +1894,29 @@ config:
         - 0
         - {}
     name: conv2d_20
-  - class_name: Add
-    config:
-      name: add_8
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_20
-        - 0
-        - 0
-        - &id022 {}
-      - - add_7
-        - 0
-        - 0
-        - *id022
-    name: add_8
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_17
       trainable: true
     inbound_nodes:
-    - - - add_8
+    - - - conv2d_20
         - 0
         - 0
         - {}
     name: activation_17
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1788,6 +1941,7 @@ config:
     name: batch_normalization_17
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_17
       noise_shape: null
       rate: 0.4
@@ -1812,24 +1966,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id023 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id023
       name: conv2d_21
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1838,26 +1987,44 @@ config:
         - 0
         - {}
     name: conv2d_21
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_18
+      dtype: float32
+      name: add_8
       trainable: true
     inbound_nodes:
     - - - conv2d_21
+        - 0
+        - 0
+        - &id024 {}
+      - - add_7
+        - 0
+        - 0
+        - *id024
+    name: add_8
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_18
+      trainable: true
+    inbound_nodes:
+    - - - add_8
         - 0
         - 0
         - {}
     name: activation_18
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1882,6 +2049,7 @@ config:
     name: batch_normalization_18
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_18
       noise_shape: null
       rate: 0.4
@@ -1906,20 +2074,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
-      filters: 128
+      dtype: float32
+      filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id023
+      kernel_size: &id025 !!python/tuple
+      - 3
+      - 3
       name: conv2d_22
       padding: same
-      strides: *id006
+      strides: &id026 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -1928,40 +2099,29 @@ config:
         - 0
         - {}
     name: conv2d_22
-  - class_name: Add
-    config:
-      name: add_9
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_22
-        - 0
-        - 0
-        - &id024 {}
-      - - add_8
-        - 0
-        - 0
-        - *id024
-    name: add_9
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_19
       trainable: true
     inbound_nodes:
-    - - - add_9
+    - - - conv2d_22
         - 0
         - 0
         - {}
     name: activation_19
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -1986,6 +2146,7 @@ config:
     name: batch_normalization_19
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_19
       noise_shape: null
       rate: 0.4
@@ -2010,24 +2171,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id025 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id025
       name: conv2d_23
       padding: same
-      strides: &id026 !!python/tuple
-      - 2
-      - 2
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2036,26 +2192,76 @@ config:
         - 0
         - {}
     name: conv2d_23
-  - class_name: Activation
+  - class_name: Conv2D
     config:
-      activation: relu
-      name: activation_20
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 256
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id009
+      name: conv2d_24
+      padding: same
+      strides: *id026
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_8
+        - 0
+        - 0
+        - {}
+    name: conv2d_24
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_9
       trainable: true
     inbound_nodes:
     - - - conv2d_23
+        - 0
+        - 0
+        - &id027 {}
+      - - conv2d_24
+        - 0
+        - 0
+        - *id027
+    name: add_9
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_20
+      trainable: true
+    inbound_nodes:
+    - - - add_9
         - 0
         - 0
         - {}
     name: activation_20
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2080,6 +2286,7 @@ config:
     name: batch_normalization_20
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_20
       noise_shape: null
       rate: 0.4
@@ -2104,20 +2311,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id025
-      name: conv2d_24
+      kernel_size: &id028 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_25
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2125,74 +2335,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_24
-  - class_name: Conv2D
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id002
-      filters: 256
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id009
-      name: conv2d_25
-      padding: same
-      strides: *id026
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_9
-        - 0
-        - 0
-        - {}
     name: conv2d_25
-  - class_name: Add
-    config:
-      name: add_10
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_24
-        - 0
-        - 0
-        - &id027 {}
-      - - conv2d_25
-        - 0
-        - 0
-        - *id027
-    name: add_10
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_21
       trainable: true
     inbound_nodes:
-    - - - add_10
+    - - - conv2d_25
         - 0
         - 0
         - {}
     name: activation_21
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2217,6 +2383,7 @@ config:
     name: batch_normalization_21
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_21
       noise_shape: null
       rate: 0.4
@@ -2241,24 +2408,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id028 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id028
       name: conv2d_26
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2267,26 +2429,44 @@ config:
         - 0
         - {}
     name: conv2d_26
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_22
+      dtype: float32
+      name: add_10
       trainable: true
     inbound_nodes:
     - - - conv2d_26
+        - 0
+        - 0
+        - &id029 {}
+      - - add_9
+        - 0
+        - 0
+        - *id029
+    name: add_10
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_22
+      trainable: true
+    inbound_nodes:
+    - - - add_10
         - 0
         - 0
         - {}
     name: activation_22
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2311,6 +2491,7 @@ config:
     name: batch_normalization_22
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_22
       noise_shape: null
       rate: 0.4
@@ -2335,20 +2516,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id028
+      kernel_size: &id030 !!python/tuple
+      - 3
+      - 3
       name: conv2d_27
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2357,40 +2541,29 @@ config:
         - 0
         - {}
     name: conv2d_27
-  - class_name: Add
-    config:
-      name: add_11
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_27
-        - 0
-        - 0
-        - &id029 {}
-      - - add_10
-        - 0
-        - 0
-        - *id029
-    name: add_11
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_23
       trainable: true
     inbound_nodes:
-    - - - add_11
+    - - - conv2d_27
         - 0
         - 0
         - {}
     name: activation_23
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2415,6 +2588,7 @@ config:
     name: batch_normalization_23
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_23
       noise_shape: null
       rate: 0.4
@@ -2439,24 +2613,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id030 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id030
       name: conv2d_28
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2465,26 +2634,44 @@ config:
         - 0
         - {}
     name: conv2d_28
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_24
+      dtype: float32
+      name: add_11
       trainable: true
     inbound_nodes:
     - - - conv2d_28
+        - 0
+        - 0
+        - &id031 {}
+      - - add_10
+        - 0
+        - 0
+        - *id031
+    name: add_11
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_24
+      trainable: true
+    inbound_nodes:
+    - - - add_11
         - 0
         - 0
         - {}
     name: activation_24
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2509,6 +2696,7 @@ config:
     name: batch_normalization_24
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_24
       noise_shape: null
       rate: 0.4
@@ -2533,20 +2721,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id030
+      kernel_size: &id032 !!python/tuple
+      - 3
+      - 3
       name: conv2d_29
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2555,40 +2746,29 @@ config:
         - 0
         - {}
     name: conv2d_29
-  - class_name: Add
-    config:
-      name: add_12
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_29
-        - 0
-        - 0
-        - &id031 {}
-      - - add_11
-        - 0
-        - 0
-        - *id031
-    name: add_12
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_25
       trainable: true
     inbound_nodes:
-    - - - add_12
+    - - - conv2d_29
         - 0
         - 0
         - {}
     name: activation_25
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2613,6 +2793,7 @@ config:
     name: batch_normalization_25
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_25
       noise_shape: null
       rate: 0.4
@@ -2637,24 +2818,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id032 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id032
       name: conv2d_30
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2663,26 +2839,44 @@ config:
         - 0
         - {}
     name: conv2d_30
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_26
+      dtype: float32
+      name: add_12
       trainable: true
     inbound_nodes:
     - - - conv2d_30
+        - 0
+        - 0
+        - &id033 {}
+      - - add_11
+        - 0
+        - 0
+        - *id033
+    name: add_12
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_26
+      trainable: true
+    inbound_nodes:
+    - - - add_12
         - 0
         - 0
         - {}
     name: activation_26
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2707,6 +2901,7 @@ config:
     name: batch_normalization_26
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_26
       noise_shape: null
       rate: 0.4
@@ -2731,20 +2926,23 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: *id032
+      kernel_size: &id034 !!python/tuple
+      - 3
+      - 3
       name: conv2d_31
       padding: same
-      strides: *id006
+      strides: !!python/tuple
+      - 1
+      - 1
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2753,40 +2951,29 @@ config:
         - 0
         - {}
     name: conv2d_31
-  - class_name: Add
-    config:
-      name: add_13
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_31
-        - 0
-        - 0
-        - &id033 {}
-      - - add_12
-        - 0
-        - 0
-        - *id033
-    name: add_13
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_27
       trainable: true
     inbound_nodes:
-    - - - add_13
+    - - - conv2d_31
         - 0
         - 0
         - {}
     name: activation_27
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2811,6 +2998,7 @@ config:
     name: batch_normalization_27
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_27
       noise_shape: null
       rate: 0.4
@@ -2835,24 +3023,19 @@ config:
       dilation_rate: !!python/tuple
       - 1
       - 1
+      dtype: float32
       filters: 256
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id034 !!python/tuple
-      - 3
-      - 3
+      kernel_size: *id034
       name: conv2d_32
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id006
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -2861,26 +3044,64 @@ config:
         - 0
         - {}
     name: conv2d_32
-  - class_name: Activation
+  - class_name: Add
     config:
-      activation: relu
-      name: activation_28
+      dtype: float32
+      name: add_13
       trainable: true
     inbound_nodes:
     - - - conv2d_32
+        - 0
+        - 0
+        - &id035 {}
+      - - add_12
+        - 0
+        - 0
+        - *id035
+    name: add_13
+  - class_name: MultiHeadAttention
+    config:
+      d_model: 32
+      dtype: float32
+      memory_flange: &id036 !!python/tuple
+      - 8
+      - 8
+      n_heads: 8
+      name: attn_1
+      out_channel: 64
+      query_shape: !!python/tuple
+      - 80
+      - 32
+      trainable: true
+    inbound_nodes:
+    - - - add_13
+        - 0
+        - 0
+        - {}
+    name: attn_1
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_28
+      trainable: true
+    inbound_nodes:
+    - - - attn_1
         - 0
         - 0
         - {}
     name: activation_28
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -2903,116 +3124,47 @@ config:
         - 0
         - {}
     name: batch_normalization_28
-  - class_name: Dropout
+  - class_name: MultiHeadAttention
     config:
-      name: dropout_28
-      noise_shape: null
-      rate: 0.4
-      seed: null
+      d_model: 64
+      dtype: float32
+      memory_flange: *id036
+      n_heads: 8
+      name: attn-2
+      out_channel: 128
+      query_shape: !!python/tuple
+      - 64
+      - 16
       trainable: true
     inbound_nodes:
     - - - batch_normalization_28
         - 0
         - 0
         - {}
-    name: dropout_28
-  - class_name: Conv2D
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: !!python/tuple
-      - 1
-      - 1
-      filters: 256
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id034
-      name: conv2d_33
-      padding: same
-      strides: *id006
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - dropout_28
-        - 0
-        - 0
-        - {}
-    name: conv2d_33
-  - class_name: Add
-    config:
-      name: add_14
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_33
-        - 0
-        - 0
-        - &id035 {}
-      - - add_13
-        - 0
-        - 0
-        - *id035
-    name: add_14
-  - class_name: Lambda
-    config:
-      arguments: {}
-      function: !!python/tuple
-      - '4wEAAAAAAAAAAQAAAAMAAAATAAAAcwwAAAB0AHwAZgGIAI4BUwApAU4pAdoTbXVsdGloZWFkX2F0
-
-        dGVudGlvbikB2gFhKQHaBmt3YXJnc6kA+jMvaG9zdC9ob21lL0FNVF9Qcm9qZWN0L3Byb2plY3Qv
-
-        TW9kZWxzL21vZGVsX2F0dG4ucHnaCDxsYW1iZGE+mgAAAPMAAAAA
-
-        '
-      - null
-      - !!python/tuple
-        - out_channel: 64
-          query_shape: !!python/tuple
-          - 100
-          - 32
-      function_type: lambda
-      name: lambda_1
-      output_shape: null
-      output_shape_type: raw
-      trainable: true
-    inbound_nodes:
-    - - - add_14
-        - 0
-        - 0
-        - {}
-    name: lambda_1
+    name: attn-2
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_29
       trainable: true
     inbound_nodes:
-    - - - lambda_1
+    - - - attn-2
         - 0
         - 0
         - {}
     name: activation_29
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3035,55 +3187,96 @@ config:
         - 0
         - {}
     name: batch_normalization_29
-  - class_name: Lambda
+  - class_name: Concatenate
     config:
-      arguments: {}
-      function: !!python/tuple
-      - '4wEAAAAAAAAAAQAAAAMAAAATAAAAcwwAAAB0AHwAZgGIAI4BUwApAU4pAdoTbXVsdGloZWFkX2F0
-
-        dGVudGlvbikB2gFhKQHaBmt3YXJnc6kA+jMvaG9zdC9ob21lL0FNVF9Qcm9qZWN0L3Byb2plY3Qv
-
-        TW9kZWxzL21vZGVsX2F0dG4ucHnaCDxsYW1iZGE+mgAAAPMAAAAA
-
-        '
-      - null
-      - !!python/tuple
-        - d_model: 64
-          out_channel: 128
-          query_shape: !!python/tuple
-          - 64
-          - 16
-      function_type: lambda
-      name: lambda_2
-      output_shape: null
-      output_shape_type: raw
+      axis: -1
+      dtype: float32
+      name: concatenate
       trainable: true
     inbound_nodes:
-    - - - batch_normalization_29
+    - - - add_13
+        - 0
+        - 0
+        - &id037 {}
+      - - batch_normalization_29
+        - 0
+        - 0
+        - *id037
+    name: concatenate
+  - class_name: Conv2D
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 256
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: conv2d_35
+      padding: same
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - concatenate
         - 0
         - 0
         - {}
-    name: lambda_2
+    name: conv2d_35
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_14
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_35
+        - 0
+        - 0
+        - &id038 {}
+      - - add_13
+        - 0
+        - 0
+        - *id038
+    name: add_14
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_30
       trainable: true
     inbound_nodes:
-    - - - lambda_2
+    - - - add_14
         - 0
         - 0
         - {}
     name: activation_30
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3106,21 +3299,20 @@ config:
         - 0
         - {}
     name: batch_normalization_30
-  - class_name: Concatenate
+  - class_name: Dropout
     config:
-      axis: -1
-      name: concatenate_1
+      dtype: float32
+      name: dropout_28
+      noise_shape: null
+      rate: 0.4
+      seed: null
       trainable: true
     inbound_nodes:
-    - - - add_14
+    - - - batch_normalization_30
         - 0
         - 0
-        - &id036 {}
-      - - batch_normalization_30
-        - 0
-        - 0
-        - *id036
-    name: concatenate_1
+        - {}
+    name: dropout_28
   - class_name: Conv2D
     config:
       activation: linear
@@ -3132,66 +3324,54 @@ config:
       bias_regularizer: null
       data_format: channels_last
       dilation_rate: *id002
-      filters: 256
+      dtype: float32
+      filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: !!python/tuple
-      - 1
-      - 1
-      name: conv2d_38
+      kernel_size: &id039 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_36
       padding: same
-      strides: !!python/tuple
+      strides: &id045 !!python/tuple
       - 1
       - 1
       trainable: true
       use_bias: true
     inbound_nodes:
-    - - - concatenate_1
+    - - - dropout_28
         - 0
         - 0
         - {}
-    name: conv2d_38
-  - class_name: Add
-    config:
-      name: add_15
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_38
-        - 0
-        - 0
-        - &id037 {}
-      - - add_14
-        - 0
-        - 0
-        - *id037
-    name: add_15
+    name: conv2d_36
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_31
       trainable: true
     inbound_nodes:
-    - - - add_15
+    - - - conv2d_36
         - 0
         - 0
         - {}
     name: activation_31
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3216,6 +3396,7 @@ config:
     name: batch_normalization_31
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_29
       noise_shape: null
       rate: 0.4
@@ -3227,7 +3408,7 @@ config:
         - 0
         - {}
     name: dropout_29
-  - class_name: Conv2D
+  - class_name: Conv2DTranspose
     config:
       activation: linear
       activity_regularizer: null
@@ -3237,25 +3418,25 @@ config:
         config: {}
       bias_regularizer: null
       data_format: channels_last
-      dilation_rate: *id002
+      dilation_rate: &id040 !!python/tuple
+      - 1
+      - 1
+      dtype: float32
       filters: 128
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id038 !!python/tuple
-      - 3
-      - 3
-      name: conv2d_39
+      kernel_size: *id039
+      name: conv2d_transpose
+      output_padding: null
       padding: same
-      strides: &id044 !!python/tuple
-      - 1
-      - 1
+      strides: &id041 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -3263,27 +3444,92 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_39
+    name: conv2d_transpose
+  - class_name: Conv2DTranspose
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id040
+      dtype: float32
+      filters: 128
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: &id047 !!python/tuple
+      - 1
+      - 1
+      name: conv2d_transpose_1
+      output_padding: null
+      padding: same
+      strides: *id041
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_14
+        - 0
+        - 0
+        - {}
+    name: conv2d_transpose_1
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_15
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_transpose
+        - 0
+        - 0
+        - &id042 {}
+      - - conv2d_transpose_1
+        - 0
+        - 0
+        - *id042
+    name: add_15
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_32
       trainable: true
     inbound_nodes:
-    - - - conv2d_39
+    - - - add_15
         - 0
         - 0
         - {}
     name: activation_32
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_33
+      trainable: true
+    inbound_nodes:
+    - - - add_8
+        - 0
+        - 0
+        - {}
+    name: activation_33
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3306,138 +3552,17 @@ config:
         - 0
         - {}
     name: batch_normalization_32
-  - class_name: Dropout
-    config:
-      name: dropout_30
-      noise_shape: null
-      rate: 0.4
-      seed: null
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_32
-        - 0
-        - 0
-        - {}
-    name: dropout_30
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: &id039 !!python/tuple
-      - 1
-      - 1
-      filters: 128
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id038
-      name: conv2d_transpose_1
-      output_padding: null
-      padding: same
-      strides: &id040 !!python/tuple
-      - 2
-      - 2
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - dropout_30
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_1
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 128
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: &id046 !!python/tuple
-      - 1
-      - 1
-      name: conv2d_transpose_2
-      output_padding: null
-      padding: same
-      strides: *id040
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_15
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_2
-  - class_name: Add
-    config:
-      name: add_16
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_transpose_1
-        - 0
-        - 0
-        - &id041 {}
-      - - conv2d_transpose_2
-        - 0
-        - 0
-        - *id041
-    name: add_16
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_33
-      trainable: true
-    inbound_nodes:
-    - - - add_16
-        - 0
-        - 0
-        - {}
-    name: activation_33
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_34
-      trainable: true
-    inbound_nodes:
-    - - - add_9
-        - 0
-        - 0
-        - {}
-    name: activation_34
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3460,15 +3585,110 @@ config:
         - 0
         - {}
     name: batch_normalization_33
-  - class_name: BatchNormalization
+  - class_name: Concatenate
     config:
       axis: -1
+      dtype: float32
+      name: concatenate_1
+      trainable: true
+    inbound_nodes:
+    - - - batch_normalization_32
+        - 0
+        - 0
+        - &id043 {}
+      - - batch_normalization_33
+        - 0
+        - 0
+        - *id043
+    name: concatenate_1
+  - class_name: Dropout
+    config:
+      dtype: float32
+      name: dropout_30
+      noise_shape: null
+      rate: 0.4
+      seed: null
+      trainable: true
+    inbound_nodes:
+    - - - concatenate_1
+        - 0
+        - 0
+        - {}
+    name: dropout_30
+  - class_name: Conv2D
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 128
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: conv2d_37
+      padding: same
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - dropout_30
+        - 0
+        - 0
+        - {}
+    name: conv2d_37
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_16
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_37
+        - 0
+        - 0
+        - &id044 {}
+      - - add_15
+        - 0
+        - 0
+        - *id044
+    name: add_16
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_34
+      trainable: true
+    inbound_nodes:
+    - - - add_16
+        - 0
+        - 0
+        - {}
+    name: activation_34
+  - class_name: BatchNormalization
+    config:
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3491,30 +3711,16 @@ config:
         - 0
         - {}
     name: batch_normalization_34
-  - class_name: Concatenate
-    config:
-      axis: -1
-      name: concatenate_2
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_33
-        - 0
-        - 0
-        - &id042 {}
-      - - batch_normalization_34
-        - 0
-        - 0
-        - *id042
-    name: concatenate_2
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_31
       noise_shape: null
       rate: 0.4
       seed: null
       trainable: true
     inbound_nodes:
-    - - - concatenate_2
+    - - - batch_normalization_34
         - 0
         - 0
         - {}
@@ -3530,24 +3736,21 @@ config:
       bias_regularizer: null
       data_format: channels_last
       dilation_rate: *id002
-      filters: 128
+      dtype: float32
+      filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: !!python/tuple
-      - 1
-      - 1
-      name: conv2d_40
+      kernel_size: &id046 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_38
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id045
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -3555,41 +3758,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_40
-  - class_name: Add
-    config:
-      name: add_17
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_40
-        - 0
-        - 0
-        - &id043 {}
-      - - add_16
-        - 0
-        - 0
-        - *id043
-    name: add_17
+    name: conv2d_38
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_35
       trainable: true
     inbound_nodes:
-    - - - add_17
+    - - - conv2d_38
         - 0
         - 0
         - {}
     name: activation_35
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3614,6 +3806,7 @@ config:
     name: batch_normalization_35
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_32
       noise_shape: null
       rate: 0.4
@@ -3625,7 +3818,7 @@ config:
         - 0
         - {}
     name: dropout_32
-  - class_name: Conv2D
+  - class_name: Conv2DTranspose
     config:
       activation: linear
       activity_regularizer: null
@@ -3635,23 +3828,23 @@ config:
         config: {}
       bias_regularizer: null
       data_format: channels_last
-      dilation_rate: *id002
+      dilation_rate: *id040
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id045 !!python/tuple
-      - 3
-      - 3
-      name: conv2d_41
+      kernel_size: *id046
+      name: conv2d_transpose_2
+      output_padding: null
       padding: same
-      strides: *id044
+      strides: &id048 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -3659,27 +3852,90 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_41
+    name: conv2d_transpose_2
+  - class_name: Conv2DTranspose
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id040
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id047
+      name: conv2d_transpose_3
+      output_padding: null
+      padding: same
+      strides: *id048
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_16
+        - 0
+        - 0
+        - {}
+    name: conv2d_transpose_3
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_17
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_transpose_2
+        - 0
+        - 0
+        - &id049 {}
+      - - conv2d_transpose_3
+        - 0
+        - 0
+        - *id049
+    name: add_17
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_36
       trainable: true
     inbound_nodes:
-    - - - conv2d_41
+    - - - add_17
         - 0
         - 0
         - {}
     name: activation_36
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_37
+      trainable: true
+    inbound_nodes:
+    - - - add_4
+        - 0
+        - 0
+        - {}
+    name: activation_37
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3702,134 +3958,17 @@ config:
         - 0
         - {}
     name: batch_normalization_36
-  - class_name: Dropout
-    config:
-      name: dropout_33
-      noise_shape: null
-      rate: 0.4
-      seed: null
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_36
-        - 0
-        - 0
-        - {}
-    name: dropout_33
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id045
-      name: conv2d_transpose_3
-      output_padding: null
-      padding: same
-      strides: &id047 !!python/tuple
-      - 2
-      - 2
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - dropout_33
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_3
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id046
-      name: conv2d_transpose_4
-      output_padding: null
-      padding: same
-      strides: *id047
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_17
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_4
-  - class_name: Add
-    config:
-      name: add_18
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_transpose_3
-        - 0
-        - 0
-        - &id048 {}
-      - - conv2d_transpose_4
-        - 0
-        - 0
-        - *id048
-    name: add_18
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_37
-      trainable: true
-    inbound_nodes:
-    - - - add_18
-        - 0
-        - 0
-        - {}
-    name: activation_37
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_38
-      trainable: true
-    inbound_nodes:
-    - - - add_5
-        - 0
-        - 0
-        - {}
-    name: activation_38
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3852,15 +3991,110 @@ config:
         - 0
         - {}
     name: batch_normalization_37
-  - class_name: BatchNormalization
+  - class_name: Concatenate
     config:
       axis: -1
+      dtype: float32
+      name: concatenate_2
+      trainable: true
+    inbound_nodes:
+    - - - batch_normalization_36
+        - 0
+        - 0
+        - &id050 {}
+      - - batch_normalization_37
+        - 0
+        - 0
+        - *id050
+    name: concatenate_2
+  - class_name: Dropout
+    config:
+      dtype: float32
+      name: dropout_33
+      noise_shape: null
+      rate: 0.4
+      seed: null
+      trainable: true
+    inbound_nodes:
+    - - - concatenate_2
+        - 0
+        - 0
+        - {}
+    name: dropout_33
+  - class_name: Conv2D
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: conv2d_39
+      padding: same
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - dropout_33
+        - 0
+        - 0
+        - {}
+    name: conv2d_39
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_18
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_39
+        - 0
+        - 0
+        - &id051 {}
+      - - add_17
+        - 0
+        - 0
+        - *id051
+    name: add_18
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_38
+      trainable: true
+    inbound_nodes:
+    - - - add_18
+        - 0
+        - 0
+        - {}
+    name: activation_38
+  - class_name: BatchNormalization
+    config:
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -3883,30 +4117,16 @@ config:
         - 0
         - {}
     name: batch_normalization_38
-  - class_name: Concatenate
-    config:
-      axis: -1
-      name: concatenate_3
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_37
-        - 0
-        - 0
-        - &id049 {}
-      - - batch_normalization_38
-        - 0
-        - 0
-        - *id049
-    name: concatenate_3
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_34
       noise_shape: null
       rate: 0.4
       seed: null
       trainable: true
     inbound_nodes:
-    - - - concatenate_3
+    - - - batch_normalization_38
         - 0
         - 0
         - {}
@@ -3922,24 +4142,21 @@ config:
       bias_regularizer: null
       data_format: channels_last
       dilation_rate: *id002
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: !!python/tuple
-      - 1
-      - 1
-      name: conv2d_42
+      kernel_size: &id052 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_40
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id045
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -3947,41 +4164,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_42
-  - class_name: Add
-    config:
-      name: add_19
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_42
-        - 0
-        - 0
-        - &id050 {}
-      - - add_18
-        - 0
-        - 0
-        - *id050
-    name: add_19
+    name: conv2d_40
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_39
       trainable: true
     inbound_nodes:
-    - - - add_19
+    - - - conv2d_40
         - 0
         - 0
         - {}
     name: activation_39
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4006,6 +4212,7 @@ config:
     name: batch_normalization_39
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_35
       noise_shape: null
       rate: 0.4
@@ -4017,7 +4224,7 @@ config:
         - 0
         - {}
     name: dropout_35
-  - class_name: Conv2D
+  - class_name: Conv2DTranspose
     config:
       activation: linear
       activity_regularizer: null
@@ -4027,23 +4234,23 @@ config:
         config: {}
       bias_regularizer: null
       data_format: channels_last
-      dilation_rate: *id002
+      dilation_rate: *id040
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id051 !!python/tuple
-      - 3
-      - 3
-      name: conv2d_43
+      kernel_size: *id052
+      name: conv2d_transpose_4
+      output_padding: null
       padding: same
-      strides: *id044
+      strides: &id053 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -4051,27 +4258,90 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_43
+    name: conv2d_transpose_4
+  - class_name: Conv2DTranspose
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id040
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id047
+      name: conv2d_transpose_5
+      output_padding: null
+      padding: same
+      strides: *id053
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_18
+        - 0
+        - 0
+        - {}
+    name: conv2d_transpose_5
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_19
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_transpose_4
+        - 0
+        - 0
+        - &id054 {}
+      - - conv2d_transpose_5
+        - 0
+        - 0
+        - *id054
+    name: add_19
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_40
       trainable: true
     inbound_nodes:
-    - - - conv2d_43
+    - - - add_19
         - 0
         - 0
         - {}
     name: activation_40
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_41
+      trainable: true
+    inbound_nodes:
+    - - - add_1
+        - 0
+        - 0
+        - {}
+    name: activation_41
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4094,134 +4364,17 @@ config:
         - 0
         - {}
     name: batch_normalization_40
-  - class_name: Dropout
-    config:
-      name: dropout_36
-      noise_shape: null
-      rate: 0.4
-      seed: null
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_40
-        - 0
-        - 0
-        - {}
-    name: dropout_36
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id051
-      name: conv2d_transpose_5
-      output_padding: null
-      padding: same
-      strides: &id052 !!python/tuple
-      - 2
-      - 2
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - dropout_36
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_5
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id046
-      name: conv2d_transpose_6
-      output_padding: null
-      padding: same
-      strides: *id052
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_19
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_6
-  - class_name: Add
-    config:
-      name: add_20
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_transpose_5
-        - 0
-        - 0
-        - &id053 {}
-      - - conv2d_transpose_6
-        - 0
-        - 0
-        - *id053
-    name: add_20
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_41
-      trainable: true
-    inbound_nodes:
-    - - - add_20
-        - 0
-        - 0
-        - {}
-    name: activation_41
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_42
-      trainable: true
-    inbound_nodes:
-    - - - add_2
-        - 0
-        - 0
-        - {}
-    name: activation_42
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4244,15 +4397,110 @@ config:
         - 0
         - {}
     name: batch_normalization_41
-  - class_name: BatchNormalization
+  - class_name: Concatenate
     config:
       axis: -1
+      dtype: float32
+      name: concatenate_3
+      trainable: true
+    inbound_nodes:
+    - - - batch_normalization_40
+        - 0
+        - 0
+        - &id055 {}
+      - - batch_normalization_41
+        - 0
+        - 0
+        - *id055
+    name: concatenate_3
+  - class_name: Dropout
+    config:
+      dtype: float32
+      name: dropout_36
+      noise_shape: null
+      rate: 0.4
+      seed: null
+      trainable: true
+    inbound_nodes:
+    - - - concatenate_3
+        - 0
+        - 0
+        - {}
+    name: dropout_36
+  - class_name: Conv2D
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id002
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: !!python/tuple
+      - 1
+      - 1
+      name: conv2d_41
+      padding: same
+      strides: !!python/tuple
+      - 1
+      - 1
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - dropout_36
+        - 0
+        - 0
+        - {}
+    name: conv2d_41
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_20
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_41
+        - 0
+        - 0
+        - &id056 {}
+      - - add_19
+        - 0
+        - 0
+        - *id056
+    name: add_20
+  - class_name: Activation
+    config:
+      activation: relu
+      dtype: float32
+      name: activation_42
+      trainable: true
+    inbound_nodes:
+    - - - add_20
+        - 0
+        - 0
+        - {}
+    name: activation_42
+  - class_name: BatchNormalization
+    config:
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4275,30 +4523,16 @@ config:
         - 0
         - {}
     name: batch_normalization_42
-  - class_name: Concatenate
-    config:
-      axis: -1
-      name: concatenate_4
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_41
-        - 0
-        - 0
-        - &id054 {}
-      - - batch_normalization_42
-        - 0
-        - 0
-        - *id054
-    name: concatenate_4
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_37
       noise_shape: null
       rate: 0.4
       seed: null
       trainable: true
     inbound_nodes:
-    - - - concatenate_4
+    - - - batch_normalization_42
         - 0
         - 0
         - {}
@@ -4314,24 +4548,21 @@ config:
       bias_regularizer: null
       data_format: channels_last
       dilation_rate: *id002
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: !!python/tuple
-      - 1
-      - 1
-      name: conv2d_44
+      kernel_size: &id057 !!python/tuple
+      - 3
+      - 3
+      name: conv2d_42
       padding: same
-      strides: !!python/tuple
-      - 1
-      - 1
+      strides: *id045
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -4339,41 +4570,30 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_44
-  - class_name: Add
-    config:
-      name: add_21
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_44
-        - 0
-        - 0
-        - &id055 {}
-      - - add_20
-        - 0
-        - 0
-        - *id055
-    name: add_21
+    name: conv2d_42
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_43
       trainable: true
     inbound_nodes:
-    - - - add_21
+    - - - conv2d_42
         - 0
         - 0
         - {}
     name: activation_43
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4398,6 +4618,7 @@ config:
     name: batch_normalization_43
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_38
       noise_shape: null
       rate: 0.4
@@ -4409,7 +4630,7 @@ config:
         - 0
         - {}
     name: dropout_38
-  - class_name: Conv2D
+  - class_name: Conv2DTranspose
     config:
       activation: linear
       activity_regularizer: null
@@ -4419,23 +4640,23 @@ config:
         config: {}
       bias_regularizer: null
       data_format: channels_last
-      dilation_rate: *id002
+      dilation_rate: *id040
+      dtype: float32
       filters: 64
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
-      kernel_size: &id056 !!python/tuple
-      - 3
-      - 3
-      name: conv2d_45
+      kernel_size: *id057
+      name: conv2d_transpose_6
+      output_padding: null
       padding: same
-      strides: *id044
+      strides: &id058 !!python/tuple
+      - 2
+      - 2
       trainable: true
       use_bias: true
     inbound_nodes:
@@ -4443,27 +4664,78 @@ config:
         - 0
         - 0
         - {}
-    name: conv2d_45
+    name: conv2d_transpose_6
+  - class_name: Conv2DTranspose
+    config:
+      activation: linear
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: *id040
+      dtype: float32
+      filters: 64
+      groups: 1
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: GlorotUniform
+        config:
+          seed: null
+      kernel_regularizer: null
+      kernel_size: *id047
+      name: conv2d_transpose_7
+      output_padding: null
+      padding: same
+      strides: *id058
+      trainable: true
+      use_bias: true
+    inbound_nodes:
+    - - - add_20
+        - 0
+        - 0
+        - {}
+    name: conv2d_transpose_7
+  - class_name: Add
+    config:
+      dtype: float32
+      name: add_21
+      trainable: true
+    inbound_nodes:
+    - - - conv2d_transpose_6
+        - 0
+        - 0
+        - &id059 {}
+      - - conv2d_transpose_7
+        - 0
+        - 0
+        - *id059
+    name: add_21
   - class_name: Activation
     config:
       activation: relu
+      dtype: float32
       name: activation_44
       trainable: true
     inbound_nodes:
-    - - - conv2d_45
+    - - - add_21
         - 0
         - 0
         - {}
     name: activation_44
   - class_name: BatchNormalization
     config:
-      axis: -1
+      axis: !!python/object/apply:tensorflow.python.training.tracking.data_structures.ListWrapper
+      - - 3
       beta_constraint: null
       beta_initializer:
         class_name: Zeros
         config: {}
       beta_regularizer: null
       center: true
+      dtype: float32
       epsilon: 0.001
       gamma_constraint: null
       gamma_initializer:
@@ -4488,6 +4760,7 @@ config:
     name: batch_normalization_44
   - class_name: Dropout
     config:
+      dtype: float32
       name: dropout_39
       noise_shape: null
       rate: 0.4
@@ -4499,145 +4772,6 @@ config:
         - 0
         - {}
     name: dropout_39
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id056
-      name: conv2d_transpose_7
-      output_padding: null
-      padding: same
-      strides: &id057 !!python/tuple
-      - 2
-      - 2
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - dropout_39
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_7
-  - class_name: Conv2DTranspose
-    config:
-      activation: linear
-      activity_regularizer: null
-      bias_constraint: null
-      bias_initializer:
-        class_name: Zeros
-        config: {}
-      bias_regularizer: null
-      data_format: channels_last
-      dilation_rate: *id039
-      filters: 64
-      kernel_constraint: null
-      kernel_initializer:
-        class_name: VarianceScaling
-        config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
-          seed: null
-      kernel_regularizer: null
-      kernel_size: *id046
-      name: conv2d_transpose_8
-      output_padding: null
-      padding: same
-      strides: *id057
-      trainable: true
-      use_bias: true
-    inbound_nodes:
-    - - - add_21
-        - 0
-        - 0
-        - {}
-    name: conv2d_transpose_8
-  - class_name: Add
-    config:
-      name: add_22
-      trainable: true
-    inbound_nodes:
-    - - - conv2d_transpose_7
-        - 0
-        - 0
-        - &id058 {}
-      - - conv2d_transpose_8
-        - 0
-        - 0
-        - *id058
-    name: add_22
-  - class_name: Activation
-    config:
-      activation: relu
-      name: activation_45
-      trainable: true
-    inbound_nodes:
-    - - - add_22
-        - 0
-        - 0
-        - {}
-    name: activation_45
-  - class_name: BatchNormalization
-    config:
-      axis: -1
-      beta_constraint: null
-      beta_initializer:
-        class_name: Zeros
-        config: {}
-      beta_regularizer: null
-      center: true
-      epsilon: 0.001
-      gamma_constraint: null
-      gamma_initializer:
-        class_name: Ones
-        config: {}
-      gamma_regularizer: null
-      momentum: 0.99
-      moving_mean_initializer:
-        class_name: Zeros
-        config: {}
-      moving_variance_initializer:
-        class_name: Ones
-        config: {}
-      name: batch_normalization_45
-      scale: true
-      trainable: true
-    inbound_nodes:
-    - - - activation_45
-        - 0
-        - 0
-        - {}
-    name: batch_normalization_45
-  - class_name: Dropout
-    config:
-      name: dropout_40
-      noise_shape: null
-      rate: 0.4
-      seed: null
-      trainable: true
-    inbound_nodes:
-    - - - batch_normalization_45
-        - 0
-        - 0
-        - {}
-    name: dropout_40
   - class_name: Conv2D
     config:
       activation: linear
@@ -4649,14 +4783,13 @@ config:
       bias_regularizer: null
       data_format: channels_last
       dilation_rate: *id002
+      dtype: float32
       filters: 13
+      groups: 1
       kernel_constraint: null
       kernel_initializer:
-        class_name: VarianceScaling
+        class_name: GlorotUniform
         config:
-          distribution: uniform
-          mode: fan_avg
-          scale: 1.0
           seed: null
       kernel_regularizer: null
       kernel_size: !!python/tuple
@@ -4670,14 +4803,14 @@ config:
       trainable: true
       use_bias: true
     inbound_nodes:
-    - - - dropout_40
+    - - - dropout_39
         - 0
         - 0
         - {}
     name: prediction
-  name: model_1
+  name: functional_1
   output_layers:
   - - prediction
     - 0
     - 0
-keras_version: 2.2.4
+keras_version: 2.4.0
