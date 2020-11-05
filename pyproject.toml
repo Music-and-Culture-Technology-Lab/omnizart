@@ -1,15 +1,23 @@
 [tool.poetry]
 name = "omnizart"
-version = "0.1.0"
-description = ""
+version = "0.1.0-beta.0"
+description = "Omniscient Mozart, being able to transcribe everything in the music."
+readme = "README.md"
 authors = ["BreezeWhite <freedombluewater@gmail.com>"]
 license = "MIT"
+repository = "https://github.com/Music-and-Culture-Technology-Lab/omnizart"
+documentation = "https://music-and-culture-technology-lab.github.io/omnizart-doc/"
 homepage = "https://sites.google.com/view/mctl/home"
 keywords = ["automatic music transcription", "drum transcription", "vocal transcription", "beat tracking"]
+classifiers = [
+    "Topic :: Multimedia :: Sound/Audio :: MIDI",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git"
+]
 exclude = ["weights*"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">3.6"
 click = "^7.1.2"
 pretty_midi = "^0.2.9"
 librosa = "^0.8.0"
