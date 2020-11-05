@@ -10,7 +10,7 @@ on:
     branches: [ build_doc ]
   release:
     branches: [ master, main ]
-    type: [ published ]
+    type: [ created ]
 
 jobs:
   build:
@@ -23,53 +23,53 @@ jobs:
         DEFAULT_VENV_APPROACH: poetry
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Cache site packages
-      uses: actions/cache@v2
-      env:
-        cache-name: python-packages
-      with:
-        path: |
-          ~/.cache/pip
-          ~/.cache/pypoetry
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache site packages
+        uses: actions/cache@v2
+        env:
+          cache-name: python-packages
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get install libsndfile1
-        ./scripts/install.sh
-        pip install sphinx sphinx-press-theme sphinx-click numpydoc
-    - name: Build html
-      env:
-        PYTHONPATH: ../
-      run: |
-        pwd
-        cd docs
-        make html
-    - name: Clone documentation repo
-      run: |
-        eval $(ssh-agent -s)
-        ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
-        git clone git@github.com:Music-and-Culture-Technology-Lab/omnizart-doc.git
-        git config --global user.name "omnizart-actions"
-    - name: Push html to omnizart-doc repo
-      run: |
-        eval $(ssh-agent -s)
-        ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
-        cp -r docs/build/html/* omnizart-doc
-        cd omnizart-doc
-        git add .
-        utc_time=`date --utc`
-        git commit -m "Update through github action ${utc_time}"
-        git push origin master
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libsndfile1
+          ./scripts/install.sh
+          pip install sphinx sphinx-press-theme sphinx-click numpydoc
+      - name: Build html
+        env:
+          PYTHONPATH: ../
+        run: |
+          pwd
+          cd docs
+          make html
+      - name: Clone documentation repo
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
+          git clone git@github.com:Music-and-Culture-Technology-Lab/omnizart-doc.git
+          git config --global user.name "omnizart-actions"
+      - name: Push html to omnizart-doc repo
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add - <<< "${{ secrets.OMNIZART_DOC_PRIVATE_KEY }}"
+          cp -r docs/build/html/* omnizart-doc
+          cd omnizart-doc
+          git add .
+          utc_time=`date --utc`
+          git commit -m "Update through github action ${utc_time}"
+          git push origin master
 
 
 
