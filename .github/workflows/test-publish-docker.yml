@@ -1,0 +1,32 @@
+name: test-publish-docker
+
+on:
+  push:
+    branches: [ github-workflow ]
+    tags:
+      - 'v*-test'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: Login to docker
+        uses: docker/login-action@v1
+        with:
+          username: mctlab
+          password: ${{ secrets.DOCKER_HUB_PASSWD }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Publish docker image
+        env:
+          TAG: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          docker build -t omnizart:${TAG} .
+          docker tag omnizart:${TAG} mctlab/omnizart:${TAG}
+          docker push mctlab/omnizart:${TAG}
