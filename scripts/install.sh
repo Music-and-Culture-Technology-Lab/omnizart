@@ -100,4 +100,7 @@ fi
 
 omnizart download-checkpoints
 
-echo -e "\nTo activate the environment, run the following command:\n source .venv/bin/activate"
+if [ "$USE_VENV" = "true" ]; then
+    echo -e "\nTo activate the environment, run the following command:\n source .venv/bin/activate"
+fi
+

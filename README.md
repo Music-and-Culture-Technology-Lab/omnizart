@@ -2,9 +2,28 @@
 
 ![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)
 ![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)
+[![PyPI version](https://badge.fury.io/py/omnizart.svg)](https://badge.fury.io/py/omnizart)
+![PyPI - License](https://img.shields.io/pypi/l/omnizart)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/omnizart)
 
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
+
+A quick-start example is as following:
+``` bash
+# Install omnizart
+pip install omnizart
+
+# Download the checkpoints after installation
+omnizart download-checkpoints
+
+# Now it's ready for the transcription~
+omnizart drum transcribe <path/to/audio.wav>
+omnizart chord transcribe <path/to/audio.wav>
+omnizart music transcribe <path/to/audio.wav>
+```
+
+
 
 Comprehensive usage and API references can be found in the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
 
@@ -25,9 +44,9 @@ invisible bugs that cause the training fails to converge compared to the author'
 
 Example usage
 <pre>
-omnizart transcribe music <i>path/to/audio</i>
-omnizart transcribe chord <i>path/to/audio</i>
-omnizart transcribe drum <i>path/to/audio</i>
+omnizart music transcribe <i>path/to/audio</i>
+omnizart chord transcribe <i>path/to/audio</i>
+omnizart drum transcribe <i>path/to/audio</i>
 </pre>
 
 For training a new model, download the dataset first and follow steps described below.
@@ -49,12 +68,9 @@ Describes the neccessary background of how to develop this project.
 git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
 
 # Install dependenies. For more different installation approaches, please refer to the official documentation page.
+# The following command will download the checkpoints automatically.
 cd omnizart
 make install
-
-# After installation, download the archived checkpionts by executing the following command.
-# The checkpoints will be stored under omnizart/checkpoints
-omnizart download-checkpoints
 
 # For developers, you have to install Dev dependencies as well, since they will not be installed by default.
 poetry install
