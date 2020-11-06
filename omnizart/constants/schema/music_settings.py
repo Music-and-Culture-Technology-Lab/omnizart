@@ -172,7 +172,8 @@ TRAINING_SCHEMA = {
                     ]
                 ),
                 "Channels": list_unit("string", choices=["Spec", "GCoS", "Ceps"]),
-                "Timesteps": simple_unit("integer")
+                "Timesteps": simple_unit("integer"),
+                "FeatureNum": simple_unit("integer")
             },
             "required": [
                 "Epoch",
@@ -184,7 +185,8 @@ TRAINING_SCHEMA = {
                 "LossFunction",
                 "LabelType",
                 "Channels",
-                "Timesteps"
+                "Timesteps",
+                "FeatureNum"
             ],
             "additionalProperties": False
         }

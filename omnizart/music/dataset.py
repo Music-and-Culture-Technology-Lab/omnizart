@@ -5,6 +5,7 @@ import pickle
 import random
 
 import h5py
+import numpy as np
 import tensorflow as tf
 
 from omnizart.music.labels import LabelType
@@ -130,7 +131,8 @@ class FeatureLoader:
         feature_files=None,
         num_samples=100,
         timesteps=128,
-        channels=[1, 3]
+        channels=[1, 3],
+        feature_num=352
     ):
         if feature_files is None:
             assert feature_folder is not None
@@ -153,6 +155,12 @@ class FeatureLoader:
             self.pkls[hdf] = pickle.load(open(hdf.replace(".hdf", ".pickle"), "rb"))["label"]
         self.hdf_keys = list(self.hdf_refs.keys())
 
+        ori_feature_num = ref["feature"].shape[1]
+        diff = feature_num - ori_feature_num
+        pad_b = diff // 2
+        pad_t = diff - pad_b
+        self.pad_shape = ((0, 0), (pad_b, pad_t), (0, 0))
+
     def __iter__(self):
         half_slice_len = int(round(self.timesteps / 2))
         for _ in range(self.num_samples):
@@ -164,8 +172,10 @@ class FeatureLoader:
             slice_range = range(center_id-half_slice_len, center_id+half_slice_len)  # noqa: E226
 
             feature = self.hdf_refs[key]["feature"][slice_range][:]
+            feature = np.pad(feature[:, :, self.channels], self.pad_shape, constant_values=0)
             label = self.pkls[key][slice_range[0]:slice_range[-1]+1]  # noqa: E226
-            yield feature[:, :, self.channels], self.conv_func(label)
+            label = np.pad(self.conv_func(label), self.pad_shape, constant_values=0)
+            yield feature, label
 
 
 def get_dataset(
@@ -175,7 +185,8 @@ def get_dataset(
     batch_size=8,
     steps=100,
     timesteps=128,
-    channels=[1, 3]
+    channels=[1, 3],
+    feature_num=352
 ):
     """Get the dataset instance.
 
@@ -202,6 +213,14 @@ def get_dataset(
         Time length of the feature.
     channels: list[int]
         Channels to be used for training. Allowed values are [1, 2, 3].
+    feature_num: int
+        Target input size of feature dimension. Padding zeros to the bottom and top
+        if the input feature size and target size is inconsistent.
+
+    Returns
+    -------
+    dataset: tf.data.Dataset
+        A tensorflow dataset instance.
     """
     loader = FeatureLoader(
         label_conversion_func,
@@ -209,7 +228,8 @@ def get_dataset(
         feature_files=feature_files,
         num_samples=batch_size*steps,  # noqa: E226
         timesteps=timesteps,
-        channels=channels
+        channels=channels,
+        feature_num=feature_num
     )
 
     def gen_wrapper():

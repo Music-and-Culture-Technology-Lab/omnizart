@@ -183,11 +183,7 @@ def label_conversion(
 
     pad_b = (feature_num - output.shape[1]) // 2
     pad_t = feature_num - pad_b - output.shape[1]
-    b_shape = (len(output), pad_b, output.shape[2])
-    t_shape = (len(output), pad_t, output.shape[2])
-    bottom = np.zeros(b_shape)
-    top = np.zeros(t_shape)
-    output = np.concatenate([bottom, output, top], axis=1)
+    output = np.pad(output, ((0, 0), (pad_b, pad_t), (0, 0)), constant_values=0)
 
     if mpe:
         mpe_label = np.nanmax(output[:, :, 1:], axis=2)
@@ -352,7 +348,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
 
         end_note = max(label_list, key=lambda label: label.end_time)
         num_frm = int(round(end_note.end_time / t_unit))
-        label_obj = [{}] * num_frm
+        label_obj = [{} for _ in range(num_frm)]
         for label in label_list:
             start_frm = int(round(label.start_time / t_unit))
             end_frm = int(round(label.end_time / t_unit))

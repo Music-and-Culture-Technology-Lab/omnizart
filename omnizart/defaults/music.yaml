@@ -166,5 +166,8 @@ General:
                 Description: Length of time axis of the input feature.
                 Type: Integer
                 Value: 256
-
+            FeatureNum:
+                Description: The target size of feature dimension.
+                Type: Integer
+                Value: 352
 
