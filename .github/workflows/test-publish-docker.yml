@@ -3,6 +3,8 @@ name: test-publish-docker
 on:
   push:
     branches: [ github-workflow ]
+    tags:
+      - 'v*-test'
 
 jobs:
   build:
