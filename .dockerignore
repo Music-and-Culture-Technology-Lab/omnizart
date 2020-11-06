@@ -1,0 +1,10 @@
+.git/
+.vscode/
+.pytest_cache/
+.venv/
+__pycache__/
+checkpoints/
+bootstrap_data/
+docs/
+build/
+dist/
