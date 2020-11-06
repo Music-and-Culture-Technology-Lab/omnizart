@@ -24,6 +24,21 @@ jobs:
           poetry build
           poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
           poetry publish
+      - name: Login to docker
+        uses: docker/login-action@v1
+        with:
+          username: mctlab
+          password: ${{ secrets.DOCKER_HUB_PASSWD }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Publish docker image
+        env:
+          TAG: ${{ steps.get_version.outputs.VERSION }}
+        run: |
+          docker build -t omnizart:${TAG} .
+          docker tag omnizart:${TAG} mctlab/omnizart:${TAG}
+          docker push mctlab/omnizart:${TAG}
       - name: Create release
         uses: actions/create-release@v1
         env: 
@@ -32,5 +47,5 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body_path: CHANGELOG.md
-          prelease: true
+          prereleased: true
           draft: true
