@@ -37,7 +37,8 @@ jobs:
         run: |
           docker build -t omnizart:${TAG} .
           docker tag omnizart:${TAG} mctlab/omnizart:${TAG}
-          docker push mctlab/omnizart:${TAG}
+          docker tag omnizart:${TAG} mctlab/omnizart:latest
+          docker push mctlab/omnizart
       - name: Create release
         uses: actions/create-release@v1
         env: 
@@ -46,5 +47,5 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body_path: CHANGELOG.md
-          prereleased: true
+          prerelease: true
           draft: true
