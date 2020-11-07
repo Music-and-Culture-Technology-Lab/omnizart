@@ -155,8 +155,8 @@ class FeatureLoader:
             self.pkls[hdf] = pickle.load(open(hdf.replace(".hdf", ".pickle"), "rb"))["label"]
         self.hdf_keys = list(self.hdf_refs.keys())
 
-        ori_feature_num = ref["feature"].shape[1]
-        diff = feature_num - ori_feature_num
+        ori_feature_num = list(self.hdf_refs.values())[0]["feature"]
+        diff = feature_num - ori_feature_num.shape[1]
         pad_b = diff // 2
         pad_t = diff - pad_b
         self.pad_shape = ((0, 0), (pad_b, pad_t), (0, 0))
@@ -244,6 +244,8 @@ def get_dataset(
 
 if __name__ == "__main__":
     l_type = LabelType("note-stream")
+    conv_func = l_type.get_conversion_func()
     FEAT_FOLDER = "/host/home/76_pop_rhythm/train_feature/slice"
-    # loader = FeatureLoader(feature_folder=FEAT_FOLDER)
-    dataset = get_dataset(l_type.get_conversion_func(), feature_folder=FEAT_FOLDER)
+    FEAT_FILES = ["/data/omnizart/checkpoints/2298.hdf"]
+    loader = FeatureLoader(conv_func, feature_files=FEAT_FILES)
+    #dataset = get_dataset(conv_func, feature_folder=FEAT_FOLDER)

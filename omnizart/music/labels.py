@@ -169,8 +169,7 @@ def label_conversion(
 
         for pitch, insts in lab.items():
             for inst, prob in insts.items():
-                # TODO: Remove minus one in future!!
-                inst = int(inst) - 1
+                inst = int(inst)
                 if inst not in channel_mapping:
                     continue
 
@@ -431,7 +430,7 @@ class MusicNetLabelExtraction(BaseLabelExtraction):
             for row in reader:
                 onset = float(row["start_time"]) / sample_rate
                 offset = float(row["end_time"]) / sample_rate
-                inst = int(row["instrument"])
+                inst = int(row["instrument"]) - 1
                 note = int(row["note"])
                 start_beat = float(row["start_beat"])
                 end_beat = float(row["end_beat"])
