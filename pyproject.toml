@@ -17,7 +17,8 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python3.6",
+    "Programming Language :: Python :: 3 :: Only",
+
 ]
 exclude = ["weights*"]
 
