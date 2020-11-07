@@ -80,5 +80,7 @@ General:
         Value: 8
       ValSteps:
         Value: 500
+      FeatureNum:
+        Value: 352
   TranscriptionMode:
     Value: Pop

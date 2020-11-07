@@ -70,12 +70,17 @@ def download_checkpoints():
         "music_pop": {
             "fid": "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
             "save_as": "checkpoints/music/music_pop/weights.h5",
-            "file_length": 31892440
+            "file_length": 33813824
         },
         "music_piano": {
             "fid": "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
             "save_as": "checkpoints/music/music_piano/weights.h5",
             "file_length": 50738464
+        },
+        "music_note_stream": {
+            "fid": "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
+            "save_as": "checkpoints/music/music_piano/weights.h5",
+            "file_length": 33816384
         }
     }
 
