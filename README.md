@@ -27,7 +27,7 @@ omnizart music transcribe <path/to/audio.wav>
 Or use the docker image:
 ```
 docker pull mctlab/omnizart:latest
-docker run -it mctlab/omnziart:latest bash
+docker run -it mctlab/omnizart:latest bash
 ```
 
 Comprehensive usage and API references can be found in the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
