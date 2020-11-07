@@ -12,7 +12,12 @@ keywords = ["automatic music transcription", "drum transcription", "vocal transc
 classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: MIDI",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Version Control :: Git"
+    "Topic :: Documentation :: Sphinx",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python3.6",
 ]
 exclude = ["weights*"]
 
