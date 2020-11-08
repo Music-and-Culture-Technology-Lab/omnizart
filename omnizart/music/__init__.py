@@ -15,12 +15,15 @@ Columns in ``.hdf`` feature file:
 
 References
 ##########
-Technical details can be found in the publications [1]_ and [2]_.
+Technical details can be found in the publications [1]_, [2]_, and [3]_.
 
-.. [1] Wu, Yu-Te, Berlin Chen, and Li Su. "Automatic Music Yranscription Leveraging Generalized Cepstral Features and
+.. [1] Yu-Te Wu, Berlin Chen, and Li Su, "Multi-Instrument Automatic Music Transcription With Self-Attention-Based
+   Instance Segmentation." in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2020.
+
+.. [2] Wu, Yu-Te, Berlin Chen, and Li Su. "Automatic Music Yranscription Leveraging Generalized Cepstral Features and
    Deep Learning." IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2018.
 
-.. [2] Wu, Yu-Te, Berlin Chen, and Li Su. "Polyphonic Music Transcription with Semantic Segmentation."
+.. [3] Wu, Yu-Te, Berlin Chen, and Li Su. "Polyphonic Music Transcription with Semantic Segmentation."
    IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2019.
 """
 
