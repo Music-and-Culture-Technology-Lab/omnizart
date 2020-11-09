@@ -62,6 +62,7 @@ install_requires = \
  'pyyaml>=5.3.1,<6.0.0',
  'tensorflow>=2.3.0,<3.0.0',
  'tqdm>=4.49.0,<5.0.0',
+ 'urllib3>=1.25.11,<2.0.0',
  'vamp>=1.1.0,<2.0.0']
 
 entry_points = \
@@ -81,7 +82,7 @@ setup_kwargs = {
     'package_data': package_data,
     'install_requires': install_requires,
     'entry_points': entry_points,
-    'python_requires': '>=3.6',
+    'python_requires': '>=3.6,<4',
 }
 
 

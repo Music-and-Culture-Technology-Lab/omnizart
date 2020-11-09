@@ -23,7 +23,7 @@ classifiers = [
 exclude = ["weights*"]
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.6,<4"
 click = "^7.1.2"
 pretty_midi = "^0.2.9"
 librosa = "^0.8.0"
@@ -36,6 +36,7 @@ numba = "0.48"
 tqdm = "^4.49.0"
 pyfluidsynth = "^1.2.5"
 vamp = "^1.1.0"
+urllib3 = "^1.25.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
