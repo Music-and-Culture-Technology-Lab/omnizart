@@ -19,6 +19,7 @@ class BaseTranscription(metaclass=ABCMeta):
     def __init__(self, setting_class, conf_path=None):
         self.setting_class = setting_class
         self.settings = setting_class(conf_path=conf_path)
+        self.custom_objects = {}
 
     @abstractmethod
     def transcribe(self, input_audio, model_path, output="./"):

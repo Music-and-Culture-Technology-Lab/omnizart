@@ -11,7 +11,7 @@ def test_get_frame_by_time():
 
 
 def test_extract_patch_cqt(mocker):
-    with h5py.File("tests/resource/sample_feature.hdf") as fin:
+    with h5py.File("./tests/resource/sample_feature.hdf", "r") as fin:
         mini_beat_arr = fin["mini_beat_arr"][:]
         cqt = fin["cqt"][:]
         patch_cqt = fin["patch_cqt"][:]
