@@ -13,9 +13,9 @@ General:
         Type: Map
         SubType: [String, String]
         Value:
-            Piano: ./checkpoints/music/music_piano
-            Pop: ./checkpoints/music/music_pop
-            Stream: ./checkpoints/music/music_note_stream
+            Piano: checkpoints/music/music_piano
+            Pop: checkpoints/music/music_pop
+            Stream: checkpoints/music/music_note_stream
     Feature:
         Description: Default settings of feature extraction
         Settings:

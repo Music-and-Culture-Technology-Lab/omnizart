@@ -79,7 +79,7 @@ def download_checkpoints():
         },
         "music_note_stream": {
             "fid": "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
-            "save_as": "checkpoints/music/music_piano/weights.h5",
+            "save_as": "checkpoints/music/music_pop/weights.h5",
             "file_length": 33816384
         }
     }
