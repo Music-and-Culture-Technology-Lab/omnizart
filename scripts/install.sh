@@ -26,6 +26,15 @@ if [ "$USE_VENV" = "true" ]; then echo "Using $VENV_APPROACH to create virtual e
 
 
 
+upgrade_pkg() {
+    python3 -m pip install --upgrade pip
+
+    # Some packages have some problem installing with poetry.
+    # Thus manually install them here.
+    pip install --upgrade setuptools
+    pip install wheel
+}
+
 activate_venv_with_poetry() {
     # Create virtual environment.
     poetry shell
@@ -52,6 +61,7 @@ install_with_pip() {
     # and requirements.txt.
     pip install madmom --use-feature=2020-resolver
 
+    pip install -r requirements.txt
     python3 setup.py install 
 }
 
@@ -69,11 +79,7 @@ check_if_venv_activated() {
 
 # ------------ Start Installation ------------ #
 # Need to upgrade pip first, or latter installation may fail.
-pip install --upgrade pip
-
-# Some packages have some problem installing with poetry.
-# Thus manually install them here.
-pip install --upgrade setuptools
+upgrade_pkg
 
 if [ "$VENV_APPROACH" = "poetry"  ]; then
     # Check if poetry is installed
@@ -85,12 +91,14 @@ if [ "$VENV_APPROACH" = "poetry"  ]; then
     if [ "$USE_VENV" = "true" ]; then
         activate_venv_with_venv
         check_if_venv_activated
+        upgrade_pkg
     fi
     install_with_poetry
 elif [ "$VENV_APPROACH" = "venv" ]; then
     if [ "$USE_VENV" = "venv" ]; then
         activate_venv_with_venv
         check_if_venv_activated
+        upgrade_pkg
     fi
     install_with_pip
 else
