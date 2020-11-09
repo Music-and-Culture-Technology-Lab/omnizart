@@ -248,4 +248,4 @@ if __name__ == "__main__":
     FEAT_FOLDER = "/host/home/76_pop_rhythm/train_feature/slice"
     FEAT_FILES = ["/data/omnizart/checkpoints/2298.hdf"]
     loader = FeatureLoader(conv_func, feature_files=FEAT_FILES)
-    #dataset = get_dataset(conv_func, feature_folder=FEAT_FOLDER)
+    # dataset = get_dataset(conv_func, feature_folder=FEAT_FOLDER)

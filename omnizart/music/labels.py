@@ -39,6 +39,8 @@ class LabelType:
 
         self._classical_channel_mapping = self._init_classical_channel_mapping()
         self._pop_channel_mapping = self._init_pop_channel_mapping()
+        self._classical_midi_types = len(set(self._classical_channel_mapping.values()))
+        self._pop_midi_types = len(set(self._pop_channel_mapping.values()))
 
         self.mode_mapping = {
             "true-frame": {"conversion_func": self.get_frame, "out_classes": 2},
@@ -74,13 +76,16 @@ class LabelType:
         return self.mode_mapping[self.mode]["out_classes"]
 
     def get_frame(self, label):
-        return label_conversion(label, channel_mapping=self._classical_channel_mapping, mpe=True)
+        frame = label_conversion(label, channel_mapping=self._classical_channel_mapping, mpe=True)
+        off = 1.0 - frame
+        off = np.expand_dims(off, 2)
+        return np.dstack([off, frame])
 
     def get_frame_onset(self, label):
         frame = self.get_frame(label)
         onset = label_conversion(
             label, channel_mapping=self._classical_channel_mapping, onsets=True, mpe=True
-        )[:, :, 1]
+        )
 
         frame[:, :, 1] -= onset
         frm_on = np.dstack([frame, onset])
@@ -89,16 +94,19 @@ class LabelType:
         return frm_on
 
     def multi_inst_frm(self, label):
-        return label_conversion(label, channel_mapping=self._classical_channel_mapping)
+        frame = label_conversion(label, channel_mapping=self._classical_channel_mapping)
+        off = 1.0 - np.sum(frame, axis=2)
+        off = np.expand_dims(off, 2)
+        return np.dstack([off, frame])
 
     def multi_inst_note(self, label):
         onsets = label_conversion(label, channel_mapping=self._classical_channel_mapping, onsets=True)
         dura = label_conversion(label, channel_mapping=self._classical_channel_mapping) - onsets
         out = np.zeros(onsets.shape[:-1] + (23,))
 
-        for i in range(len(set(self._classical_channel_mapping.values()))):
-            out[:, :, i*2+2] = onsets[:, :, i+1]  # noqa: E226
-            out[:, :, i*2+1] = dura[:, :, i+1]  # noqa: E226
+        for i in range(self._classical_midi_types):
+            out[:, :, i*2+2] = onsets[:, :, i]  # noqa: E226
+            out[:, :, i*2+1] = dura[:, :, i]  # noqa: E226
         out[:, :, 0] = 1 - np.sum(out[:, :, 1:], axis=2)
 
         return out
@@ -112,9 +120,9 @@ class LabelType:
         ) - onsets
         out = np.zeros(onsets.shape[:-1] + (13,))
 
-        for i in range(len(set(self._pop_channel_mapping.values()))):
-            out[:, :, i*2+2] = onsets[:, :, i+1]  # noqa: E226
-            out[:, :, i*2+1] = dura[:, :, i+1]  # noqa: E226
+        for i in range(self._pop_midi_types):
+            out[:, :, i*2+2] = onsets[:, :, i]  # noqa: E226
+            out[:, :, i*2+1] = dura[:, :, i]  # noqa: E226
         out[:, :, 0] = 1 - np.sum(out[:, :, 1:], axis=2)
 
         return out
@@ -161,8 +169,8 @@ def label_conversion(
     if channel_mapping is None:
         channel_mapping = {i: i for i in range(1, 129)}
 
-    inst_num = len(set(channel_mapping.keys()))
-    output = np.zeros((len(label), ori_feature_size, inst_num+1))  # noqa: E226
+    inst_num = len(set(channel_mapping.values()))
+    output = np.zeros((len(label), ori_feature_size, inst_num))  # noqa: E226
     for t, lab in enumerate(label):
         if len(lab) == 0:
             continue
@@ -174,21 +182,20 @@ def label_conversion(
                     continue
 
                 pitch = int(pitch)
-                channel = channel_mapping[inst]
+                channel = channel_mapping[inst] - 1
                 output[t, pitch*scale:(pitch+1)*scale, channel] = prob  # noqa: E226
 
     if not onsets:
-        output = np.where(output > 0, 1, 0)
+        output[output>0] = 1  # noqa: E225
 
     pad_b = (feature_num - output.shape[1]) // 2
     pad_t = feature_num - pad_b - output.shape[1]
-    output = np.pad(output, ((0, 0), (pad_b, pad_t), (0, 0)), constant_values=0)
+    if pad_b > 0 or pad_t > 0:
+        output = np.pad(output, ((0, 0), (pad_b, pad_t), (0, 0)), constant_values=0)
 
     if mpe:
-        mpe_label = np.nanmax(output[:, :, 1:], axis=2)
-        output = np.dstack([output[:, :, 0], mpe_label])
+        output = np.nanmax(output, axis=2)
 
-    output[:, :, 0] = 1 - np.sum(output[:, :, 1:], axis=2)
     return output
 
 
