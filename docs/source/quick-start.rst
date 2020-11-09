@@ -96,5 +96,5 @@ and representative information.
 
 .. code-block:: bash
 
-    omnizart transcribe all <path/to/audio.wav>
+    omnizart music transcribe <path/to/audio.wav>
 
