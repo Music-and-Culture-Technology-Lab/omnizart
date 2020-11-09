@@ -1,6 +1,19 @@
 # Changelog
 
-## 0.1.0-beta.0 - 2020-11-05
+## 0.1.0-beta.2
+
+### Enhancement
+- Better dealing with the input model path.
+- Better approach for resolving dataset path when given with "./".
+- Add documentation for Conda user for manually install omnizart.
+
+### Bug Fix
+- Fix wrong save path of checkpoints.
+- Fix installation script for not upgrading pip after activating virtual environment.
+
+---
+
+## 0.1.0-beta.1 - 2020-11-08
 
 First release of `omnizart` CLI tool, as well as a python package.
 
