@@ -41,6 +41,7 @@ class BaseTranscription(metaclass=ABCMeta):
         return model, settings
 
     def _resolve_model_path(self, model_path=None):
+        model_path = os.path.abspath(model_path) if model_path is not None else None
         if model_path in self.settings.checkpoint_path:
             # The given model_path is actually the 'mode'.
             default_path = self.settings.checkpoint_path[model_path]
@@ -61,7 +62,7 @@ class BaseTranscription(metaclass=ABCMeta):
             cand_dirs = [c_dir for c_dir in dirs if c_dir.startswith(prefix)]
 
             if len(cand_dirs) == 0:  # pylint: disable=R1720
-                raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}.")
+                raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}")
             elif len(cand_dirs) > 1:
                 logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
             model_path = os.path.join(model_path, cand_dirs[0])

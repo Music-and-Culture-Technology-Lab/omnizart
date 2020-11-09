@@ -384,7 +384,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
 
 
 def _resolve_dataset_type(dataset_path):
-    low_path = dataset_path.lower()
+    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
     keywords = {"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
     d_type = [val for key, val in keywords.items() if key in low_path]
     if len(d_type) == 0:
