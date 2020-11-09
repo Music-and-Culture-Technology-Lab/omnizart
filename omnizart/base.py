@@ -48,6 +48,7 @@ class BaseTranscription(metaclass=ABCMeta):
             logger.info("Using built-in model %s for transcription.", model_path)
         else:
             model_path = os.path.abspath(model_path) if model_path is not None else None
+            logger.debug("Absolute path of the given model: %s", model_path)
             if model_path is None:
                 default_path = self.settings.checkpoint_path[self.settings.transcription_mode]
                 model_path = os.path.join(MODULE_PATH, default_path)
