@@ -48,6 +48,7 @@ jobs:
         run: |
           sudo apt-get install libsndfile1
           if [ ${{ matrix.python-version }} = "3.6" ]; then
+            echo "I'm here~"
             export DEFAULT_INSTALL_APPROACH=pip
           fi
           ./scripts/install.sh

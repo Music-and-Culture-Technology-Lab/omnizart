@@ -24,6 +24,15 @@ INSTALL_APPROACH="${DEFAULT_INSTALL_APPROACH:=poetry}"
 if [ "$USE_VENV" = "true" ]; then echo "Using $INSTALL_APPROACH to create virtual environment"; fi
 
 
+upgrade_pkg() {
+    python3 -m pip install --upgrade pip
+
+    # Some packages have some problem installing with poetry.
+    # Thus manually install them here.
+    pip install --upgrade setuptools
+    pip install wheel
+}
+
 
 upgrade_pkg() {
     python3 -m pip install --upgrade pip
@@ -110,4 +119,3 @@ omnizart download-checkpoints
 if [ "$USE_VENV" = "true" ]; then
     echo -e "\nTo activate the environment, run the following command:\n source .venv/bin/activate"
 fi
-
