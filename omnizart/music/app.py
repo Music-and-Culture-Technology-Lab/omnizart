@@ -88,7 +88,12 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
-        pred = predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
+        pred = predict(
+            feature[:, :, channels],
+            model,
+            timesteps=model_settings.training.timesteps,
+            feature_num=model_settings.training.feature_num
+        )
 
         logger.info("Infering notes....")
         midi = multi_inst_note_inference(
@@ -109,7 +114,7 @@ class MusicTranscription(BaseTranscription):
             midi.write(save_to)
             logger.info("MIDI file has been written to %s", save_to)
         if os.environ.get("LOG_LEVEL", "") == "debug":
-            dump_pickle({"pred": pred}, jpath(save_to, "debug_pred.pickle"))
+            dump_pickle({"pred": pred}, "./debug_pred.pickle")
 
         logger.info("Transcription finished")
         return midi
@@ -265,7 +270,8 @@ class MusicTranscription(BaseTranscription):
             batch_size=settings.training.batch_size,
             steps=settings.training.steps,
             timesteps=settings.training.timesteps,
-            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels]
+            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
+            feature_num=settings.training.feature_num
         )
         val_dataset = get_dataset(
             l_type.get_conversion_func(),
@@ -273,7 +279,8 @@ class MusicTranscription(BaseTranscription):
             batch_size=settings.training.val_batch_size,
             steps=settings.training.val_steps,
             timesteps=settings.training.timesteps,
-            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels]
+            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
+            feature_num=settings.training.feature_num
         )
 
         if input_model_path is None:
@@ -377,7 +384,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
 
 
 def _resolve_dataset_type(dataset_path):
-    low_path = dataset_path.lower()
+    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
     keywords = {"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
     d_type = [val for key, val in keywords.items() if key in low_path]
     if len(d_type) == 0:

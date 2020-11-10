@@ -69,13 +69,13 @@ General:
       Epoch:
         Value: 20
       LabelType:
-        Value: pop-note-stream
+        Value: note-stream
       LossFunction:
         Value: smooth
       Steps:
         Value: 3000
       Timesteps:
-        Value: 256
+        Value: 128
       ValBatchSize:
         Value: 8
       ValSteps:

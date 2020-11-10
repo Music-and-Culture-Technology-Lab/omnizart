@@ -30,6 +30,9 @@ omnizart.egg-info/
 docs/build/
 build/
 
+# Large files
+sample_feature.hdf
+
 # Other files
 checkpoints/
 test.sh

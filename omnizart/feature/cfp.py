@@ -164,7 +164,7 @@ def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_
             max_workers=3)
     )
     for idx, (feat_list, slice_idx) in feat_generator:
-        logger.debug("Slice feature extraced: %d/%d", idx+1, len(slice_list))
+        logger.debug("Slice feature extracted: %d/%d", idx+1, len(slice_list))
         tfrL0, tfrLF, tfrLQ, f, q, t, cen_freq = feat_list
         tmpL0[slice_idx] = tfrL0
         tmpLF[slice_idx] = tfrLF

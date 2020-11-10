@@ -44,12 +44,14 @@ system-wide this time.
     # Install with virtual environment
     ./scripts/install.sh venv
 
-    # Use 'poetry' for installation
-    export DEFAULT_VENV_APPROACH=poetry
-    ./scripts/install.sh
-
+    ## For conda user, the following approach is recommanded, since there
+    ## are some conflicts between poetry and conda.
     # Use built-in 'venv' libarary for installation
     export DEFAULT_VENV_APPROACH=venv
+    ./scripts/install.sh
+
+    # Use 'poetry' for installation
+    export DEFAULT_VENV_APPROACH=poetry
     ./scripts/install.sh
 
 
@@ -96,5 +98,5 @@ and representative information.
 
 .. code-block:: bash
 
-    omnizart transcribe all <path/to/audio.wav>
+    omnizart music transcribe <path/to/audio.wav>
 

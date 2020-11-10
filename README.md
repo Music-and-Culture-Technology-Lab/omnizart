@@ -1,10 +1,34 @@
 # omnizart
 
 ![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)
-![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)
+[![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)](https://music-and-culture-technology-lab.github.io/omnizart-doc/)
+[![PyPI version](https://badge.fury.io/py/omnizart.svg)](https://badge.fury.io/py/omnizart)
+![PyPI - License](https://img.shields.io/pypi/l/omnizart)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/omnizart)](https://pypistats.org/packages/omnizart)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mctlab/omnizart)](https://hub.docker.com/r/mctlab/omnizart)
 
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
+
+A quick-start example is as following:
+``` bash
+# Install omnizart
+pip install omnizart
+
+# Download the checkpoints after installation
+omnizart download-checkpoints
+
+# Now it's ready for the transcription~
+omnizart drum transcribe <path/to/audio.wav>
+omnizart chord transcribe <path/to/audio.wav>
+omnizart music transcribe <path/to/audio.wav>
+```
+
+Or use the docker image:
+```
+docker pull mctlab/omnizart:latest
+docker run -it mctlab/omnizart:latest bash
+```
 
 Comprehensive usage and API references can be found in the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
 
@@ -25,9 +49,9 @@ invisible bugs that cause the training fails to converge compared to the author'
 
 Example usage
 <pre>
-omnizart transcribe music <i>path/to/audio</i>
-omnizart transcribe chord <i>path/to/audio</i>
-omnizart transcribe drum <i>path/to/audio</i>
+omnizart music transcribe <i>path/to/audio</i>
+omnizart chord transcribe <i>path/to/audio</i>
+omnizart drum transcribe <i>path/to/audio</i>
 </pre>
 
 For training a new model, download the dataset first and follow steps described below.
@@ -49,12 +73,9 @@ Describes the neccessary background of how to develop this project.
 git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
 
 # Install dependenies. For more different installation approaches, please refer to the official documentation page.
+# The following command will download the checkpoints automatically.
 cd omnizart
 make install
-
-# After installation, download the archived checkpionts by executing the following command.
-# The checkpoints will be stored under omnizart/checkpoints
-omnizart download-checkpoints
 
 # For developers, you have to install Dev dependencies as well, since they will not be installed by default.
 poetry install
@@ -98,6 +119,7 @@ Uses github actions for automatic linting, unittesting, document building, and p
 Currently supports two workflows:
 * General check
 * Documentation page publishing
+* Publish PyPI package and docker image
 
 ### General Check
 Everytime you push to the master branch, file a pull request, and merge into master branch, will trigger
@@ -121,8 +143,37 @@ Steps to update the documentation page:
 * Merge into `build_doc` branch (by admin)
 * Push to this repo (by admin)
 
+### Publish PyPI Package and Docker Image
+Publish the python package to PyPI and also the docker image to dockerhub when push tags to the repository.
+The publish process will be automatically done by the github actions. There are several steps in the process:
+
+1. Pack and publish the python package.
+2. Build the docker image and publish to Docker Hub.
+3. Create release -> this will also trigger the automation of documentation publishment.
+
+
 ## Docker
-Pack everything into a docker file. Under construction...
+We provide both the Dockerfile for local image build and also the pre-build image on Docker Hub.
+
+To build the image, run the following:
+```
+docker build -t omnizart:my-image .
+```
+
+To use the pre-build image, follow below steps:
+```
+# Download from Docker Hub
+docker pull mctlab/omnizart
+
+# Execute the image
+docker run -it mctlab/omnizart:latest
+
+### For those who want to leverage the power of GPU for acceleration, make sure
+### you have installed docker>=19.03 and the 'nvidia-container-toolkit' package.
+# Execute the docker with GPU support
+docker run --gpus all -it mctlab/omnizart:latest
+```
+
 
 ## Command Test
 To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 

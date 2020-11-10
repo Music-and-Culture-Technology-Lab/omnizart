@@ -13,6 +13,8 @@ def transcribe(input_audio, model_path, output):
     This will output a MIDI file with the same name as the given audio, except the
     extension will be replaced with '.mid'.
 
+    Supported modes are: Piano, Stream, Pop
+
     \b
     Example Usage
     $ omnizart music transcribe \ 

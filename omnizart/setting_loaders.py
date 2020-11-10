@@ -94,6 +94,7 @@ class MusicSettings(Settings):
             self.label_type: str = None
             self.channels: list = None
             self.timesteps: int = None
+            self.feature_num: int = None
 
 
 @json_serializable(key_path="./General", value_path="./Value")

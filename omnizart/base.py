@@ -19,6 +19,7 @@ class BaseTranscription(metaclass=ABCMeta):
     def __init__(self, setting_class, conf_path=None):
         self.setting_class = setting_class
         self.settings = setting_class(conf_path=conf_path)
+        self.custom_objects = {}
 
     @abstractmethod
     def transcribe(self, input_audio, model_path, output="./"):
@@ -45,25 +46,28 @@ class BaseTranscription(metaclass=ABCMeta):
             default_path = self.settings.checkpoint_path[model_path]
             model_path = os.path.join(MODULE_PATH, default_path)
             logger.info("Using built-in model %s for transcription.", model_path)
-        elif model_path is None:
-            default_path = self.settings.checkpoint_path[self.settings.transcription_mode]
-            model_path = os.path.join(MODULE_PATH, default_path)
-            logger.info("Using built-in model %s for transcription.", model_path)
-        elif not os.path.exists(model_path):
-            raise FileNotFoundError(f"The given path doesn't exist: {model_path}.")
-        elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \
-                and not set(["arch.yaml", "weights.h5", "configurations.yaml"]).issubset(os.listdir(model_path)):
+        else:
+            model_path = os.path.abspath(model_path) if model_path is not None else None
+            logger.debug("Absolute path of the given model: %s", model_path)
+            if model_path is None:
+                default_path = self.settings.checkpoint_path[self.settings.transcription_mode]
+                model_path = os.path.join(MODULE_PATH, default_path)
+                logger.info("Using built-in model %s for transcription.", model_path)
+            elif not os.path.exists(model_path):
+                raise FileNotFoundError(f"The given path doesn't exist: {model_path}.")
+            elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \
+                    and not set(["arch.yaml", "weights.h5", "configurations.yaml"]).issubset(os.listdir(model_path)):
 
-            # Search checkpoint folders under the given path
-            dirs = [c_dir for c_dir in os.listdir(model_path) if os.path.isdir(c_dir)]
-            prefix = self.settings.model.save_prefix.lower()
-            cand_dirs = [c_dir for c_dir in dirs if c_dir.startswith(prefix)]
+                # Search checkpoint folders under the given path
+                dirs = [c_dir for c_dir in os.listdir(model_path) if os.path.isdir(c_dir)]
+                prefix = self.settings.model.save_prefix.lower()
+                cand_dirs = [c_dir for c_dir in dirs if c_dir.startswith(prefix)]
 
-            if len(cand_dirs) == 0:  # pylint: disable=R1720
-                raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}.")
-            elif len(cand_dirs) > 1:
-                logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
-            model_path = os.path.join(model_path, cand_dirs[0])
+                if len(cand_dirs) == 0:  # pylint: disable=R1720
+                    raise FileNotFoundError(f"No checkpoint of {prefix} found in {model_path}")
+                elif len(cand_dirs) > 1:
+                    logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
+                model_path = os.path.join(model_path, cand_dirs[0])
 
         arch_path = os.path.join(model_path, "arch.yaml")
         weight_path = os.path.join(model_path, "weights.h5")

@@ -428,7 +428,7 @@ def multi_inst_note_inference(
     Publications can be found `here <https://bit.ly/2QhdWX5>`_.
     """
 
-    if mode in ["note-stream", "note"]:
+    if mode in ["note-stream", "note", "pop-note-stream"]:
         ch_per_inst = 2
     elif mode in ["frame-stream", "frame"]:
         ch_per_inst = 2
@@ -437,7 +437,7 @@ def multi_inst_note_inference(
         mode = "frame"
         ch_per_inst = 1
     else:
-        raise ValueError
+        raise ValueError(f"Unsupported mode: {mode}")
     assert (pred.shape[-1] - 1) % ch_per_inst == 0, f"Input shape: {pred.shape}"
 
     ch_container = []
