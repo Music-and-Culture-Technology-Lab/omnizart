@@ -48,13 +48,11 @@ jobs:
         run: |
           sudo apt-get install libsndfile1
           if [ ${{ matrix.python-version }} = "3.6" ]; then
-            echo "I'm here~"
             export DEFAULT_INSTALL_APPROACH=pip
           fi
           ./scripts/install.sh
+          omnizart download-checkpoints --output-path ./
           pip install flake8 pylint pytest pytest-cov pytest-mock
-          pacakge_location=`pip show tensorflow | grep Location`
-          echo 'Site-packages installed in "$pacakge_location"'
       - name: Check with linters
         run: |
           make lint

@@ -54,7 +54,8 @@ def download_dataset(dataset, output, unzip):
 
 
 @click.command()
-def download_checkpoints():
+@click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
+def download_checkpoints(output_path):
     """Downlaod the archived checkpoints of different models."""
     CHECKPOINTS = {
         "chord_v1": {
@@ -84,11 +85,17 @@ def download_checkpoints():
         }
     }
 
+    if output_path is not None:
+        abs_path = os.path.abspath(output_path)
+        output_path = os.path.join(abs_path, "omnizart")
+    else:
+        output_path = MODULE_PATH
+
     for checkpoint, info in CHECKPOINTS.items():
         print(f"Downloading checkpoints: {checkpoint}")
         save_name = os.path.basename(info["save_as"])
         save_path = os.path.dirname(info["save_as"])
-        save_path = os.path.join(MODULE_PATH, save_path)
+        save_path = os.path.join(output_path, save_path)
         download_large_file_from_google_drive(
             info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name
         )
