@@ -49,6 +49,7 @@ install_with_poetry() {
 install_with_pip() {
     # Install some tricky packages that cannot be resolved by setup.py
     # and requirements.txt.
+    pip install Cython
     pip install madmom --use-feature=2020-resolver
 
     python3 setup.py install 
