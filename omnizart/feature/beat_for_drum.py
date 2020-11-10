@@ -59,7 +59,7 @@ class MadmomBeatTracking:
             queue = {future_1: "dbn_down_beat", future_2: "dbn_beat", future_3: "beat"}
 
         results = {}
-        for future in concurrent.futures.as_completed(queue, timeout=120):
+        for future in concurrent.futures.as_completed(queue, timeout=600):
             func_name = queue[future]
             results[func_name] = future.result()
             logger.debug("Job %s finished.", func_name)
