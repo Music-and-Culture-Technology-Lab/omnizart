@@ -5,11 +5,10 @@ set -e
 # Script for installing the 'omnizart' command and the required packages.
 #
 # The script will first create a virtual environment, separating from the system's environment.
-# There are two approaches for creating the virtual env: poetry or venv. 
+# There are two approaches for installing the 'omnizart' pacakage: poetry or pip. 
 # The former relies on the third-party package 'poetry', and the latter is a built-in package.
-# This script uses venv as the default tool. You could also setup an environment variable
-# 'DEFAULT_VENV_APPROACH' to 'poetry' for using poetry to create virtual env and
-# install packages.
+# This script uses 'python -m venv .venv' to create the virutal environment for both
+# installation approaches.
 #
 # After creating virtual env with venv, the script automatically installs the
 # required packages and the 'omnizart' command in virtual env. As the installation
@@ -21,8 +20,8 @@ if [ ! -z "$1" ] && [ "$1" = "venv"  ]; then
     USE_VENV=true
 fi
 
-VENV_APPROACH="${DEFAULT_VENV_APPROACH:=poetry}"
-if [ "$USE_VENV" = "true" ]; then echo "Using $VENV_APPROACH to create virtual environment"; fi
+INSTALL_APPROACH="${DEFAULT_INSTALL_APPROACH:=poetry}"
+if [ "$USE_VENV" = "true" ]; then echo "Using $INSTALL_APPROACH to create virtual environment"; fi
 
 
 
@@ -81,7 +80,7 @@ check_if_venv_activated() {
 # Need to upgrade pip first, or latter installation may fail.
 upgrade_pkg
 
-if [ "$VENV_APPROACH" = "poetry"  ]; then
+if [ "$INSTALL_APPROACH" = "poetry"  ]; then
     # Check if poetry is installed
     if ! hash poetry 2>/dev/null; then
         echo "Installing poetry..."
@@ -94,7 +93,7 @@ if [ "$VENV_APPROACH" = "poetry"  ]; then
         upgrade_pkg
     fi
     install_with_poetry
-elif [ "$VENV_APPROACH" = "venv" ]; then
+elif [ "$INSTALL_APPROACH" = "pip" ]; then
     if [ "$USE_VENV" = "venv" ]; then
         activate_venv_with_venv
         check_if_venv_activated
