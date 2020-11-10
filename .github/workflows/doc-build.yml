@@ -8,6 +8,7 @@ name: docs
 on:
   push:
     branches: [ build_doc ]
+    tags: [ 'v*' ]
   release:
     branches: [ master, main ]
     type: [ published ]
