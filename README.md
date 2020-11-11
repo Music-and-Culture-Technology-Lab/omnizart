@@ -85,6 +85,14 @@ poetry install
 Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
 We still provide the above two files for convenience. You can also generate them by executing ``make export``.
 
+### ATTENTION
+There is a major difference between install with `poetry install` and `python setup.py install`. When using poetry for installation, which
+is the default approach when running `make insatll`, the site-pacakges and resource files aer placed in the **current** folder.
+This is different from executing `python setup.py install`, which resource files are installed in where a normal package you download through `pip install` will be placed (e.g. ~/.local/lib/python3.6/site-packages) .
+
+And why things aren't placed in the normal path, but the command still can be executed? The answer is that poetry add an additional package path to your *PATH*  environment variable, and guess what is that path? Bingo! Your current path where you can execute `poetry install`! What a big trap it is...
+
+
 ## Documentation
 Automatically generate documents from inline docstrings of module, class, and function. 
 [Hosted document page](http://140.109.21.96:8000/build/html/index.html)
@@ -112,7 +120,7 @@ to check the format manually after refacorting the code with tools.
 To format the code with black and yapf, enter `make format`.
 
 ## Unittest
-Uses `pytest` for unittesting. Under construction...
+Uses `pytest` for unittest. The overall coverage rate should pass 25%, or CI would fail.
 
 ## CI/CD
 Uses github actions for automatic linting, unittesting, document building, and package release.
@@ -176,4 +184,8 @@ docker run --gpus all -it mctlab/omnizart:latest
 
 
 ## Command Test
-To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 
+To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment.
+
+## Others
+### Log Level
+The default log level is set to `warn`. You can change it by exporting environment variable *LOG_LEVEL* to one of `debug`, `info`, `warning`, `error`, or `critical`. The verbosity is sorted from high to low (debug -> critical). For the consideration behind the log level design, please refer to the [soruce code](https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/utils.py#L20) or the [documentation page](https://music-and-culture-technology-lab.github.io/omnizart-doc/utils.html#omnizart.utils.get_logger)
