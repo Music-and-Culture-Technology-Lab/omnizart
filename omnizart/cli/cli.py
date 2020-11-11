@@ -16,7 +16,8 @@ import click
 import omnizart.constants.datasets as dset
 from omnizart import MODULE_PATH
 from omnizart.remote import download, download_large_file_from_google_drive
-from omnizart.utils import ensure_path_exists
+from omnizart.utils import ensure_path_exists, synth_midi
+from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music
 from omnizart.cli.drum import drum
 from omnizart.cli.chord import chord
@@ -101,9 +102,52 @@ def download_checkpoints(output_path):
         )
 
 
+@click.command()
+@click.argument("input_midi", type=click.Path(exists=True))
+@click.option(
+    "-o", "--output-path", help="Output path of the synthesized midi.", type=click.Path(writable=True), default="./"
+)
+@click.option("--sf2-path", help="Path to your own soundfont file.", type=click.Path(exists=True))
+def synth(input_midi, output_path, sf2_path):
+    """Synthesize the MIDI into wav file.
+
+    If --sf2-path is not specified, will use the default soundfont file same as used by MuseScore."
+    """
+    f_name, _ = os.path.splitext(os.path.basename(input_midi))
+    out_name = f"{f_name}_synth.wav"
+    if os.path.isdir(output_path):
+        # Specifies only directory without file name.
+        # Use the default file name.
+        ensure_path_exists(output_path)
+        output_file = os.path.join(output_path, out_name)
+    else:
+        # Already specified the output file name.
+        f_dir = os.path.dirname(output_path)
+        ensure_path_exists(f_dir)
+        output_file = output_path
+    click.echo(f"Output file as: {output_file}")
+
+    if sf2_path is None:
+        if not os.path.exists(SOUNDFONT_PATH):
+            # Download the default soundfont file.
+            click.echo("Downloading default sondfont file...")
+            download_large_file_from_google_drive(
+                url="16RM-dWKcNtjpBoo7DFSONpplPEg5ruvO",
+                file_length=31277462,
+                save_path=os.path.dirname(SOUNDFONT_PATH),
+                save_name=os.path.basename(SOUNDFONT_PATH)
+            )
+        sf2_path = SOUNDFONT_PATH
+
+    click.echo("Synthesizing MIDI...")
+    synth_midi(input_midi, output_path=output_file, sf2_path=sf2_path)
+    click.echo("Synthesize finished")
+
+
 entry.add_command(music)
 entry.add_command(drum)
 entry.add_command(chord)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)
 entry.add_command(download_checkpoints)
+entry.add_command(synth)
