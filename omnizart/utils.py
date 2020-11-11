@@ -2,10 +2,12 @@
 # pylint: disable=W0212,R0915,W0621
 import os
 import re
+import types
 import pickle
 import logging
 import uuid
 import concurrent.futures
+import importlib
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import yaml
@@ -346,3 +348,37 @@ def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_P
     midi = pretty_midi.PrettyMIDI(midi_path)
     raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=sf2_path)
     wave.write(output_path, sampling_rate, raw_wav)
+
+
+class LazyLoader(types.ModuleType):
+    """Lazily import a module, mainly to avoid pulling in large dependencies."""
+    def __init__(self, local_name, parent_module_globals, name, warning=None):
+        self._local_name = local_name
+        self._parent_module_globals = parent_module_globals
+        self._warning = warning
+
+        super().__init__(name)
+
+    def _load(self):
+        """Load the module and insert it into the parent's globals."""
+        module = importlib.import_module(self.__name__)
+        self._parent_module_globals[self._local_name] = module
+
+        if self._warning:
+            logger.warning(self._warning)
+            # Make sure to only warn once.
+            self._warning = None
+
+        # Update this object's dict so that if someone keeps a reference to the
+        # LazyLoader, lookupts are efficient (__getattr__ is only called on lookups
+        # that fail).
+        self.__dict__.update(module.__dict__)
+        return module
+
+    def __getattr__(self, item):
+        module = self._load()
+        return getattr(module, item)
+
+    def __dir__(self):
+        module = self._load()
+        return dir(module)

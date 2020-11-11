@@ -2,7 +2,10 @@
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
-from omnizart.drum import app
+from omnizart.utils import LazyLoader
+
+
+drum = LazyLoader("drum", globals(), "omnizart.drum")
 
 
 @click.command()
@@ -20,7 +23,7 @@ def transcribe(input_audio, model_path, output):
         --model-path path/to/model \ 
         --output example.mid
     """
-    app.transcribe(input_audio, model_path, output=output)
+    drum.app.transcribe(input_audio, model_path, output=output)
 
 
 def process_doc():

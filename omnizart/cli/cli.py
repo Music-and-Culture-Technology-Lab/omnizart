@@ -122,7 +122,7 @@ def synth(input_midi, output_path, sf2_path):
         output_file = os.path.join(output_path, out_name)
     else:
         # Already specified the output file name.
-        f_dir = os.path.dirname(output_path)
+        f_dir = os.path.dirname(os.path.abspath(output_path))
         ensure_path_exists(f_dir)
         output_file = output_path
     click.echo(f"Output file as: {output_file}")
