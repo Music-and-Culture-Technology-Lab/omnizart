@@ -24,7 +24,48 @@ from omnizart.cli.chord import chord
 from omnizart.cli.transcribe import transcribe
 
 
-@click.group()
+SUB_COMMAND_GROUP = [
+    {"Transcription": ["music", "chord", "drum", "transcribe"]},
+    {"Utilities": ["download-checkpoints", "download-dataset", "synth"]}
+]
+
+
+class GroupSubCommandHelpMsg(click.Group):
+    """Group different types of sub-commands when showing help message."""
+    def format_commands(self, ctx, formatter):
+        all_commands = self.list_commands(ctx)
+        limit = formatter.width - 6 - max(len(cmd) for cmd in all_commands)
+
+        for group in SUB_COMMAND_GROUP:
+            grp_name = list(group.keys())[0]
+            subcommands = list(group.values())[0]
+            rows = []
+            for subcommand in subcommands:
+                cmd = self.get_command(ctx, subcommand)
+                help_msg = cmd.get_short_help_str(limit)
+                rows.append((subcommand, help_msg))
+                all_commands.remove(subcommand)
+
+            with formatter.section(grp_name):
+                formatter.write_dl(rows)
+
+        other_cmd = []
+        for subcommand in all_commands:
+            cmd = self.get_command(ctx, subcommand)
+            if cmd is None:
+                continue
+            if cmd.hidden:
+                continue
+
+            help_msg = cmd.get_short_help_str(limit)
+            other_cmd.append((subcommand, help_msg))
+
+        if len(other_cmd) > 0:
+            with formatter.section("Others"):
+                formatter.write_dl(other_cmd)
+
+
+@click.group(cls=GroupSubCommandHelpMsg)
 def entry():
     pass
 
