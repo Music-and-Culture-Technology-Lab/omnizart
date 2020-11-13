@@ -62,7 +62,7 @@ General:
       BatchSize:
         Value: 8
       Channels:
-        Value: !!python/tuple
+        Value:
         - Spec
         - Ceps
         - GCoS
