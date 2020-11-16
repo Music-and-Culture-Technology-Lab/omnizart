@@ -351,7 +351,14 @@ def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_P
 
 
 class LazyLoader(types.ModuleType):
-    """Lazily import a module, mainly to avoid pulling in large dependencies."""
+    """Lazily import a module, mainly to avoid pulling in large dependencies.
+
+    Original implementations are from tensorflow [1]_.
+
+    References
+    ----------
+    .. [1] https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/util/lazy_loader.py
+    """
     def __init__(self, local_name, parent_module_globals, name, warning=None):
         self._local_name = local_name
         self._parent_module_globals = parent_module_globals

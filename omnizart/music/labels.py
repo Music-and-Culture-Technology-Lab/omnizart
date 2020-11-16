@@ -39,6 +39,7 @@ class LabelType:
 
         self._classical_channel_mapping = self._init_classical_channel_mapping()
         self._pop_channel_mapping = self._init_pop_channel_mapping()
+        self._note_channel_mapping = {i: 1 for i in range(128)}
         self._classical_midi_types = len(set(self._classical_channel_mapping.values()))
         self._pop_midi_types = len(set(self._pop_channel_mapping.values()))
 
@@ -84,7 +85,7 @@ class LabelType:
     def get_frame_onset(self, label):
         frame = self.get_frame(label)
         onset = label_conversion(
-            label, channel_mapping=self._classical_channel_mapping, onsets=True, mpe=True
+            label, channel_mapping=self._note_channel_mapping, onsets=True, mpe=True
         )
 
         frame[:, :, 1] -= onset
@@ -167,7 +168,7 @@ def label_conversion(
     scale = ori_feature_size // base
 
     if channel_mapping is None:
-        channel_mapping = {i: i for i in range(1, 129)}
+        channel_mapping = {i: i+1 for i in range(128)}
 
     inst_num = len(set(channel_mapping.values()))
     output = np.zeros((len(label), ori_feature_size, inst_num))  # noqa: E226
