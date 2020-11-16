@@ -1,6 +1,9 @@
 Quick Start
 ===========
 
+`Colab <https://bit.ly/omnizart-colab>`_ <- Try ``omnizart`` online now, without any local installation and efforts!!
+
+
 Installation
 ############
 
@@ -100,3 +103,19 @@ and representative information.
 
     omnizart music transcribe <path/to/audio.wav>
 
+
+Synthesize
+##########
+
+After transcribing, it is usually hard to directly listen to the MIDI, which needs
+additional soundfont to synthesize the symbolic representation into raw audio.
+
+We hear your voice! We provide a built-in command, with default soundfont already
+included, to transform the MIDI into wav file. Execute following:
+
+.. code-block:: bash
+
+    omnizart synth example.mid
+
+When you execute the first time, it takes a little while for downloading the
+free-licensed soundfont.
