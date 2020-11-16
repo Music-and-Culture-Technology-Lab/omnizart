@@ -10,6 +10,8 @@
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
+### Try omnizart now!! [Colab](https://bit.ly/omnizart-colab)
+
 A quick-start example is as following:
 ``` bash
 # Install omnizart
@@ -58,7 +60,7 @@ For training a new model, download the dataset first and follow steps described 
 <pre>
 # The following command will default saving the extracted feature under the same folder,
 # called <b>train_feature</b> and <b>test_feature</b>
-omnizart music generate-featuer -d <i>path/to/dataset</i>
+omnizart music generate-feature -d <i>path/to/dataset</i>
 
 # Train a new model
 omnizart music train-model -d <i>path/to/dataset</i>/train_feature --model-name My-Model

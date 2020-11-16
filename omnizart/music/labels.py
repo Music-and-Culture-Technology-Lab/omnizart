@@ -168,7 +168,7 @@ def label_conversion(
     scale = ori_feature_size // base
 
     if channel_mapping is None:
-        channel_mapping = {i: i+1 for i in range(128)}
+        channel_mapping = {i: i+1 for i in range(128)}  # noqa: E226
 
     inst_num = len(set(channel_mapping.values()))
     output = np.zeros((len(label), ori_feature_size, inst_num))  # noqa: E226
