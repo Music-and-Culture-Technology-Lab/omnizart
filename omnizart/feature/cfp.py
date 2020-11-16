@@ -271,11 +271,12 @@ def _extract_vocal_cfp(
     fr=2.0,
     fc=80.0,
     tc=1/1000,
+    **kwargs
 ):
     logger.debug("Extract three types of CFP with different window sizes.")
-    high_z, high_spec, _, _, _ = _extract_cfp(x, fs, win_size=743, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
-    med_z, med_spec, _, _, _ = _extract_cfp(x, fs, win_size=372, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
-    low_z, low_spec, _, _, _ = _extract_cfp(x, fs, win_size=186, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
+    high_z, high_spec, _, _, _ = _extract_cfp(x, fs, win_size=743, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
+    med_z, med_spec, _, _, _ = _extract_cfp(x, fs, win_size=372, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
+    low_z, low_spec, _, _, _ = _extract_cfp(x, fs, win_size=186, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
 
     # Normalize Z
     high_z_norm = (high_z - np.mean(high_z)) / np.std(high_z)

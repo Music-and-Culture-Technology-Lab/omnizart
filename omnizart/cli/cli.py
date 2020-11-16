@@ -98,7 +98,7 @@ def download_dataset(dataset, output, unzip):
 @click.command()
 @click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
 def download_checkpoints(output_path):
-    """Downlaod the archived checkpoints of different models."""
+    """Download the archived checkpoints of different models."""
     CHECKPOINTS = {
         "chord_v1": {
             "fid": "1QX5bBoYzZyC2fvK26YEtF_Hqt3DzhiHk",
