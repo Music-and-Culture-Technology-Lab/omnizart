@@ -3,6 +3,7 @@
 *.swp
 *.swo
 *.sh~
+Thumbs.db*
 
 # Audio files
 *.wav
