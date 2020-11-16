@@ -113,7 +113,7 @@ def download_checkpoints(output_path):
         "music_pop": {
             "fid": "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
             "save_as": "checkpoints/music/music_pop/weights.h5",
-            "file_length": 33813824
+            "file_length": 33820096
         },
         "music_piano": {
             "fid": "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
