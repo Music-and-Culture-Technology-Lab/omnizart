@@ -6,7 +6,8 @@ import pretty_midi
 import numpy as np
 
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
-from omnizart.utils import get_logger, dump_pickle
+from omnizart.io import dump_pickle
+from omnizart.utils import get_logger
 
 
 logger = get_logger("Music Labels")

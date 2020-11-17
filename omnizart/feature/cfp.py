@@ -8,7 +8,8 @@ Mantainer: BreezeWhite
 import numpy as np
 import scipy
 
-from omnizart.utils import load_audio_with_librosa, get_logger, parallel_generator
+from omnizart.io import load_audio
+from omnizart.utils import get_logger, parallel_generator
 
 
 logger = get_logger("CFP Feature")
@@ -173,8 +174,21 @@ def parallel_extract(x, samples, max_sample, fr, fs, Hop, h, fc, tc, g, bin_per_
     return tmpL0, tmpLF, tmpLQ, tmpZ, f, q, t, cen_freq
 
 
-def extract_cfp(
-    filename,
+def spectral_flux(spec, invert=False, norm=True):
+    flux = np.pad(np.diff(spec), ((0, 0), (1, 0)))
+    if invert:
+        flux *= -1.0
+
+    flux[flux<0] = 0.0
+    if norm:
+        flux = (flux - np.mean(flux)) / np.std(flux)
+
+    return flux
+
+
+def _extract_cfp(
+    x,
+    fs,
     hop=0.02,  # in seconds
     win_size=7939,
     fr=2.0,
@@ -210,14 +224,11 @@ def extract_cfp(
        Music," in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2015.
     """
 
-    logger.debug("Loading audio: %s", filename)
-    x, fs = load_audio_with_librosa(filename, sampling_rate=down_fs)
     Hop = round(down_fs * hop)
     x = x.astype("float32")
     h = scipy.signal.blackmanharris(win_size)  # window size
     g = np.array(g)
 
-    max_sample = 2000
     samples = np.floor(len(x) / Hop).astype("int")
     logger.debug("Sample number: %d", samples)
     logger.debug("Extracting CFP feature...")
@@ -241,3 +252,57 @@ def extract_cfp(
         Z = tfrLF * tfrLQ
 
     return Z, tfrL0, tfrLF, tfrLQ, cen_freq
+
+
+def extract_cfp(filename, down_fs=44100, **kwargs):
+    """Wrap around _extract_cfp.
+
+    Separate load audio from the actual CFP extraction.
+    """
+    logger.debug("Loading audio: %s", filename)
+    x, fs = load_audio(filename, sampling_rate=down_fs)
+    return _extract_cfp(x, fs, down_fs=fs, **kwargs)
+
+
+def _extract_vocal_cfp(
+    x,
+    fs,
+    hop=0.02,
+    fr=2.0,
+    fc=80.0,
+    tc=1/1000,
+):
+    logger.debug("Extract three types of CFP with different window sizes.")
+    high_z, high_spec, _, _, _ = _extract_cfp(x, fs, win_size=743, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
+    med_z, med_spec, _, _, _ = _extract_cfp(x, fs, win_size=372, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
+    low_z, low_spec, _, _, _ = _extract_cfp(x, fs, win_size=186, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs)
+
+    # Normalize Z
+    high_z_norm = (high_z - np.mean(high_z)) / np.std(high_z)
+    med_z_norm = (med_z - np.mean(med_z)) / np.std(med_z)
+    low_z_norm = (low_z - np.mean(low_z)) / np.std(low_z)
+
+    # Spectral flux
+    high_flux = spectral_flux(high_spec)
+    med_flux = spectral_flux(med_spec)
+    low_flux = spectral_flux(low_spec)
+
+    # Inverse spectral flux
+    high_inv_flux = spectral_flux(high_spec, invert=True)
+    med_inv_flux = spectral_flux(med_spec, invert=True)
+    low_inv_flux = spectral_flux(low_spec, invert=True)
+
+    # Collect and concat
+    flux = np.dstack([low_flux, med_flux, high_flux])
+    inv_flux = np.dstack([low_inv_flux, med_inv_flux, high_inv_flux])
+    z_norm = np.dstack([low_z_norm, med_z_norm, high_z_norm])
+
+    output = np.dstack([flux, inv_flux, z_norm])
+    return np.transpose(output, axes=[1, 0, 2])  # time x feat x channel
+
+
+def extract_vocal_cfp(filename, down_fs=16000, **kwargs):
+    logger.debug("Loading audio: %s", filename)
+    x, fs = load_audio(filename, sampling_rate=down_fs)
+    logger.debug("Extracting vocal feature")
+    return _extract_vocal_cfp(x, fs, **kwargs)
