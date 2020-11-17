@@ -1,6 +1,6 @@
 import vamp
 
-from omnizart.utils import load_audio_with_librosa
+from omnizart.io import load_audio
 
 
 AVAILABLE_OUTPUT_TYPES = ["logfreqspec", "tunedlogfreqspec", "semitonespectrum", "chroma", "basschroma", "bothchroma"]
@@ -73,7 +73,7 @@ def extract_chroma(
         "chromanormalize": CHROMA_NORM[chroma_norm]
     }
 
-    data, rate = load_audio_with_librosa(audio_path)
+    data, rate = load_audio(audio_path)
     step_size, chroma = vamp.collect(
         data, rate, "nnls-chroma:nnls-chroma", output=output_type, parameters=params
     )["matrix"]

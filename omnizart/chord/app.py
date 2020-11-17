@@ -8,7 +8,8 @@ import tensorflow as tf
 
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import ChordSettings
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
+from omnizart.io import write_yaml
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
