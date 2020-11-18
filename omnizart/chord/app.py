@@ -107,11 +107,7 @@ class ChordTranscription(BaseTranscription):
         During the feature extraction, the feature data is stored as a numpy array
         with named field, makes it works like a dict type.
         """
-        if chord_settings is not None:
-            assert isinstance(chord_settings, ChordSettings)
-            settings = chord_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(chord_settings)
 
         index_file_path = jpath(dataset_path, McGillBillBoard.index_file_path)
         train_ids, test_ids = get_train_test_split_ids(
@@ -186,12 +182,7 @@ class ChordTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-
-        if chord_settings is not None:
-            assert isinstance(chord_settings, ChordSettings)
-            settings = chord_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(chord_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train one model: %s", input_model_path)

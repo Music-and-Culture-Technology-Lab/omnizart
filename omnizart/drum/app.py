@@ -118,11 +118,7 @@ class DrumTranscription(BaseTranscription):
             The only supported dataset for drum transcription. Records the train/test
             partition according to the folder.
         """
-        if drum_settings is not None:
-            assert isinstance(drum_settings, DrumSettings)
-            settings = drum_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(drum_settings)
 
         # Resolve feature output path
         if settings.dataset.feature_save_path == "+":
@@ -183,11 +179,7 @@ class DrumTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-        if drum_settings is not None:
-            assert isinstance(drum_settings, DrumSettings)
-            settings = drum_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(drum_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train on model: %s", input_model_path)
