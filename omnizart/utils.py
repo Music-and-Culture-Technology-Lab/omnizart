@@ -281,6 +281,16 @@ def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_P
     wave.write(output_path, sampling_rate, raw_wav)
 
 
+def resolve_dataset_type(dataset_path, keywords):
+    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
+    d_type = [val for key, val in keywords.items() if key in low_path]
+    if len(d_type) == 0:
+        return None
+
+    assert len(set(d_type)) == 1
+    return d_type[0]
+
+
 class LazyLoader(types.ModuleType):
     """Lazily import a module, mainly to avoid pulling in large dependencies.
 
