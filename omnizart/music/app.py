@@ -26,7 +26,9 @@ from omnizart.music.labels import (
 )
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription
-from omnizart.utils import get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists
+from omnizart.utils import (
+    get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists, resolve_dataset_type
+)
 from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings
@@ -147,13 +149,12 @@ class MusicTranscription(BaseTranscription):
         omnizart.constants.datasets:
             Supported dataset that can be applied and the split of training/testing pieces.
         """
-        if music_settings is not None:
-            assert isinstance(music_settings, MusicSettings)
-            settings = music_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(music_settings)
 
-        dataset_type = _resolve_dataset_type(dataset_path)
+        dataset_type = resolve_dataset_type(
+            dataset_path,
+            keywords={"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
+        )
         if dataset_type is None:
             logger.warning(
                 "The given path %s does not match any built-in processable dataset. Do nothing...",
@@ -244,11 +245,7 @@ class MusicTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-        if music_settings is not None:
-            assert isinstance(music_settings, MusicSettings)
-            settings = music_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(music_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train on model: %s", input_model_path)
@@ -381,17 +378,6 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
             logger.error("H5py failed to save the feature file after %d retries.", retry_times)
             raise OSError
     print("")
-
-
-def _resolve_dataset_type(dataset_path):
-    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
-    keywords = {"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
-    d_type = [val for key, val in keywords.items() if key in low_path]
-    if len(d_type) == 0:
-        return None
-
-    assert len(set(d_type)) == 1
-    return d_type[0]
 
 
 def model_training_test():
