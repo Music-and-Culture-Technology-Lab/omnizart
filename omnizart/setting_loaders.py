@@ -227,7 +227,6 @@ class VocalSettings(Settings):
         def __init__(self):
             self.hop_size: float = None
             self.sampling_rate: int = None
-            self.window_size: int = None
             self.frequency_resolution: float = None
             self.frequency_center: float = None
             self.time_center: float = None
