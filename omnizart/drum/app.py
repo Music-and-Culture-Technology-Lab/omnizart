@@ -121,19 +121,11 @@ class DrumTranscription(BaseTranscription):
         settings = self._validate_and_get_settings(drum_settings)
 
         # Resolve feature output path
-        if settings.dataset.feature_save_path == "+":
-            base_output_path = dataset_path
-            settings.dataset.save_path = dataset_path
-        else:
-            base_output_path = settings.dataset.feature_save_path
-        train_feat_out_path = jpath(base_output_path, "train_feature")
-        test_feat_out_path = jpath(base_output_path, "test_feature")
-        ensure_path_exists(train_feat_out_path)
-        ensure_path_exists(test_feat_out_path)
+        train_feat_out_path, test_feat_out_path = self._resolve_feature_output_path(dataset_path, settings)
         logger.info("Output training feature to %s", train_feat_out_path)
         logger.info("Output testing feature to %s", test_feat_out_path)
 
-        struct = PopStructure()
+        struct = PopStructure
         train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
         train_labels = struct.get_train_labels(dataset_path=dataset_path)
         logger.info(

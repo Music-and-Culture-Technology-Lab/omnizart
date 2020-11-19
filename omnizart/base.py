@@ -4,12 +4,13 @@ Defines common interfaces, attributes, and utilities for different tasks.
 """
 
 import os
+from os.path import join as jpath
 from abc import ABCMeta, abstractmethod
 
 from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
-from omnizart.utils import get_logger
+from omnizart.utils import get_logger, ensure_path_exists
 from omnizart.constants.midi import LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
 
 
@@ -79,6 +80,18 @@ class BaseTranscription(metaclass=ABCMeta):
 
     def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
         return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)
+
+    def _resolve_feature_output_path(self, dataset_path, settings):
+        if settings.dataset.feature_save_path == "+":
+            base_output_path = dataset_path
+            settings.dataset.save_path = dataset_path
+        else:
+            base_output_path = settings.dataset.feature_save_path
+        train_feat_out_path = jpath(base_output_path, "train_feature")
+        test_feat_out_path = jpath(base_output_path, "test_feature")
+        ensure_path_exists(train_feat_out_path)
+        ensure_path_exists(test_feat_out_path)
+        return train_feat_out_path, test_feat_out_path
 
     def _validate_and_get_settings(self, setting_instance):
         if setting_instance is not None:
