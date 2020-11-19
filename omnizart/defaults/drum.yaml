@@ -1,7 +1,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart transribe drum` command.
+        Description: Mode of transcription by executing the `omnizart drum transcribe` command.
         Type: String
         Value: Keras
     CheckpointPath:

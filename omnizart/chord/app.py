@@ -8,7 +8,8 @@ import tensorflow as tf
 
 from omnizart.base import BaseTranscription
 from omnizart.setting_loaders import ChordSettings
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
+from omnizart.io import write_yaml
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
@@ -106,11 +107,7 @@ class ChordTranscription(BaseTranscription):
         During the feature extraction, the feature data is stored as a numpy array
         with named field, makes it works like a dict type.
         """
-        if chord_settings is not None:
-            assert isinstance(chord_settings, ChordSettings)
-            settings = chord_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(chord_settings)
 
         index_file_path = jpath(dataset_path, McGillBillBoard.index_file_path)
         train_ids, test_ids = get_train_test_split_ids(
@@ -118,15 +115,7 @@ class ChordTranscription(BaseTranscription):
         )
 
         # Resolve feature output path
-        if settings.dataset.feature_save_path == "+":
-            base_output_path = dataset_path
-            settings.dataset.save_path = dataset_path
-        else:
-            base_output_path = settings.dataset.feature_save_path
-        train_feat_out_path = jpath(base_output_path, "train_feature")
-        test_feat_out_path = jpath(base_output_path, "test_feature")
-        ensure_path_exists(train_feat_out_path)
-        ensure_path_exists(test_feat_out_path)
+        train_feat_out_path, test_feat_out_path = self._resolve_feature_output_path(dataset_path, settings)
         logger.info("Output training feature to %s", train_feat_out_path)
         logger.info("Output testing feature to %s", test_feat_out_path)
 
@@ -185,12 +174,7 @@ class ChordTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-
-        if chord_settings is not None:
-            assert isinstance(chord_settings, ChordSettings)
-            settings = chord_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(chord_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train one model: %s", input_model_path)

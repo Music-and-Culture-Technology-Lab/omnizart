@@ -1,6 +1,9 @@
 Quick Start
 ===========
 
+`Colab <https://bit.ly/omnizart-colab>`_ <- Try ``omnizart`` online now, without any local installation and efforts!!
+
+
 Installation
 ############
 
@@ -46,14 +49,13 @@ system-wide this time.
 
     ## For conda user, the following approach is recommanded, since there
     ## are some conflicts between poetry and conda.
-    # Use built-in 'venv' libarary for installation
-    export DEFAULT_VENV_APPROACH=venv
+    # Use pip for installation. Takes longer time.
+    export DEFAULT_INSTALL_APPROACH=pip
     ./scripts/install.sh
 
-    # Use 'poetry' for installation
-    export DEFAULT_VENV_APPROACH=poetry
+    # Use poetry for installation. Install pacakges in parallel, and thus much faster.
+    export DEFAULT_INSTALL_APPROACH=poetry
     ./scripts/install.sh
-
 
 
 A more manual way for installing this package is by using ``poetry``, which we use this
@@ -84,14 +86,15 @@ is by using the ``setup.py`` and ``requirements.txt`` files.
     pip install --upgrade setuptools
 
     # May encounter problems when installing the dependency 'madmom'
+    pip install -r requirements.txt
     python setup.py install
 
     # Download the checkpoints
     omnizart download-checkpoints
 
 
-Transcribe a pop song
-#####################
+Transcribe a song
+#################
 
 Transcribes a song into a MIDI file and a CSV file that contains more complete
 and representative information.
@@ -100,3 +103,19 @@ and representative information.
 
     omnizart music transcribe <path/to/audio.wav>
 
+
+Synthesize
+##########
+
+After transcribing, it is usually hard to directly listen to the MIDI, which needs
+additional soundfont to synthesize the symbolic representation into raw audio.
+
+We hear your voice! We provide a built-in command, with default soundfont already
+included, to transform the MIDI into wav file. Execute following:
+
+.. code-block:: bash
+
+    omnizart synth example.mid
+
+When you execute the first time, it takes a little while for downloading the
+free-licensed soundfont.

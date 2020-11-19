@@ -1,7 +1,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart transribe chord` command.
+        Description: Mode of transcription by executing the `omnizart chord transcribe` command.
         Type: String
         Value: ChordV1
     CheckpointPath:

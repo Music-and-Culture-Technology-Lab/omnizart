@@ -1,7 +1,8 @@
 import librosa
 import numpy as np
 
-from omnizart.utils import load_audio_with_librosa, get_logger
+from omnizart.io import load_audio
+from omnizart.utils import get_logger
 
 
 logger = get_logger("CQT Feature")
@@ -63,7 +64,7 @@ def extract_cqt(
         data.
     """
     logger.debug("Loading audio: %s", audio_path)
-    audio_data, _ = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
+    audio_data, _ = load_audio(audio_path, sampling_rate=sampling_rate)
 
     zeros = np.zeros(pad_sec * sampling_rate)
     padded_audio = np.concatenate([zeros, audio_data, zeros])

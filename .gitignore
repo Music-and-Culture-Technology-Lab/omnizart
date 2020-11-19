@@ -3,6 +3,7 @@
 *.swp
 *.swo
 *.sh~
+Thumbs.db*
 
 # Audio files
 *.wav
@@ -37,5 +38,5 @@ sample_feature.hdf
 # Other files
 checkpoints/
 test.sh
-soundfont.sf2
 *.ipynb
+soundfonts.sf2

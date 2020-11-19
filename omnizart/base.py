@@ -4,12 +4,15 @@ Defines common interfaces, attributes, and utilities for different tasks.
 """
 
 import os
+from os.path import join as jpath
 from abc import ABCMeta, abstractmethod
 
 from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
-from omnizart.utils import get_logger
+from omnizart.utils import get_logger, ensure_path_exists
+from omnizart.constants.midi import LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
+
 
 logger = get_logger("Base Class")
 
@@ -77,3 +80,95 @@ class BaseTranscription(metaclass=ABCMeta):
 
     def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
         return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)
+
+    def _resolve_feature_output_path(self, dataset_path, settings):
+        if settings.dataset.feature_save_path == "+":
+            base_output_path = dataset_path
+            settings.dataset.save_path = dataset_path
+        else:
+            base_output_path = settings.dataset.feature_save_path
+        train_feat_out_path = jpath(base_output_path, "train_feature")
+        test_feat_out_path = jpath(base_output_path, "test_feature")
+        ensure_path_exists(train_feat_out_path)
+        ensure_path_exists(test_feat_out_path)
+        return train_feat_out_path, test_feat_out_path
+
+    def _validate_and_get_settings(self, setting_instance):
+        if setting_instance is not None:
+            assert isinstance(setting_instance, self.setting_class)
+            return setting_instance
+        return self.settings
+
+
+class Label:
+    """Interface of different label format.
+
+    Plays role for generalize the label format, and subsequent dataset class should
+    implement functions transforming labels (whether in .mid, .txt, or .csv format)
+    and parse the necessary columns into attributes this class holds.
+
+    Parameters
+    ----------
+    start_time: float
+        Onset time of the note in seconds.
+    end_time: float
+        Offset time of the note in seconds.
+    note: int
+        Midi number of the number, should be within 21~108.
+    velocity: int
+        Velocity of keypress, should be wihtin 0~127
+    start_beat: float
+        Start beat index of the note.
+    end_beat: float
+        End beat index of the note.
+    note_value: str
+        Type of the note (e.g. quater, eighth, sixteenth).
+    is_drum: bool
+        Whether the note represents the drum channel.
+    """
+    def __init__(
+        self,
+        start_time,
+        end_time,
+        note,
+        instrument=0,
+        velocity=64,
+        start_beat=0,
+        end_beat=10,
+        note_value="",
+        is_drum=False
+    ):
+        self.start_time = start_time
+        self.end_time = end_time
+        self.note = note
+        self.velocity = velocity
+        self.instrument = instrument
+        self.start_beat = start_beat
+        self.end_beat = end_beat
+        self.note_value = note_value
+        self.is_drum = is_drum
+
+    @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, midi_num):
+        if LOWEST_MIDI_NOTE <= midi_num <= HIGHEST_MIDI_NOTE:
+            self._note = midi_num
+        else:
+            logger.warning(
+                "The given midi number is out-of-bound and will be skipped. "
+                "Received midi number: %d. Available: [%d - %d]",
+                midi_num, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
+            )
+            self._note = -1
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        assert 0 <= value <= 127
+        self._velocity = value

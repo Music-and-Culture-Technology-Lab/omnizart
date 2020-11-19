@@ -2,14 +2,13 @@
 # pylint: disable=W0212,R0915,W0621
 import os
 import re
-import pickle
+import types
 import logging
 import uuid
 import concurrent.futures
+import importlib
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
-import yaml
-import librosa
 import jsonschema
 import pretty_midi
 import scipy.io.wavfile as wave
@@ -68,72 +67,6 @@ def get_logger(name=None, level="warn"):
 
 
 logger = get_logger("Omnizart Utils")
-
-
-def dump_pickle(data, save_to):
-    """Dump data to the given path.
-
-    Parameters
-    ----------
-    data: python objects
-        Data to store. Should be python built-in types like `dict`, `list`, `str`, `int`, etc
-    save_to: Path
-        The full path to store the pickle file, including file name.
-        Will create the directory if the given path doesn't exist.
-
-    """
-    base_dir = os.path.dirname(save_to)
-    ensure_path_exists(base_dir)
-    with open(save_to, "wb") as pkl_file:
-        pickle.dump(data, pkl_file)
-
-
-def load_pickle(pickle_file):
-    """Load pickle file from the given path
-
-    Read and returns the data from the given pickle file path
-
-    Parameters
-    ----------
-    pickle_file: Path
-        The full path to the pickle file for read
-
-    Returns
-    -------
-    object
-        Python object, could be `dict`, `list`, `str`, etc.
-    """
-    return pickle.load(open(pickle_file, "rb"))
-
-
-def load_audio_with_librosa(audio_path, sampling_rate=44100):
-    """Load audio from the given path with librosa.load
-
-    Parameters
-    ----------
-    audio_path: Path
-        Path to the audio.
-    sampling_rate: int
-        Target sampling rate after loaded.
-
-    Returns
-    -------
-    audio: 1D numpy array
-        Raw data of the audio.
-    tar_sampling_rate: int
-        Sampling rate of the audio. Will be the same as the given ``sampling_rate``.
-    """
-    return librosa.load(audio_path, mono=True, sr=sampling_rate)
-
-
-def load_yaml(yaml_path):
-    return yaml.load(open(yaml_path, "r"), Loader=yaml.Loader)
-
-
-def write_yaml(json_obj, output_path, dump=True):
-    # If dump is false, then the json_obj should be yaml string already.
-    out_str = yaml.dump(json_obj) if dump else json_obj
-    open(output_path, "w").write(out_str)
 
 
 def camel_to_snake(string):
@@ -341,20 +274,63 @@ def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_
     executor.shutdown()
 
 
-def synth_midi(midi_path, sampling_rate=44100, out_path=None):
+def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_PATH):
     """Synthesize MIDI into wav audio."""
     midi = pretty_midi.PrettyMIDI(midi_path)
-    raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=SOUNDFONT_PATH)
-    if out_path is not None:
-        filename = os.path.basename(midi_path).replace(".mid", ".wav")
-        ensure_path_exists(out_path)
-        out_path = os.path.join(out_path, filename)
-        wave.write(out_path, sampling_rate, raw_wav)
-        return out_path
-
-    wave.write(midi_path.replace(".mid", ".wav"), sampling_rate, raw_wav)
-    return midi_path.replace(".mid", ".wav")
+    raw_wav = midi.fluidsynth(fs=sampling_rate, sf2_path=sf2_path)
+    wave.write(output_path, sampling_rate, raw_wav)
 
 
 def midi2freq(m):
-    return 2 ** ((m - 69)/ 12) * 440
+    return 2 ** ((m - 69) / 12) * 440
+
+
+def resolve_dataset_type(dataset_path, keywords):
+    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
+    d_type = [val for key, val in keywords.items() if key in low_path]
+    if len(d_type) == 0:
+        return None
+
+    assert len(set(d_type)) == 1
+    return d_type[0]
+
+
+class LazyLoader(types.ModuleType):
+    """Lazily import a module, mainly to avoid pulling in large dependencies.
+
+    Original implementations are from tensorflow [1]_.
+
+    References
+    ----------
+    .. [1] https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/util/lazy_loader.py
+    """
+    def __init__(self, local_name, parent_module_globals, name, warning=None):
+        self._local_name = local_name
+        self._parent_module_globals = parent_module_globals
+        self._warning = warning
+
+        super().__init__(name)
+
+    def _load(self):
+        """Load the module and insert it into the parent's globals."""
+        module = importlib.import_module(self.__name__)
+        self._parent_module_globals[self._local_name] = module
+
+        if self._warning:
+            logger.warning(self._warning)
+            # Make sure to only warn once.
+            self._warning = None
+
+        # Update this object's dict so that if someone keeps a reference to the
+        # LazyLoader, lookupts are efficient (__getattr__ is only called on lookups
+        # that fail).
+        self.__dict__.update(module.__dict__)
+        return module
+
+    def __getattr__(self, item):
+        module = self._load()
+        return getattr(module, item)
+
+    def __dir__(self):
+        module = self._load()
+        return dir(module)

@@ -13,7 +13,8 @@ from madmom.features import (
     BeatTrackingProcessor,
 )
 
-from omnizart.utils import load_audio_with_librosa, get_logger
+from omnizart.io import load_audio
+from omnizart.utils import get_logger
 
 logger = get_logger("Beat Extraction")
 
@@ -59,7 +60,7 @@ class MadmomBeatTracking:
             queue = {future_1: "dbn_down_beat", future_2: "dbn_beat", future_3: "beat"}
 
         results = {}
-        for future in concurrent.futures.as_completed(queue, timeout=120):
+        for future in concurrent.futures.as_completed(queue, timeout=600):
             func_name = queue[future]
             results[func_name] = future.result()
             logger.debug("Job %s finished.", func_name)
@@ -108,7 +109,7 @@ def extract_beat_with_madmom(audio_path, sampling_rate=44100):
         Total length of the audio in seconds.
     """
     logger.debug("Loading audio: %s", audio_path)
-    audio_data, _ = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
+    audio_data, _ = load_audio(audio_path, sampling_rate=sampling_rate)
     logger.debug("Runnig beat tracking...")
     return MadmomBeatTracking().process(audio_data), len(audio_data) / sampling_rate
 

@@ -5,7 +5,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart transribe music` command.
+        Description: Mode of transcription by executing the `omnizart music transcribe` command.
         Type: String 
         Value: Piano
     CheckpointPath:

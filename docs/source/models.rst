@@ -33,6 +33,15 @@ Spectral Normalization Model
     :show-inheritance:
 
 
+Chord Transformer
+#################
+
+.. automodule:: omnizart.models.chord_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Utils
 #####
 

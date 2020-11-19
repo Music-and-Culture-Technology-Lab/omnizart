@@ -4,7 +4,8 @@ import abc
 
 import numpy as np
 
-from omnizart.utils import write_yaml, get_logger, ensure_path_exists
+from omnizart.io import write_yaml
+from omnizart.utils import get_logger, ensure_path_exists
 
 logger = get_logger("Callbacks")
 

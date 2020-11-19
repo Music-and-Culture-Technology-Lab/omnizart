@@ -1,6 +1,6 @@
 # omnizart
 
-![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)
+[![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)](https://github.com/Music-and-Culture-Technology-Lab/omnizart/actions?query=workflow%3Ageneral-check)
 [![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)](https://music-and-culture-technology-lab.github.io/omnizart-doc/)
 [![PyPI version](https://badge.fury.io/py/omnizart.svg)](https://badge.fury.io/py/omnizart)
 ![PyPI - License](https://img.shields.io/pypi/l/omnizart)
@@ -9,6 +9,8 @@
 
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
+
+### Try omnizart now!! [Colab](https://bit.ly/omnizart-colab)
 
 A quick-start example is as following:
 ``` bash
@@ -58,7 +60,7 @@ For training a new model, download the dataset first and follow steps described 
 <pre>
 # The following command will default saving the extracted feature under the same folder,
 # called <b>train_feature</b> and <b>test_feature</b>
-omnizart music generate-featuer -d <i>path/to/dataset</i>
+omnizart music generate-feature -d <i>path/to/dataset</i>
 
 # Train a new model
 omnizart music train-model -d <i>path/to/dataset</i>/train_feature --model-name My-Model
@@ -84,6 +86,16 @@ poetry install
 ## Package management
 Uses [poetry](https://python-poetry.org/) for package management, instead of writing `requirements.txt` and `setup.py` manually.
 We still provide the above two files for convenience. You can also generate them by executing ``make export``.
+
+### ATTENTION! MUST SEE!
+There is a major difference between install with `poetry install` and `python setup.py install`. When using poetry for installation, which
+is the default approach when running `make insatll`, the site-pacakges and resource files are placed in the **current** folder.
+This is different from executing `python setup.py install`, which resource files are installed in where a normal package you download through `pip install` will be placed (e.g. ~/.local/lib/python3.6/site-packages) .
+
+And why things aren't placed in the normal path, but the command still can be executed? The answer is that poetry add an additional package path to your *PATH*  environment variable, and guess what is that path? Bingo! Your current path where you can execute `poetry install`! The difference has a major impact on running `omnizart download-checkpoints`. The default save path of checkpoints is to where omnizart being installed. That would be fine for end users, but not good news for developers though. That means after you git clone this project, and installed with `setup.py` approach, the **checkpoints are stored under ~/.local/.../site-packages/**, not your current development path. Therefore, it is strongly suggested that developers should use the default installation approach for a more comfortable developing experience^^.
+
+Feedback: what a big trap there is...
+
 
 ## Documentation
 Automatically generate documents from inline docstrings of module, class, and function. 
@@ -112,7 +124,7 @@ to check the format manually after refacorting the code with tools.
 To format the code with black and yapf, enter `make format`.
 
 ## Unittest
-Uses `pytest` for unittesting. Under construction...
+Uses `pytest` for unittest. The overall coverage rate should pass 25%, or CI would fail.
 
 ## CI/CD
 Uses github actions for automatic linting, unittesting, document building, and package release.
@@ -176,4 +188,8 @@ docker run --gpus all -it mctlab/omnizart:latest
 
 
 ## Command Test
-To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment. 
+To actually install and test the `omnizart` command, execute `make install`. This will automatically create a virtual environment and install everything needed inside it. After installation, just follow the instruction showing on the screen to activate the environment, then type `omnizart --help` to check if it works. After testing the command, type `deactivate` to leave the virtual environment.
+
+## Others
+### Log Level
+The default log level is set to `warn`. You can change it by exporting environment variable *LOG_LEVEL* to one of `debug`, `info`, `warning`, `error`, or `critical`. The verbosity is sorted from high to low (debug -> critical). For the consideration behind the log level design, please refer to the [soruce code](https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/utils.py#L20) or the [documentation page](https://music-and-culture-technology-lab.github.io/omnizart-doc/utils.html#omnizart.utils.get_logger)

@@ -5,8 +5,10 @@ import csv
 import pretty_midi
 import numpy as np
 
-from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
-from omnizart.utils import get_logger, dump_pickle
+from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE
+from omnizart.io import dump_pickle
+from omnizart.utils import get_logger
+from omnizart.base import Label
 
 
 logger = get_logger("Music Labels")
@@ -39,6 +41,7 @@ class LabelType:
 
         self._classical_channel_mapping = self._init_classical_channel_mapping()
         self._pop_channel_mapping = self._init_pop_channel_mapping()
+        self._note_channel_mapping = {i: 1 for i in range(128)}
         self._classical_midi_types = len(set(self._classical_channel_mapping.values()))
         self._pop_midi_types = len(set(self._pop_channel_mapping.values()))
 
@@ -84,7 +87,7 @@ class LabelType:
     def get_frame_onset(self, label):
         frame = self.get_frame(label)
         onset = label_conversion(
-            label, channel_mapping=self._classical_channel_mapping, onsets=True, mpe=True
+            label, channel_mapping=self._note_channel_mapping, onsets=True, mpe=True
         )
 
         frame[:, :, 1] -= onset
@@ -167,7 +170,7 @@ def label_conversion(
     scale = ori_feature_size // base
 
     if channel_mapping is None:
-        channel_mapping = {i: i for i in range(1, 129)}
+        channel_mapping = {i: i+1 for i in range(128)}  # noqa: E226
 
     inst_num = len(set(channel_mapping.values()))
     output = np.zeros((len(label), ori_feature_size, inst_num))  # noqa: E226
@@ -197,80 +200,6 @@ def label_conversion(
         output = np.nanmax(output, axis=2)
 
     return output
-
-
-class Label:
-    """Interface of different label format.
-
-    Plays role for generalize the label format, and subsequent dataset class should
-    implement functions transforming labels (whether in .mid, .txt, or .csv format)
-    and parse the necessary columns into attributes this class holds.
-
-    Parameters
-    ----------
-    start_time: float
-        Onset time of the note in seconds.
-    end_time: float
-        Offset time of the note in seconds.
-    note: int
-        Midi number of the number, should be within 21~108.
-    velocity: int
-        Velocity of keypress, should be wihtin 0~127
-    start_beat: float
-        Start beat index of the note.
-    end_beat: float
-        End beat index of the note.
-    note_value: str
-        Type of the note (e.g. quater, eighth, sixteenth).
-    is_drum: bool
-        Whether the note represents the drum channel.
-    """
-    def __init__(
-        self,
-        start_time,
-        end_time,
-        note,
-        instrument=0,
-        velocity=64,
-        start_beat=0,
-        end_beat=10,
-        note_value="",
-        is_drum=False
-    ):
-        self.start_time = start_time
-        self.end_time = end_time
-        self.note = note
-        self.velocity = velocity
-        self.instrument = instrument
-        self.start_beat = start_beat
-        self.end_beat = end_beat
-        self.note_value = note_value
-        self.is_drum = is_drum
-
-    @property
-    def note(self):
-        return self._note
-
-    @note.setter
-    def note(self, midi_num):
-        if LOWEST_MIDI_NOTE <= midi_num <= HIGHEST_MIDI_NOTE:
-            self._note = midi_num
-        else:
-            logger.warning(
-                "The given midi number is out-of-bound and will be skipped. "
-                "Received midi number: %d. Available: [%d - %d]",
-                midi_num, LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
-            )
-            self._note = -1
-
-    @property
-    def velocity(self):
-        return self._velocity
-
-    @velocity.setter
-    def velocity(self, value):
-        assert 0 <= value <= 127
-        self._velocity = value
 
 
 class BaseLabelExtraction(metaclass=abc.ABCMeta):

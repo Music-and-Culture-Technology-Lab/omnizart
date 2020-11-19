@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0
+### Features
+- Add command for synthesizing MIDI file.
+- Provides colab for quick start now!
+
+### Enhancement
+- Lazy import application instance for avoiding pulling large amount of dependencies.
+- Group sub-commands into different sections when showing help message.
+
+---
+
 ## 0.1.0-beta.2
 
 ### Enhancement
