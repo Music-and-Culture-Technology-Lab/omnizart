@@ -9,7 +9,7 @@ class BaseStructure(metaclass=ABCMeta):
     """Defines the necessary attributes and methods for each sub-dataset structure class.
 
     All sub-dataset structure class should inherit this meta class to ensure
-    the necessary attributes, methods are overriden.
+    the necessary attributes, and to overide the methods.
     """
     @property
     @classmethod
@@ -35,7 +35,7 @@ class BaseStructure(metaclass=ABCMeta):
     @property
     @abstractmethod
     def train_wavs(self):
-        """Records folders that contains trainig wav files.
+        """Record folders that contain trainig wav files.
 
         The path to sub-folders should be the relative path to root folder of the dataset.
 
@@ -49,8 +49,8 @@ class BaseStructure(metaclass=ABCMeta):
         |  └── MAPS_AkPnBcht_2
         |      └── AkPnBcht
 
-        Where ``AkPnCGdD`` and ``AkPnBcht`` are the folders store the wav files.
-        The function should return a list like:
+        where ``AkPnCGdD`` and ``AkPnBcht`` are the folders that store the wav files.
+        The function should then return a list like:
 
         |  >>> ['MAPS_AkPnCGdD_2/AkPnCGdD', 'MAPS_AkPnBcht_2/AkPnBcht']
         """
@@ -58,7 +58,7 @@ class BaseStructure(metaclass=ABCMeta):
     @property
     @abstractmethod
     def test_wavs(self):
-        """Records folders that contains testing wav files.
+        """Record folders that contain testing wav files.
 
         Same as what `train_wavs` does, but for testing wav files.
         """
@@ -66,19 +66,17 @@ class BaseStructure(metaclass=ABCMeta):
     @property
     @abstractmethod
     def train_labels(self):
-        """Records folders that contains training labels.
+        """Record folders that contain training labels.
 
-        Similar to the `train_wavs` function, records information of where the corresponding
-        ground-truth files are stored.
+        Record information of the ground-truth files corresponding to `train_wavs`.
         """
 
     @property
     @abstractmethod
     def test_labels(self):
-        """Records folders that contains testing labels.
+        """Record folders that contain testing labels.
 
-        Similar to the `train_labels` function, records information of where the corresponding
-        ground-truth files are stored.
+        Same as what `train_labels` does, but for testing ground-truth files.
         """
 
     def _get_file_list(self, dataset_path, dirs, ext):  # pylint: disable=R0201
@@ -88,19 +86,19 @@ class BaseStructure(metaclass=ABCMeta):
         return files
 
     def get_train_wavs(self, dataset_path="./"):
-        """Get list of complete train wav paths"""
+        """Get list of paths to training wav files"""
         return self._get_file_list(dataset_path, self.train_wavs, ".wav")
 
     def get_test_wavs(self, dataset_path="./"):
-        """Get list of complete test wav paths"""
+        """Get list of paths to testing wav files"""
         return self._get_file_list(dataset_path, self.test_wavs, ".wav")
 
     def get_train_labels(self, dataset_path="./"):
-        """Get list of complete train label paths"""
+        """Get list of paths to train labels"""
         return self._get_file_list(dataset_path, self.train_labels, self.label_ext)
 
     def get_test_labels(self, dataset_path="./"):
-        """Get list of complete test label paths"""
+        """Get list of paths to test labels"""
         return self._get_file_list(dataset_path, self.test_labels, self.label_ext)
 
 
@@ -339,3 +337,27 @@ class BeethovenSonatas:  # pylint: disable=R0903
 
     #: Hosted dataset download url.
     url = "https://drive.google.com/uc?export=download&id=1nYq2FB5LQfYJoXyYZl3XcklpJkCOnwhV"
+
+
+class MIR1K:
+    """Constant settings of MIR-1K dataset."""
+    # TODO: specify the exact train/val split
+
+    #: Path to the audio (.wav) folder relative to dataset
+    audio_folder = "./Wavfile"
+
+    #: Path to the label (.pv) folder relative to dataset
+    label_folder = "./PitchLabel"
+
+    #: Hosted dataset download url.
+    url = "http://mirlab.org/dataset/public/MIR-1K.zip"
+
+    @property
+    def label_ext(self):
+        """"""
+        return ".pv"
+
+
+class MedleyDB:
+    """Constant settings of MedleyDB dataset."""
+    pass

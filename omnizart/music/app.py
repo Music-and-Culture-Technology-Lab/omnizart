@@ -84,6 +84,9 @@ class MusicTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
+        # TODO: The feature parameters are not passed as in `generate_feature`;
+        # this might cause problem due to the mismatch between the generated feature (for training)
+        # and the extracted feature (for transcription)
         feature = extract_cfp_feature(input_audio, harmonic=model_settings.feature.harmonic)
 
         logger.info("Predicting...")

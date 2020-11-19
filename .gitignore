@@ -23,6 +23,7 @@ htmlcov/
 # Transcription results
 *.mid
 *.csv
+*.txt
 
 # Built files
 dist/
@@ -37,3 +38,4 @@ sample_feature.hdf
 checkpoints/
 test.sh
 soundfont.sf2
+*.ipynb

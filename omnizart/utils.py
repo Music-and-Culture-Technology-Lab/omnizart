@@ -354,3 +354,7 @@ def synth_midi(midi_path, sampling_rate=44100, out_path=None):
 
     wave.write(midi_path.replace(".mid", ".wav"), sampling_rate, raw_wav)
     return midi_path.replace(".mid", ".wav")
+
+
+def midi2freq(m):
+    return 2 ** ((m - 69)/ 12) * 440

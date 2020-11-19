@@ -206,3 +206,45 @@ class ChordSettings(Settings):
             self.early_stop: int = None
             self.init_learning_rate: float = None
             self.learning_rate_decay: float = None
+
+
+@json_serializable(key_path="./General", value_path="./Value")
+class VocalFrameSettings(Settings):
+    default_setting_file: str = "vocal_frame.yaml"
+
+    def __init__(self, conf_path=None):
+        self.checkpoint_path: str = None
+        self.feature = self.VocalFrameFeature()
+        self.dataset = self.VocalFrameDatasetset()
+        self.model = self.VocalFrameModel()
+        self.training = self.VocalFrameTraining()
+
+        super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalFrameFeature():
+        def __init__(self):
+            self.hop_size: float = None
+            self.sampling_rate: int = None
+            self.window_size: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalFrameDatasetset():
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalFrameModel():
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalFrameTraining():
+        def __init__(self):
+            self.epoch: int = None
+            self.early_stop: int = None
+            self.steps: int = None
+            self.batch_size: int = None
+            self.timesteps: int = None
