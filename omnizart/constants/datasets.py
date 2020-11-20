@@ -97,7 +97,7 @@ class BaseStructure:
         decompress it and delete the original zipped file.
 
         You can apply some post process after download by overriding the function ``_post_download``.
-        The _post_download function receives a single ``dataset_path`` as the parameter, 
+        The _post_download function receives a single ``dataset_path`` as the parameter,
         and you can do anything to the dataset such as re-organize the directory structure,
         or filter out some files.
         """
@@ -234,7 +234,7 @@ class ExtSuStructure(BaseStructure):
         "PQ06_Schostakovich", "PQ07_Schubert", "PQ08_Schubert",
         "SQ01_Beethoven", "SQ02_Janacek", "SQ03_Schubert", "SQ04_Janacek",
         "SQ04_Ravel", "SQ05_Mozart", "SQ07_Haydn", "SQ08_Dvorak", "SQ09_Ravel",
-        "SY06_Mahler", 
+        "SY06_Mahler",
         "VS01_Schumann", "VS02_Brahms", "VS03_Debussy", "VS04_Franck", "VS05_Mozart",
         "WQ01_Nielsen", "WQ02_Schoenberg", "WQ03_Cambini", "WQ04_Danzi",
     ]
@@ -286,6 +286,9 @@ class MIR1KStructure(BaseStructure):
 
     #: Label extension
     label_ext = ".pv"
+
+    #: Folder to labels
+    labels = ["PitchLabel"]
 
     #: Folder to train wavs
     train_wavs = ["train_data"]

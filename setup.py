@@ -15,11 +15,7 @@ packages = \
  'omnizart.feature',
  'omnizart.models',
  'omnizart.music',
-<<<<<<< HEAD
  'omnizart.vocal_frame']
-=======
- 'omnizart.vocal']
->>>>>>> 4c8cec79d79d3aca130d33c1b6dc5749b7eb5145
 
 package_data = \
 {'': ['*'],
@@ -43,7 +39,7 @@ install_requires = \
  'pyfluidsynth>=1.2.5,<2.0.0',
  'pyyaml>=5.3.1,<6.0.0',
  'spleeter>=2.0.1,<3.0.0',
- 'tensorflow>=2.3.0,<3.0.0',
+ 'tensorflow==2.3.0,<3.0.0',
  'tqdm>=4.49.0,<5.0.0',
  'urllib3>=1.25.11,<2.0.0',
  'vamp>=1.1.0,<2.0.0']

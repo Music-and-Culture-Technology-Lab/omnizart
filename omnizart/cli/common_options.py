@@ -38,13 +38,13 @@ COMMON_GEN_FEATURE_OPTIONS = [
     click.option(
         "-o",
         "--output-path",
-        help="Path for svaing the extracted feature. Default to the folder under the dataset.",
+        help="Path for saving the extracted feature. Default to the folder under the dataset.",
         type=click.Path(writable=True)
     ),
     click.option(
         "-n",
         "--num-threads",
-        help="Parallel extract the feature by using multiple threads.",
+        help="Number of threads used for parallel feature extraction.",
         type=int,
         default=4,
         show_default=True
@@ -69,7 +69,7 @@ COMMON_TRAIN_MODEL_OPTIONS = [
     click.option(
         "-i",
         "--input-model",
-        help="If given, the training will continue to fine-tune on the pre-trained model.",
+        help="If given, the training will continue to fine-tune the pre-trained model.",
         type=click.Path(exists=True, writable=True),
     ),
     click.option("-e", "--epochs", help="Number of training epochs", type=int),
@@ -79,7 +79,7 @@ COMMON_TRAIN_MODEL_OPTIONS = [
     click.option("-vb", "--val-batch-size", help="Batch size of each validation step", type=int),
     click.option(
         "--early-stop",
-        help="Stop the training after the given epoch number if the validation accuracy did not improve.",
+        help="Stop the training if validation accuracy does not improve over the given number of epochs.",
         type=int
     )
 ]

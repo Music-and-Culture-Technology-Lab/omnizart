@@ -70,10 +70,15 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
     fs: int
         Sampling rate of the audio. Will be the same as the given ``sampling_rate``.
     """
-    audio_loader = adapter.get_default_audio_adapter()
-    audio, fs = audio_loader.load(audio_path, sample_rate=sampling_rate)
-    if mono:
-        audio = librosa.to_mono(audio.T)
+    try:
+        audio_loader = adapter.get_default_audio_adapter()
+        audio, fs = audio_loader.load(audio_path, sample_rate=sampling_rate)
+        if mono:
+            audio = librosa.to_mono(audio.T)
+
+    except Exception:
+        audio, fs = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
+
     return audio, fs
 
 

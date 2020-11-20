@@ -73,7 +73,7 @@ def entry():
 
 @click.command()
 @click.argument(
-    "dataset", type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su"], case_sensitive=False)
+    "dataset", type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su", "MIR1K"], case_sensitive=False)
 )
 @click.option(
     "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True)
@@ -85,8 +85,9 @@ def download_dataset(dataset, output, unzip):
         "maestro": dset.MaestroStructure.url,
         "musicnet": dset.MusicNetStructure.url,
         "mcgill": dset.McGillBillBoard.url,
-        "bps-fh": dset.BeethovenSonatas.url,
-        "ext-su": dset.ExtSuStructure.url
+        "bps-fh": dset.BeethovenSonatasStructure.url,
+        "ext-su": dset.ExtSuStructure.url,
+        "mir1k": dset.MIR1KStructure.url
     }[dataset.lower()]
     ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
