@@ -24,6 +24,7 @@ package_data = \
               'checkpoints/music/music_note_stream/*',
               'checkpoints/music/music_piano/*',
               'checkpoints/music/music_pop/*',
+              'checkpoints/vocal/contour/*',
               'defaults/*',
               'resource/vamp/*'],
  'omnizart.vocal_contour': ['.ipynb_checkpoints/*']}
