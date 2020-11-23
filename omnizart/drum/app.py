@@ -126,26 +126,22 @@ class DrumTranscription(BaseTranscription):
         logger.info("Output testing feature to %s", test_feat_out_path)
 
         struct = PopStructure
-        train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
-        train_labels = struct.get_train_labels(dataset_path=dataset_path)
+        train_data_pair = struct.get_train_data_pair(dataset_path=dataset_path)
         logger.info(
             "Start extract training feature of the dataset. "
             "This may take time to finish and affect the computer's performance"
         )
-        assert len(train_wavs) == len(train_labels)
         _parallel_feature_extraction_v2(
-            train_wavs, train_labels, train_feat_out_path, settings.feature, num_threads=num_threads
+            train_data_pair, train_feat_out_path, settings.feature, num_threads=num_threads
         )
 
-        test_wavs = struct.get_test_wavs(dataset_path=dataset_path)
-        test_labels = struct.get_test_labels(dataset_path=dataset_path)
+        test_data_pair = struct.get_test_data_pair(dataset_path=dataset_path)
         logger.info(
             "Start extract testing feature of the dataset. "
             "This may take time to finish and affect the computer's performance"
         )
-        assert len(test_wavs) == len(test_labels)
         _parallel_feature_extraction_v2(
-            test_wavs, test_labels, test_feat_out_path, settings.feature, num_threads=num_threads
+            test_data_pair, test_feat_out_path, settings.feature, num_threads=num_threads
         )
 
         # Writing out the settings
@@ -282,24 +278,23 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings
     print("")
 
 
-def _parallel_feature_extraction_v2(wav_paths, label_paths, out_path, feat_settings, num_threads=5):
-    iter_num = len(wav_paths) / num_threads
+def _parallel_feature_extraction_v2(data_pair, out_path, feat_settings, num_threads=5):
+    iter_num = len(data_pair) / num_threads
     if int(iter_num) < iter_num:
         iter_num += 1
     iter_num = int(iter_num)
 
-    label_path_mapping = _gen_wav_label_path_mapping(label_paths)
     for iter_idx in range(iter_num):
         loop = asyncio.get_event_loop()
         tasks = []
         for chunk in range(num_threads):
             wav_idx = num_threads*iter_idx + chunk  # noqa: E226
-            if wav_idx >= len(wav_paths):
+            if wav_idx >= len(data_pair):
                 break
-            logger.info("%s/%s - %s", wav_idx+1, len(wav_paths), wav_paths[wav_idx])  # noqa: E226
+            logger.info("%s/%s - %s", wav_idx+1, len(data_pair), data_pair[wav_idx][0])  # noqa: E226
             tasks.append(
                 loop.create_task(_async_all_in_one_extract(
-                    wav_paths[wav_idx], label_path_mapping, feat_settings
+                    data_pair[wav_idx][0], data_pair[wav_idx][1], feat_settings
                 ))
             )
 
@@ -318,20 +313,18 @@ def _parallel_feature_extraction_v2(wav_paths, label_paths, out_path, feat_setti
                 out_f.create_dataset("mini_beat_arr", data=m_beat_arr, compression="gzip", compression_opts=3)
 
 
-async def _async_all_in_one_extract(wav_path, label_path_mapping, feat_settings):
+async def _async_all_in_one_extract(wav_path, label_path, feat_settings):
     loop = asyncio.get_event_loop()
     patch_cqt, m_beat_arr, label_128, label_13 = await loop.run_in_executor(
-        None, _all_in_one_extract, wav_path, label_path_mapping, feat_settings
+        None, _all_in_one_extract, wav_path, label_path, feat_settings
     )
     return patch_cqt, m_beat_arr, label_128, label_13, wav_path
 
 
-def _all_in_one_extract(wav_path, label_path_mapping, feat_settings):
+def _all_in_one_extract(wav_path, label_path, feat_settings):
     patch_cqt, m_beat_arr = extract_patch_cqt(
         wav_path, sampling_rate=feat_settings.sampling_rate, hop_size=feat_settings.hop_size
     )
-
-    label_path = label_path_mapping[os.path.basename(wav_path)]
     label_128, label_13 = extract_label_13_inst(label_path, m_beat_arr)
     return patch_cqt, m_beat_arr, label_128, label_13
 

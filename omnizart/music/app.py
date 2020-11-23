@@ -26,9 +26,8 @@ from omnizart.music.labels import (
 )
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription
-from omnizart.utils import (
-    get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists, resolve_dataset_type
-)
+from omnizart.utils import get_logger, parallel_generator, ensure_path_exists, resolve_dataset_type
+from omnizart.io import dump_pickle, write_yaml
 from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings

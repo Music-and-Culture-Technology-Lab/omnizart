@@ -369,7 +369,7 @@ class CMediaStructure(BaseStructure):
     url = "https://drive.google.com/uc?export=download&id=15b298vSP9cPP8qARQwa2X_0dbzl6_Eu7"
 
     #: Label extension
-    label_ext = ".pv"
+    label_ext = ".csv"
 
     #: Folder to train wavs
     train_wavs = ["train_data"]
