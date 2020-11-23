@@ -4,9 +4,11 @@ import os
 import glob
 from shutil import copy
 
-from omnizart.utils import ensure_path_exists
+from omnizart.utils import ensure_path_exists, get_logger
 from omnizart.remote import download_large_file_from_google_drive
 
+
+logger = get_logger("Constant Datasets")
 
 
 def _get_file_list(dataset_path, dirs, ext):
@@ -17,10 +19,10 @@ def _get_file_list(dataset_path, dirs, ext):
 
 
 class BaseStructure:
-    """Defines the necessary attributes and methods for each sub-dataset structure class.
+    """Defines the necessary attributes and common functions for each sub-dataset structure class.
 
-    All sub-dataset structure class should inherit this meta class to ensure
-    the necessary attributes, methods are overriden.
+    All sub-dataset structure class should inherit this base class to ensure
+    the necessary attributes and methods are overriden.
     """
 
     #: The URL for downloading the dataset.
@@ -71,22 +73,58 @@ class BaseStructure:
     """
 
     @classmethod
-    def get_train_wavs(cls, dataset_path="./"):
+    def _get_data_pair(cls, dataset_path, wavs, labels):
+        label_path_mapping = {os.path.basename(label): label for label in labels}
+
+        pair = []
+        for wav in wavs:
+            basename = os.path.basename(wav)
+            label_name = cls._name_transform(basename).replace(".wav", cls.label_ext)
+            label_path = label_path_mapping[label_name]
+            assert os.path.exists(label_path)
+            pair.append((wav, label_path))
+
+        return pair
+
+    @classmethod
+    def get_train_data_pair(cls, dataset_path):
+        """Get pair of training file and the coressponding label file path."""
+        return cls._get_data_pair(
+            dataset_path,
+            cls.get_train_wavs(dataset_path),
+            cls.get_train_labels(dataset_path)
+        )
+
+    @classmethod
+    def get_test_data_pair(cls, dataset_path):
+        """Get pair of testing file and the coressponding label file path."""
+        return cls._get_data_pair(
+            dataset_path,
+            cls.get_test_wavs(dataset_path),
+            cls.get_test_labels(dataset_path)
+        )
+
+    @classmethod
+    def _name_transform(cls, basename):
+        return basename
+
+    @classmethod
+    def get_train_wavs(cls, dataset_path):
         """Get list of complete train wav paths"""
         return _get_file_list(dataset_path, cls.train_wavs, ".wav")
 
     @classmethod
-    def get_test_wavs(cls, dataset_path="./"):
+    def get_test_wavs(cls, dataset_path):
         """Get list of complete test wav paths"""
         return _get_file_list(dataset_path, cls.test_wavs, ".wav")
 
     @classmethod
-    def get_train_labels(cls, dataset_path="./"):
+    def get_train_labels(cls, dataset_path):
         """Get list of complete train label paths"""
         return _get_file_list(dataset_path, cls.train_labels, cls.label_ext)
 
     @classmethod
-    def get_test_labels(cls, dataset_path="./"):
+    def get_test_labels(cls, dataset_path):
         """Get list of complete test label paths"""
         return _get_file_list(dataset_path, cls.test_labels, cls.label_ext)
 
@@ -104,9 +142,9 @@ class BaseStructure:
         """
         ensure_path_exists(save_path)
         save_name = cls.__name__.replace("Structure", "") + ".zip"
-        download_large_file_from_google_drive(cls.url, save_path=save_path, save_name=save_name, unzip=True)
+        dataset_path = download_large_file_from_google_drive(cls.url, save_path=save_path, save_name=save_name, unzip=True)
         os.remove(save_name)
-        cls._post_download(dataset_path=os.path.join(save_path, save_name))
+        cls._post_download(dataset_path=dataset_path)
 
     @classmethod
     def _post_download(cls, dataset_path):
@@ -306,6 +344,7 @@ class MIR1KStructure(BaseStructure):
     @classmethod
     def _post_download(cls, dataset_path):
         """Re-distribute wav files into training and testing data."""
+        logger.debug("Received dataset path: %s", dataset_path)
         wavs = _get_file_list(dataset_path, ["Wavfile"], ".wav")
         train_num = round(len(wavs) * cls.percent_train)
         train_wavs = wavs[:train_num]
@@ -319,7 +358,6 @@ class MIR1KStructure(BaseStructure):
         for wav in test_wavs:
             copy(wav, test_folder)
         return wavs
-
 
 
 class CMediaStructure(BaseStructure):

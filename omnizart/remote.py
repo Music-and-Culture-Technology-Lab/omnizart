@@ -53,6 +53,11 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
     unzip: bool
         Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
         the original downloaded file.
+
+    Returns
+    -------
+    path: Path
+        The absolute path to the downloaded/extracted folder/file. 
     """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
@@ -73,8 +78,8 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
         length = file_length
     print(f"Total size: {format_byte(length)}")
 
-    init_chunk_size_mb = 1
-    chunk_size = init_chunk_size_mb * 2**20
+    init_chunk_size_mb = 0.1
+    chunk_size = round(init_chunk_size_mb * 2**20)
     diff_t = 1
     speed_history = [chunk_size]
     avg_speed = sum(speed_history) / len(speed_history)
@@ -114,6 +119,13 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
                 zip_ref.extract(member, path=save_path)
             print("")
 
+            # Assert the first item name is the root folder's name.
+            extracted_name = zip_ref.namelist()[0]
+            assert extracted_name.endswith("/") or extracted_name.endswith("\\")
+        return os.path.abspath(os.path.join(save_path, extracted_name))
+
+    return os.path.abspath(out_path)
+
 
 def download_large_file_from_google_drive(url, file_length=None, save_path="./", save_name=None, unzip=False):
     """Google Drive file downloader.
@@ -137,8 +149,13 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     unzip: bool
         Whether to unzip (decompress) the downloaded file (assumed zipped). Will not delete
         the original downloaded file.
+
+    Returns
+    -------
+    path: Path
+        The absolute path to the downloaded/extracted folder/file. 
     """
-    if not url.startswith("https://"):
+    if not (url.startswith("https://") or url.startswith("http://")):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
         fid = url  # noqa: F841
@@ -154,8 +171,7 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     cookie = resp.getheader("Set-Cookie")
     if cookie is None:
         # Actually a small file, without download confirmation.
-        download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
-        return
+        return download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
 
     if file_length is None:
         # Parse the file size from the returned page content.
@@ -182,7 +198,7 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     warn_col = [col for col in cols if "download_warning" in col][0]
     confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
-    download(
+    return download(
         url, file_length=file_length, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip
     )
 
