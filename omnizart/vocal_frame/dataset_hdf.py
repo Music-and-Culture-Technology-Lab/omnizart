@@ -1,3 +1,5 @@
+# pylint: disable=C0103,R0914,R0915
+
 import glob
 import h5py
 import numpy as np
@@ -11,7 +13,7 @@ def generator_audio(feature_folder, batch_size, timesteps, phase='train', percen
     hdf_files = glob.glob(f"{feature_folder}/*.hdf")
     if len(hdf_files) == 0:
         print("Warning! No feature files found in the given path")
-        
+
     X_48 = []
     X_12 = []
     Y = []
@@ -30,24 +32,23 @@ def generator_audio(feature_folder, batch_size, timesteps, phase='train', percen
     if phase == 'all':
         chorale_indices = np.arange(int(len(X_48)))
 
-    for a in range(len(X_48)):
-        if (a in chorale_indices):
-            new_x = np.array(X_48[a][:, :, 0])
+    for clip_ind, clip in enumerate(X_48):
+        if clip_ind in chorale_indices:
+            new_x = np.array(clip[:, :, 0])
 
             new_x_12 = note_res_downsampling(new_x)
             new_x_12 = padding(new_x_12, 128, timesteps)
             X_12.append(new_x_12)
 
             new_x_48 = padding(new_x, 384, timesteps)
-            X_48[a] = new_x_48
+            X_48[clip_ind] = new_x_48
 
-            new_y = np.array(Y[a])
-            Y[a] = padding(new_y, 384, timesteps)
-
+            new_y = np.array(Y[clip_ind])
+            Y[clip_ind] = padding(new_y, 384, timesteps)
         else:
-            X_48[a] = 0
+            X_48[clip_ind] = 0
             X_12.append(0)
-            Y[a] = 0
+            Y[clip_ind] = 0
 
     features_48 = []
     features_12 = []

@@ -1,8 +1,8 @@
+# pylint: disable=C0103,W0612,E0611,W0613
+
 import os
 from os.path import join as jpath
 from datetime import datetime
-import tqdm
-import pickle
 
 import numpy as np
 from scipy.io.wavfile import write as wavwrite
@@ -19,7 +19,8 @@ from omnizart.vocal_frame.inference import inference
 from omnizart.models.utils import matrix_parser
 from omnizart.constants.datasets import MIR1KStructure, _get_file_list
 from omnizart.vocal_frame.dataset_hdf import generator_audio
-from omnizart.models.vocalframe_model_tf import seg, focal_loss
+from omnizart.models.u_net import semantic_segmentation
+from omnizart.music.losses import focal_loss
 
 
 logger = get_logger("Vocal frame")
@@ -59,16 +60,19 @@ class VocalFrameTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path)
 
         logger.info("Extracting feature...")
-        feature = extract_cfp_feature(input_audio,
-                                      hop=model_settings.feature.hop_size,
-                                      win_size=model_settings.feature.window_size,
-                                      down_fs=model_settings.feature.sampling_rate)
+        feature = extract_cfp_feature(
+            input_audio,
+            hop=model_settings.feature.hop_size,
+            win_size=model_settings.feature.window_size,
+            down_fs=model_settings.feature.sampling_rate
+        )
 
         logger.info("Predicting...")
         pred = inference(
             feature[:, :, 0],
             model,
-            timestep=model_settings.training.timesteps)
+            timestep=model_settings.training.timesteps
+        )
 
         r = matrix_parser(pred)
         f0 = r[:, 1].astype(float)
@@ -128,9 +132,6 @@ class VocalFrameTranscription(BaseTranscription):
 
         # Resolve dataset type (TODO: Implement MedleyDB)
         dataset_name, struct = _resolve_dataset_type(dataset_path)
-
-        # Dirty way to structure the dataset with the current MIR1KStructure
-        struct._post_download(dataset_path)
 
         logger.info("Inferred dataset name: %s", dataset_name)
 
@@ -200,7 +201,7 @@ class VocalFrameTranscription(BaseTranscription):
             ({'input_score_48': features_48, 'input_score_12': features_12}, {'prediction': labels})
             for (features_48, features_12, labels) in generator_audio(
                 feature_folder,
-                batch_size=settings.training.batch_size,
+                batch_size=settings.training.val_batch_size,
                 timesteps=settings.training.timesteps,
                 phase='test'
             )
@@ -208,10 +209,12 @@ class VocalFrameTranscription(BaseTranscription):
 
         if input_model_path is None:
             logger.info("Constructing new model")
-            model = seg(
+            # NOTE: The default value of dropout rate for ConvBlock is different
+            # in VocalSeg which is 0.2.
+            model = semantic_segmentation(
                 multi_grid_layer_n=1,
                 feature_num=384,
-                input_channel=1,
+                ch_num=1,
                 timesteps=settings.training.timesteps
             )
 
@@ -242,7 +245,7 @@ class VocalFrameTranscription(BaseTranscription):
             validation_data=val_dataset,
             epochs=settings.training.epoch,
             steps_per_epoch=settings.training.steps,
-            validation_steps=200,
+            validation_steps=settings.training.val_steps,
             max_queue_size=100,
             callbacks=callbacks,
             use_multiprocessing=False,
@@ -261,30 +264,18 @@ def _resolve_dataset_type(dataset_path):
     msg = "vocal_frame only accepts MIR-1K and MedleyDB as the training data."
     assert low_path in ['mir-1k', 'medleydb'], msg
     if low_path == 'medleydb':
-        target_dataset = MedleyDB
         raise NotImplementedError("Using MedleyDB as the training data is no implemented yet.")
-    else:
-        target_dataset = MIR1KStructure
+
+    target_dataset = MIR1KStructure
 
     return low_path, target_dataset
 
 
 def _parallel_feature_extraction(wav_paths, label_paths, out_path, target_dataset, feat_settings, num_threads=4):
-
-    def _get_filename(filepath):
-        basename = os.path.basename(filepath)
-        filename, _ = os.path.splitext(basename)
-        return filename
-    # -----------------------------------------
-    # Code block brought from the original repo
-    # https://github.com/s603122001/Vocal-Melody-Extraction/blob/c243754bdd01442be649953f5cfb93a23f3cb7f6/project/dataset_manage.py#L103
+    assert target_dataset in ['medleydb', 'mir-1k'], \
+        f"`target_dataset` should be either 'medleydb' or 'mir-1k'; got {target_dataset}"
     if target_dataset == "medleydb":
         raise NotImplementedError
-    elif target_dataset == "mir-1k":
-        v = None
-    else:
-        raise ValueError(f"`target_dataset` should be either 'medleydb' or 'mir-1k'.")
-    # -----------------------------------------
 
     feat_extract_params = {
         "hop": feat_settings.hop_size,
@@ -303,10 +294,7 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, target_datase
         )
     )
 
-    fname_to_label_path = {}
-    for label_path in label_paths:
-        fname = _get_filename(label_path)
-        fname_to_label_path[fname] = label_path
+    fname_to_label_path = get_fn_to_path(label_paths)
 
     for idx, (feature, audio_idx) in iters:
         audio = wav_paths[audio_idx]
@@ -316,13 +304,13 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, target_datase
         # --------------------------------------------------------------------------
         # TODO: Perhaps imitate drum.app that puts `label_list` and `label_parser()`
         # in `parallel_generator()` to keep consistency
-        audio_filename = _get_filename(audio)
+        audio_filename = get_filename(audio)
         label = fname_to_label_path[audio_filename]
-        label_filename = _get_filename(label)
+        label_filename = get_filename(label)
         msg = f"{audio_idx}-th entry of the given `wav_paths` and `label_list` leads to\
             mismatched audio and label filenames: {audio_filename} and {label_filename}, respectively."
         assert audio_filename == label_filename, msg
-        y = label_parser(label, target_dataset, v)
+        y = label_parser(label, target_dataset, vocal_track_list=None)
         filename = audio_filename
         # --------------------------------------------------------------------------
 
@@ -346,7 +334,8 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, target_datase
     print("")
 
 
-# Brought from Wei-Tsung's Repo
+# Brought the original repo
+# https://github.com/s603122001/Vocal-Melody-Extraction/blob/c243754bdd01442be649953f5cfb93a23f3cb7f6/project/dataset_manage.py#L58
 def label_parser(label, target_data, vocal_track_list=None):
     # parser label for mir1k
     if target_data == 'mir-1k':
@@ -354,10 +343,24 @@ def label_parser(label, target_data, vocal_track_list=None):
         score_mat = np.zeros((len(score), 352))
         for i in range(score_mat.shape[0]):
             n = score[i]
-            if (n != 0):
+            if n != 0:
                 score_mat[i, int(np.round((score[i] - 21) * 4))] = 1
     # parser label for medleydb
     else:
         raise NotImplementedError
 
     return score_mat
+
+
+def get_filename(filepath):
+    basename = os.path.basename(filepath)
+    filename, _ = os.path.splitext(basename)
+    return filename
+
+
+def get_fn_to_path(list_paths):
+    fname_to_path = {}
+    for path in list_paths:
+        fname = get_filename(path)
+        fname_to_path[fname] = path
+    return fname_to_path

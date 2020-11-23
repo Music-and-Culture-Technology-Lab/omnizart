@@ -15,7 +15,7 @@ import click
 
 import omnizart.constants.datasets as dset
 from omnizart import MODULE_PATH
-from omnizart.remote import download, download_large_file_from_google_drive
+from omnizart.remote import download_large_file_from_google_drive
 from omnizart.utils import ensure_path_exists, synth_midi
 from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music

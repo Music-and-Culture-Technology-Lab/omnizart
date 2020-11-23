@@ -247,7 +247,9 @@ class VocalFrameSettings(Settings):
             self.epoch: int = None
             self.early_stop: int = None
             self.steps: int = None
+            self.val_steps: int = None
             self.batch_size: int = None
+            self.val_batch_size: int = None
             self.timesteps: int = None
 
 

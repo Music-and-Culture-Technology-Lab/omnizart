@@ -4,8 +4,8 @@ import tqdm
 from omnizart.models.utils import note_res_downsampling, padding
 
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+def sigmoid(tensor):
+    return 1 / (1 + np.exp(-tensor))
 
 
 def generation_prog(model,
@@ -56,17 +56,21 @@ def inference(feature,
 
     for i in tqdm.tqdm(range(iter_num)):
         time_index = i * batch_size
-        p = generation_prog(model, f_48_s, f_12_s, time_index=time_index, timesteps=timestep,
-                            batch_size=batch_size)
-        p = sigmoid(p)
-        extract_result_seg[time_index:time_index + batch_size] = p
+        probs = generation_prog(
+            model, f_48_s, f_12_s,
+            time_index=time_index,
+            timesteps=timestep,
+            batch_size=batch_size
+        )
+        probs = sigmoid(probs)
+        extract_result_seg[time_index:time_index + batch_size] = probs
 
     for i in range(len(f_12_s) - timestep):
         extract_result_seg_flatten[i:i + timestep] += extract_result_seg[i]
 
     extract_result_seg = extract_result_seg_flatten[timestep:-timestep, p_t:-p_b, 1]
     avg = 0
-    if (channel == 2):
+    if channel == 2:
         extract_result_seg_unvoiced = extract_result_seg_flatten[timestep:-timestep, p_t:-p_b, 0]
         avg_unvoiced = np.sum(np.sum(extract_result_seg_unvoiced)) / extract_result_seg_unvoiced.size
 

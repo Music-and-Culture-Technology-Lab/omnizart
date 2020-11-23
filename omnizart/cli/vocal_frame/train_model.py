@@ -19,7 +19,9 @@ def train_model(
     input_model,
     epochs,
     steps,
+    val_steps,
     batch_size,
+    val_batch_size,
     early_stop,
     timesteps
 ):
@@ -30,9 +32,13 @@ def train_model(
         settings.training.epoch = epochs
     if steps is not None:
         settings.training.steps = steps
+    if val_steps is not None:
+        settings.training.val_steps = val_steps
     if batch_size is not None:
         settings.training.batch_size = batch_size
+    if val_batch_size is not None:
+        settings.training.val_batch_size = val_batch_size
     if early_stop is not None:
         settings.training.early_stop = early_stop
 
-    app.train(feature_path, model_name=model_name, input_model_path=input_model, music_settings=settings)
+    app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalframe_settings=settings)

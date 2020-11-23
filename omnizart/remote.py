@@ -57,7 +57,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
     Returns
     -------
     path: Path
-        The absolute path to the downloaded/extracted folder/file. 
+        The absolute path to the downloaded/extracted folder/file.
     """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
@@ -153,7 +153,7 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     Returns
     -------
     path: Path
-        The absolute path to the downloaded/extracted folder/file. 
+        The absolute path to the downloaded/extracted folder/file.
     """
     if not (url.startswith("https://") or url.startswith("http://")):
         # The given 'url' is actually a file ID.

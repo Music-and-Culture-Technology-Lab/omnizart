@@ -1,3 +1,5 @@
+# pylint: disable=C0103
+
 import numpy as np
 import tensorflow as tf
 
@@ -23,16 +25,16 @@ def shape_list(input_tensor):
     return ret
 
 
-def matrix_parser(m):
+def matrix_parser(pred):
     """Prediction parser for vocal_frame."""
-    x = np.zeros(shape=(m.shape[0], 2))
+    output = np.zeros(shape=(pred.shape[0], 2))
 
-    for i in range(len(m)):
-        if (np.sum(m[i]) != 0):
-            x[i][0] = 1
-            x[i][1] = midi2freq(np.argmax(m[i]) / 4 + 21)
+    for i, pred_i in enumerate(pred):
+        if np.sum(pred_i) != 0:
+            output[i][0] = 1
+            output[i][1] = midi2freq(np.argmax(pred_i) / 4 + 21)
 
-    return x
+    return output
 
 
 def note_res_downsampling(score):
@@ -49,9 +51,9 @@ def note_res_downsampling(score):
 
     for i in range(0, 352, 4):
         cent = i + 2
-        lb = max(0, cent - r)
-        ub = min(353, (cent + 1) + r)
-        new_score[:, i // 4] = np.sum(score[:, lb:ub] * f_aug, axis=1)
+        lower_bound = max(0, cent - r)
+        upper_bound = min(353, (cent + 1) + r)
+        new_score[:, i // 4] = np.sum(score[:, lower_bound:upper_bound] * f_aug, axis=1)
 
     return new_score
 
@@ -63,7 +65,7 @@ def padding(x,
 
     extended_chorale = np.array(x)
 
-    if (((feature_num - x.shape[1]) % 2) == 0):
+    if ((feature_num - x.shape[1]) % 2) == 0:
         p_t = (feature_num - x.shape[1]) // 2
         p_b = p_t
     else:
@@ -87,7 +89,7 @@ def padding(x,
                                        padding_end),
                                       axis=0)
 
-    if (dimension):
+    if dimension:
         return extended_chorale, p_t, p_b
-    else:
-        return extended_chorale
+
+    return extended_chorale

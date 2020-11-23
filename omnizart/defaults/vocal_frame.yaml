@@ -60,8 +60,16 @@ General:
                 Description: Number of training steps for each epoch.
                 Type: Integer
                 Value: 6000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 200    
             BatchSize:
                 Description: Batch size of each training step.
+                Type: Integer
+                Value: 12
+            ValBatchSize:
+                Description: Batch size of each validation step.
                 Type: Integer
                 Value: 12
             Timesteps:
