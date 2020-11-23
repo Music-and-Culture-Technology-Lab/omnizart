@@ -91,9 +91,8 @@ def download_dataset(dataset, output, unzip):
         "mir1k": dset.MIR1KStructure,
         "cmedia": dset.CMediaStructure
     }[dataset.lower()]
-    ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
-    struct.download()
+    struct.download(save_path=output)
 
 
 @click.command()

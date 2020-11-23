@@ -5,6 +5,7 @@ import pytest
 from jsonschema import ValidationError
 
 from omnizart import utils
+from omnizart import io
 
 
 def test_logger(caplog):
@@ -27,7 +28,7 @@ def test_pickle_io():
     }
     path = "./tmp/"
     f_name = os.path.join(path, "one_more_level", "test.pickle")
-    utils.dump_pickle(data, f_name)
+    io.dump_pickle(data, f_name)
     loaded = utils.load_pickle(f_name)
     assert data == loaded
     shutil.rmtree(path)
@@ -45,7 +46,7 @@ def test_yaml_io(tmp_path):
         }
     }
     f_name = tmp_path.joinpath("test.yaml")
-    utils.write_yaml(data, f_name)
+    io.write_yaml(data, f_name)
     loaded = utils.load_yaml(f_name)
     assert data == loaded
 

@@ -76,7 +76,7 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
         if mono:
             audio = librosa.to_mono(audio.T)
 
-    except ImportError:
+    except (ImportError, adapter.SpleeterError):
         audio, fs = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
 
     return audio, fs
