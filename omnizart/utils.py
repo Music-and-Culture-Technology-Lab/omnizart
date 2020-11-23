@@ -281,8 +281,8 @@ def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_P
     wave.write(output_path, sampling_rate, raw_wav)
 
 
-def midi2freq(m):
-    return 2 ** ((m - 69) / 12) * 440
+def midi2freq(midi_number):
+    return 2 ** ((midi_number - 69) / 12) * 440
 
 
 def resolve_dataset_type(dataset_path, keywords):
