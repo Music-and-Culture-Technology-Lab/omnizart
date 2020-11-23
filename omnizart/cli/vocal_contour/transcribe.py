@@ -2,7 +2,7 @@
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
-from omnizart.vocal_frame import app
+from omnizart.vocal_contour import app
 
 
 @click.command()
@@ -15,7 +15,7 @@ def transcribe(input_audio, model_path, output):
 
     \b
     Example Usage
-    $ omnizart vocal_frame transcribe \ 
+    $ omnizart vocal_contour transcribe \ 
         example.wav \ 
         --model-path path/to/model \ 
         --output example.mid

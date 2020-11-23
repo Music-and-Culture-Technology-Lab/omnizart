@@ -3,7 +3,7 @@ from functools import partial
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
-from omnizart.vocal_frame import app
+from omnizart.vocal_contour import app
 from omnizart.setting_loaders import VocalFrameSettings
 
 

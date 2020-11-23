@@ -211,7 +211,7 @@ class ChordSettings(Settings):
 
 @json_serializable(key_path="./General", value_path="./Value")
 class VocalFrameSettings(Settings):
-    default_setting_file: str = "vocal_frame.yaml"
+    default_setting_file: str = "vocal_contour.yaml"
 
     def __init__(self, conf_path=None):
         self.checkpoint_path: str = None

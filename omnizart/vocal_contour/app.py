@@ -15,10 +15,10 @@ from omnizart.setting_loaders import VocalFrameSettings
 from omnizart.feature.wrapper_func import extract_cfp_feature
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.io import write_yaml
-from omnizart.vocal_frame.inference import inference
+from omnizart.vocal_contour.inference import inference
 from omnizart.models.utils import matrix_parser
 from omnizart.constants.datasets import MIR1KStructure, _get_file_list
-from omnizart.vocal_frame.dataset_hdf import generator_audio
+from omnizart.vocal_contour.dataset_hdf import generator_audio
 from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
 
@@ -51,7 +51,7 @@ class VocalFrameTranscription(BaseTranscription):
 
         See Also
         --------
-        omnizart.cli.vocal_frame.transcribe: The coressponding command line entry.
+        omnizart.cli.vocal_contour.transcribe: The coressponding command line entry.
         """
         if not os.path.isfile(input_audio):
             raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
@@ -164,7 +164,7 @@ class VocalFrameTranscription(BaseTranscription):
     def train(self, feature_folder, model_name=None, input_model_path=None, vocalframe_settings=None):
         """Model training.
 
-        Train a new vocal_frame model or continue to train on a pre-trained model.
+        Train a new vocal_contour model or continue to train on a pre-trained model.
 
         Parameters
         ----------
@@ -261,7 +261,7 @@ def _resolve_dataset_type(dataset_path):
 
     low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
 
-    msg = "vocal_frame only accepts MIR-1K and MedleyDB as the training data."
+    msg = "vocal_contour only accepts MIR-1K and MedleyDB as the training data."
     assert low_path in ['mir-1k', 'medleydb'], msg
     if low_path == 'medleydb':
         raise NotImplementedError("Using MedleyDB as the training data is no implemented yet.")

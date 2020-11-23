@@ -1,14 +1,14 @@
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart vocal-frame transribe` command.
+        Description: Mode of transcription by executing the `omnizart vocal-contour transribe` command.
         Type: String 
-        Value: VocalFrame
+        Value: VocalContour
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
         SubType: [String, String]
         Value: 
-            VocalFrame: checkpoints/vocal/vocal_frame
+            VocalContour: checkpoints/vocal/vocal_contour
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -40,11 +40,11 @@ General:
             SavePrefix:
                 Description: Prefix of the trained model's name to be saved.
                 Type: String
-                Value: vocal-frame
+                Value: vocal-contour
             SavePath:
                 Description: Path to save the trained model.
                 Type: String
-                Value: ./checkpoints/vocal_frame
+                Value: ./checkpoints/vocal_contour
     Training:
         Description: Parameters for training
         Settings:

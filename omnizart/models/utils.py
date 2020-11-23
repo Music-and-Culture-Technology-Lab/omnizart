@@ -26,7 +26,7 @@ def shape_list(input_tensor):
 
 
 def matrix_parser(pred):
-    """Prediction parser for vocal_frame."""
+    """Prediction parser for vocal_contour."""
     output = np.zeros(shape=(pred.shape[0], 2))
 
     for i, pred_i in enumerate(pred):
