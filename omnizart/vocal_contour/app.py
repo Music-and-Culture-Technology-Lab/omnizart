@@ -88,6 +88,9 @@ class VocalFrameTranscription(BaseTranscription):
             if os.path.isdir(save_to):
                 f0_save_to = jpath(save_to, f0_out)
                 at_save_to = jpath(save_to, audio_trans)
+            else:
+                f0_save_to = f0_out
+                at_save_to = audio_trans
             np.savetxt(f0_save_to, f0)
             wavwrite(at_save_to, model_settings.feature.sampling_rate, y)
             logger.info("Text and audio files have been written to %s", save_to)

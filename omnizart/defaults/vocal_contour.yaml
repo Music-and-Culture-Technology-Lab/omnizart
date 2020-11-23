@@ -8,7 +8,7 @@ General:
         Type: Map
         SubType: [String, String]
         Value: 
-            VocalContour: checkpoints/vocal/vocal_contour
+            VocalContour: checkpoints/vocal/contour
     Feature:
         Description: Default settings of feature extraction
         Settings:

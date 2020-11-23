@@ -214,6 +214,7 @@ class VocalFrameSettings(Settings):
     default_setting_file: str = "vocal_contour.yaml"
 
     def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
         self.checkpoint_path: str = None
         self.feature = self.VocalFrameFeature()
         self.dataset = self.VocalFrameDatasetset()

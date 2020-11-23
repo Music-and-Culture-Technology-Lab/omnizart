@@ -124,6 +124,11 @@ def download_checkpoints(output_path):
             "fid": "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
             "save_as": "checkpoints/music/music_note_stream/weights.h5",
             "file_length": 33816384
+        },
+        "vocal_contour": {
+            "fid": "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
+            "save_as": "checkpoints/vocal/contour/weights.h5",
+            "file_length": 50732192
         }
     }
 
