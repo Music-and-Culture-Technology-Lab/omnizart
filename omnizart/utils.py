@@ -230,7 +230,7 @@ def ensure_path_exists(path):
         os.makedirs(path)
 
 
-def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_size=None, timeout=300, **kwargs):
+def parallel_generator(func, input_list, max_workers=2, use_thread=False, chunk_size=None, timeout=600, **kwargs):
     if chunk_size is not None and max_workers > chunk_size:
         logger.warning(
             "Chunk size should larger than the maximum number of workers, or the parallel computation "

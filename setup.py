@@ -13,8 +13,7 @@ packages = \
  'omnizart.drum',
  'omnizart.feature',
  'omnizart.models',
- 'omnizart.music',
- 'omnizart.vocal']
+ 'omnizart.music']
 
 package_data = \
 {'': ['*'],
