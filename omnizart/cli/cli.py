@@ -73,7 +73,8 @@ def entry():
 
 @click.command()
 @click.argument(
-    "dataset", type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su", "MIR1K"], case_sensitive=False)
+    "dataset",
+    type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su", "MIR1K", "CMedia"], case_sensitive=False)
 )
 @click.option(
     "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True)
@@ -81,20 +82,18 @@ def entry():
 @click.option("--unzip", help="Whether to unzip the downloaded dataset", is_flag=True)
 def download_dataset(dataset, output, unzip):
     """A quick command for downloading datasets."""
-    url = {
-        "maestro": dset.MaestroStructure.url,
-        "musicnet": dset.MusicNetStructure.url,
-        "mcgill": dset.McGillBillBoard.url,
-        "bps-fh": dset.BeethovenSonatasStructure.url,
-        "ext-su": dset.ExtSuStructure.url,
-        "mir1k": dset.MIR1KStructure.url
+    struct = {
+        "maestro": dset.MaestroStructure,
+        "musicnet": dset.MusicNetStructure,
+        "mcgill": dset.McGillBillBoard,
+        "bps-fh": dset.BeethovenSonatasStructure,
+        "ext-su": dset.ExtSuStructure,
+        "mir1k": dset.MIR1KStructure,
+        "cmedia": dset.CMediaStructure
     }[dataset.lower()]
     ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
-    if "drive.google.com" in url:
-        download_large_file_from_google_drive(url, save_path=output, save_name=dataset + ".zip", unzip=unzip)
-    else:
-        download(url, save_path=output, unzip=unzip)
+    struct.download()
 
 
 @click.command()

@@ -10,7 +10,7 @@
 Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
 Combines all the hard works developed by everyone in MCTLab into a single command line tool, and plan to distribute as a python package in the future.
 
-### Try omnizart now!! [Colab](https://bit.ly/omnizart-colab)
+### Try omnizart now!! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/omnizart-colab)
 
 A quick-start example is as following:
 ``` bash
