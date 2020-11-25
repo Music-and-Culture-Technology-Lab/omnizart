@@ -8,6 +8,7 @@ per-file-ignores =
     omnizart/cli/transcribe.py: W605,W291 \
     omnizart/feature/cfp.py: E226 \
     omnizart/constants/feature.py: E266 \
-    omnizart/music/app.py: E402 \
-    omnizart/drum/app.py: E402 \
-    omnizart/drum/dataset.py: E126,E121
+    omnizart/music/app.py: E402,E126,E121 \
+    omnizart/drum/app.py: E402,E126,E121 \
+    omnizart/chord/app.py: E126,E121 \
+    omnizart/base.py: E126,E121
