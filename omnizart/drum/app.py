@@ -6,16 +6,16 @@ from datetime import datetime
 import asyncio
 
 import h5py
+import numpy as np
 import tensorflow as tf
 
 from omnizart.feature.wrapper_func import extract_patch_cqt
 from omnizart.drum.prediction import predict
 from omnizart.drum.labels import extract_label_13_inst
-from omnizart.drum.dataset import get_dataset
 from omnizart.drum.inference import inference
 from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
-from omnizart.base import BaseTranscription
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import DrumSettings
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.constants.datasets import PopStructure
@@ -179,18 +179,19 @@ class DrumTranscription(BaseTranscription):
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
-        train_dataset = get_dataset(
-            feature_files=train_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.batch_size,
-            steps=settings.training.steps
-        )
-        val_dataset = get_dataset(
-            feature_files=val_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.val_batch_size,
-            steps=settings.training.val_steps
-        )
+
+        output_types = (tf.float32, tf.float32)
+        output_shapes = ([120, 120, 4], [4, 13])
+        train_dataset = PopDatasetLoader(
+                feature_files=train_feat_files,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
+        val_dataset = PopDatasetLoader(
+                feature_files=val_feat_files,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+            ) \
+            .get_dataset(settings.training.val_batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Constructing new model")
@@ -336,6 +337,26 @@ def _gen_wav_label_path_mapping(label_paths):
         wav_name = f_name.replace("align_mid", "ytd_audio")
         mapping[wav_name] = label_path
     return mapping
+
+
+class PopDatasetLoader(BaseDatasetLoader):
+    """Pop dataset loader for training drum model."""
+    def __init__(self, mini_beat_per_seg=4, feature_folder=None, feature_files=None, num_samples=100, slice_hop=1):
+        super().__init__(
+            feature_folder=feature_folder,
+            feature_files=feature_files,
+            num_samples=num_samples,
+            slice_hop=slice_hop
+        )
+        self.mini_beat_per_seg = mini_beat_per_seg
+
+    def _get_feature(self, hdf_name, slice_start):
+        feat = self.hdf_refs[hdf_name]["feature"][slice_start:slice_start + self.mini_beat_per_seg].squeeze()
+        return np.transpose(feat, axes=[1, 2, 0])  # dim: 120 x 120 x mini_beat_per_seg
+
+    def _get_label(self, hdf_name, slice_start):
+        label = self.hdf_refs["label"][slice_start:slice_start + self.mini_beat_per_seg].squeeze()
+        return label.T  # dim: 13 x mini_beat_per_seg
 
 
 def loss_func(target, pred, soft_loss_range=20):

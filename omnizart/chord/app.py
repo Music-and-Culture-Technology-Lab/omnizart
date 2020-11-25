@@ -6,14 +6,13 @@ import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.base import BaseTranscription
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import ChordSettings
 from omnizart.io import write_yaml
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
-from omnizart.chord.dataset import get_dataset
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.chord_model import ChordModel, ReduceSlope
@@ -183,18 +182,18 @@ class ChordTranscription(BaseTranscription):
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
-        train_dataset = get_dataset(
-            feature_files=train_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.batch_size,
-            steps=settings.training.steps
-        )
-        val_dataset = get_dataset(
-            feature_files=val_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.val_batch_size,
-            steps=settings.training.val_steps
-        )
+        output_types = (tf.float32, (tf.int32, tf.int32))
+        output_shapes = ([100, 504], ([100], [100]))
+        train_dataset = McGillDatasetLoader(
+                feature_files=train_feat_files,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
+        val_dataset = McGillDatasetLoader(
+                feature_files=val_feat_files,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Constructing new model")
@@ -286,6 +285,37 @@ def _write_feature(feature, out_path):
             data = np.concatenate([feat[key] for feat in feature])
             out_hdf.create_dataset(key, data=data, compression="gzip", compression_opts=3)
         out_hdf.create_dataset("num_sequence", data=feature[0]["num_sequence"])
+
+
+class McGillDatasetLoader(BaseDatasetLoader):
+    """McGill BillBoard dataset loader.
+
+    The feature column name stored in the .hdf files is slightly different from
+    others, which the name is ``chroma``, not ``feature``.
+    Also the returned label should be a tuple of two different ground-truth labels
+    to fit the training scenario.
+
+    Yields
+    ------
+    feature:
+        Input feature for training the model.
+    label: tuple
+        gt_chord -> Ground-truth chord label.
+        gt_chord_change -> Ground-truth chord change label.
+    """
+    def __init__(self, feature_folder=None, feature_files=None, num_samples=100, slice_hop=1):
+        super().__init__(
+            feature_folder=feature_folder,
+            feature_files=feature_files,
+            num_samples=num_samples,
+            slice_hop=slice_hop,
+            feat_col_name="chroma"
+        )
+
+    def _get_label(self, hdf_name, slice_start):
+        gt_chord = self.hdf_refs[hdf_name]["chord"][slice_start:slice_start + self.slice_hop].squeeze()
+        gt_chord_change = self.hdf_refs[hdf_name]["chord_change"][slice_start:slice_start + self.slice_hop].squeeze()
+        return gt_chord, gt_chord_change
 
 
 def chord_loss_func(
