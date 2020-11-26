@@ -78,8 +78,7 @@ def entry():
 @click.option(
     "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True)
 )
-@click.option("--unzip", help="Whether to unzip the downloaded dataset", is_flag=True)
-def download_dataset(dataset, output, unzip):
+def download_dataset(dataset, output):
     """A quick command for downloading datasets."""
     struct = {
         "maestro": dset.MaestroStructure,
