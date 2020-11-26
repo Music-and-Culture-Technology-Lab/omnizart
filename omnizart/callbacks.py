@@ -2,7 +2,10 @@
 import os
 import abc
 
+import six
 import numpy as np
+import tensorflow as tf
+from tensorflow.python.keras.utils import tf_utils
 
 from omnizart.io import write_yaml
 from omnizart.utils import get_logger, ensure_path_exists
@@ -160,3 +163,89 @@ class ModelCheckpoint(Callback):
         if not self.save_weights_only:
             write_yaml(self.model.to_yaml(), os.path.join(self.filepath, "arch.yaml"), dump=False)
         self.model.save_weights(os.path.join(self.filepath, "weights.h5"))
+
+
+class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
+    """Re-implementation of Tensorflow ModelCheckpoint.
+
+    Customize the behaviour of saving the checkpoints.
+    When specify save_weights_only to 'True', save the weights only during training, and save
+    the whole model including architecture using model.save() at the end of training.
+
+    This callback is mainly designed for saving customized models that is unable to
+    use model.to_yaml() function.
+    """
+    def set_model(self, model):
+        self.model = model
+
+        # ## Below are the original implementation, which will do some checks
+        # ## and implicitly turn on the 'save_weights_only' flag, leading to
+        # ## an unexpected situation that there is supposed to be a 'saved_model.pb'
+        # ## in the checkpoint path, but actually not and making us unable to
+        # ## use tf.keras.models.load_model to load the model.
+        # >>> if (not self.save_weights_only and
+        #            not model._is_graph_network and
+        #            model.__class__.__name__ != 'Sequential'):
+        #        self.save_weights_only = True
+
+    def on_train_end(self, logs):
+        if self.save_weights_only:
+            filepath = self._get_file_path(0, logs)
+            basename = os.path.basename(filepath)
+            dirname = os.path.dirname(filepath)
+            self.model.save(os.path.dirname(filepath), include_optimizer=False)
+            remove_list = ["checkpoint", f"{basename}.data-00000-of-00001", f"{basename}.index"]
+            for remove_item in remove_list:
+                os.remove(os.path.join(dirname, remove_item))
+
+    def _save_model(self, epoch, logs):
+        """Saves the model.
+
+        Parameters
+        ----------
+        epoch: The epoch this iteration is in.
+        logs: The `logs` dict passed in to `on_batch_end` or `on_epoch_end`.
+        """
+        # pylint: disable=too-many-nested-blocks,too-many-branches
+        logs = logs or {}
+
+        if isinstance(self.save_freq, int) or self.epochs_since_last_save >= self.period:
+            # Block only when saving interval is reached.
+            logs = tf_utils.to_numpy_or_python_type(logs)
+            self.epochs_since_last_save = 0
+            filepath = self._get_file_path(epoch, logs)
+
+            try:
+                if self.save_best_only:
+                    current = logs.get(self.monitor)
+                    if current is None:
+                        logger.warning('Can save best model only with %s available, skipping.', self.monitor)
+                    else:
+                        if self.monitor_op(current, self.best):
+                            if self.verbose > 0:
+                                print('\nEpoch %05d: %s improved from %0.5f to %0.5f, \
+                                    saving model to %s' % (epoch + 1, self.monitor, self.best, current, filepath))
+
+                            self.best = current
+                            if self.save_weights_only:
+                                self.model.save_weights(filepath, overwrite=True, options=self._options)
+                            else:
+                                self.model.save(filepath, overwrite=True, options=self._options)
+                        else:
+                            if self.verbose > 0:
+                                print('\nEpoch %05d: %s did not improve from %0.5f' %
+                                    (epoch + 1, self.monitor, self.best))  # noqa: E128
+                else:
+                    if self.verbose > 0:
+                        print('\nEpoch %05d: saving model to %s' % (epoch + 1, filepath))
+                    if self.save_weights_only:
+                        self.model.save_weights(filepath, overwrite=True, options=self._options)
+                    else:
+                        self.model.save(filepath, overwrite=True, options=self._options)
+
+                self._maybe_remove_file()
+            except IOError as e:
+                # `e.errno` appears to be `None` so checking the content of `e.args[0]`.
+                if 'is a directory' in six.ensure_str(e.args[0]).lower():
+                    raise IOError(f'Please specify a non-directory filepath for ModelCheckpoint. \
+                        Filepath used is an existing directory: {filepath}')

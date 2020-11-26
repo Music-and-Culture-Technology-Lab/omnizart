@@ -15,6 +15,7 @@ from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
+from omnizart.callbacks import TFModelCheckpoint
 from omnizart.models.chord_model import ChordModel, ReduceSlope
 
 
@@ -231,9 +232,7 @@ class ChordTranscription(BaseTranscription):
 
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, "weights"), save_weights_only=True, monitor="val_loss"
-            ),
+            TFModelCheckpoint(jpath(model_save_path, "weights"), save_weights_only=True, monitor="val_loss"),
             ReduceSlope()
         ]
 
@@ -247,7 +246,7 @@ class ChordTranscription(BaseTranscription):
         )
         return history
 
-    def _load_model(self, model_path=None, custom_objects=None):
+    def _load_model_old(self, model_path=None):
         _, weight_path, conf_path = self._resolve_model_path(model_path)
         weight_path = weight_path.replace(".h5", "")
         settings = self.setting_class(conf_path=conf_path)
