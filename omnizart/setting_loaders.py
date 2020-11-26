@@ -256,3 +256,4 @@ class VocalSettings(Settings):
             self.val_batch_size: int = None
             self.early_stop: int = None
             self.init_learning_rate: float = None
+            self.context_length: int = None

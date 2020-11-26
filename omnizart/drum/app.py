@@ -225,7 +225,7 @@ class DrumTranscription(BaseTranscription):
         logger.info("Start training")
         history = model.fit(
             train_dataset,
-            validate_data=val_dataset,
+            validation_data=val_dataset,
             epochs=settings.training.epoch,
             steps_per_epoch=settings.training.steps,
             validation_steps=settings.training.val_steps,

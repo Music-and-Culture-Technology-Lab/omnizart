@@ -11,4 +11,5 @@ per-file-ignores =
     omnizart/music/app.py: E402,E126,E121 \
     omnizart/drum/app.py: E402,E126,E121 \
     omnizart/chord/app.py: E126,E121 \
+    omnizart/vocal/app.py: E126,E121 \
     omnizart/base.py: E126,E121
