@@ -100,9 +100,10 @@ def download_checkpoints(output_path):
     """Download the archived checkpoints of different models."""
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": "1QX5bBoYzZyC2fvK26YEtF_Hqt3DzhiHk",
-            "save_as": "checkpoints/chord/chord_v1/weights.data-00000-of-00001",
-            "file_length": 132717707
+            "fid": "1bgjI3hx49osFgzYD9Z5-Lx2WXZTJ1Jsj",
+            "save_as": "checkpoints/chord/chord_v1.zip",
+            "file_length": 37692102,
+            "unzip": True
         },
         "drum_keras": {
             "fid": "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
@@ -137,9 +138,12 @@ def download_checkpoints(output_path):
         save_name = os.path.basename(info["save_as"])
         save_path = os.path.dirname(info["save_as"])
         save_path = os.path.join(output_path, save_path)
+        unzip = info.get("unzip", False)
         download_large_file_from_google_drive(
-            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name
+            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name, unzip=unzip
         )
+        if unzip:
+            os.remove(os.path.join(save_path, save_name))
 
 
 @click.command()
