@@ -110,19 +110,22 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
 
     if unzip:
         print("Extracting files...")
-        with zipfile.ZipFile(out_path) as zip_ref:
-            members = zip_ref.infolist()
-            for idx, member in enumerate(members):
-                percent_finished = (idx+1) / len(members)*100  # noqa: E226
-                sys.stdout.write('\033[2K\033[1G')
-                print(f"Progress: {percent_finished:.2f}% - {member.filename}", end="\r")
-                zip_ref.extract(member, path=save_path)
-            print("")
+        try:
+            with zipfile.ZipFile(out_path) as zip_ref:
+                members = zip_ref.infolist()
+                for idx, member in enumerate(members):
+                    percent_finished = (idx+1) / len(members)*100  # noqa: E226
+                    sys.stdout.write('\033[2K\033[1G')
+                    print(f"Progress: {percent_finished:.2f}% - {member.filename}", end="\r")
+                    zip_ref.extract(member, path=save_path)
+                print("")
 
-            # Assert the first item name is the root folder's name.
-            extracted_name = zip_ref.namelist()[0]
-            assert extracted_name.endswith("/") or extracted_name.endswith("\\")
-        return os.path.abspath(os.path.join(save_path, extracted_name))
+                # Assert the first item name is the root folder's name.
+                extracted_name = zip_ref.namelist()[0]
+                assert extracted_name.endswith("/") or extracted_name.endswith("\\")
+            return os.path.abspath(os.path.join(save_path, extracted_name))
+        except zipfile.BadZipFile:
+            print("File is not a zip file, do nothing...")
 
     return os.path.abspath(out_path)
 
