@@ -73,7 +73,7 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
     audio_loader = adapter.get_default_audio_adapter()
     audio, fs = audio_loader.load(audio_path, sample_rate=sampling_rate)
     if mono:
-        audio = librosa.to_mono(audio.T)
+        audio = librosa.to_mono(audio.squeeze().T)
     return audio, fs
 
 

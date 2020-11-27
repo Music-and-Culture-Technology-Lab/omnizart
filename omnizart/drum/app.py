@@ -14,7 +14,8 @@ from omnizart.drum.prediction import predict
 from omnizart.drum.labels import extract_label_13_inst
 from omnizart.drum.inference import inference
 from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
+from omnizart.io import write_yaml
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import DrumSettings
 from omnizart.train import get_train_val_feat_file_list

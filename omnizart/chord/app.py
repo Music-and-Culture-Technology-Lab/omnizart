@@ -15,7 +15,6 @@ from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
-from omnizart.callbacks import TFModelCheckpoint
 from omnizart.models.chord_model import ChordModel, ReduceSlope
 
 
