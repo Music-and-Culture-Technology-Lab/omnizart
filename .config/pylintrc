@@ -7,7 +7,7 @@ ignore=bootstrap_data
 disable=C0114,C0116,C0330
 
 [BASIC]
-good-names=i,j,k,it,_,e,t,r,c,db,h,ii,z
+good-names=i,j,k,it,_,e,t,r,c,db,h,ii,z,fs
 
 [DESIGN]
 min-public-methods=1

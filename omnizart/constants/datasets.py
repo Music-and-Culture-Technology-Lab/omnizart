@@ -73,7 +73,7 @@ class BaseStructure:
     """
 
     @classmethod
-    def _get_data_pair(cls, dataset_path, wavs, labels):
+    def _get_data_pair(cls, wavs, labels):
         label_path_mapping = {os.path.basename(label): label for label in labels}
 
         pair = []
@@ -89,20 +89,12 @@ class BaseStructure:
     @classmethod
     def get_train_data_pair(cls, dataset_path):
         """Get pair of training file and the coressponding label file path."""
-        return cls._get_data_pair(
-            dataset_path,
-            cls.get_train_wavs(dataset_path),
-            cls.get_train_labels(dataset_path)
-        )
+        return cls._get_data_pair(cls.get_train_wavs(dataset_path), cls.get_train_labels(dataset_path))
 
     @classmethod
     def get_test_data_pair(cls, dataset_path):
         """Get pair of testing file and the coressponding label file path."""
-        return cls._get_data_pair(
-            dataset_path,
-            cls.get_test_wavs(dataset_path),
-            cls.get_test_labels(dataset_path)
-        )
+        return cls._get_data_pair(cls.get_test_wavs(dataset_path), cls.get_test_labels(dataset_path))
 
     @classmethod
     def _name_transform(cls, basename):
@@ -372,13 +364,39 @@ class CMediaStructure(BaseStructure):
     url = "https://drive.google.com/uc?export=download&id=15b298vSP9cPP8qARQwa2X_0dbzl6_Eu7"
 
     #: Label extension
-    label_ext = ".pv"
+    label_ext = ".csv"
 
     #: Folder to train wavs
     train_wavs = ["train_data"]
 
     #: Folder to train labels
     train_labels = ["train_labels"]
+
+    #: Folder to test wavs
+    test_wavs = []
+
+    #: Folder to test labels
+    test_labels = []
+
+
+class TonasStructure(BaseStructure):
+    """Constant settings of TONAS dataset."""
+
+    #: The dataset is not made public. You have to ask for the access from zenodo:
+    #: https://zenodo.org/record/1290722
+    url = None
+
+    #: Label extension for note-level transcription.
+    label_ext = ".notes.Corrected"
+
+    #: Label extension for f0 contour transcription.
+    label_f0_ext = ".f0.Corrected"
+
+    #: Folder to train wavs
+    train_wavs = ["Deblas", "Martinetes1", "Martinetes2"]
+
+    #: Folder to train labels
+    train_labels = train_wavs
 
     #: Folder to test wavs
     test_wavs = []
