@@ -183,10 +183,6 @@ class PyramidNet(tf.keras.Model):
         self.relu_1 = tf.keras.layers.ReLU(name="relu_1")
         self.maxpool = tf.keras.layers.MaxPool2D(strides=2, name="max_pool")
         self.batch_norm_out = tf.keras.layers.BatchNormalization(name="batch_norm_2")
-        self.relu_out = tf.keras.layers.ReLU(name="relu_out")
-        self.avgpool = tf.keras.layers.AveragePooling2D(pool_size=(1, 11), name="avg_pool")
-        self.flatten = tf.keras.layers.Flatten(name="flatten")
-        self.dense = tf.keras.layers.Dense(out_classes, activation='sigmoid', name="dense_out")
 
         total_blocks = n_units * 3
         calc_prob = lambda cur_layer: 1 - (cur_layer + 1) / total_blocks * 0.5
@@ -213,6 +209,12 @@ class PyramidNet(tf.keras.Model):
             stride=2
         )
 
+        self.relu_out = tf.keras.layers.ReLU(name="relu_out")
+        self.avgpool = tf.keras.layers.AveragePooling2D(pool_size=(1, 11), name="avg_pool")
+        self.flatten = tf.keras.layers.Flatten(name="flatten")
+        self.dense = tf.keras.layers.Dense(out_classes * 19, activation='sigmoid', name="dense_out")
+        self.reshape = tf.keras.layers.Reshape((19, out_classes))
+
     def call(self, inputs, is_training=True):  # pylint: disable=W0221
         enc = self.conv_1(inputs)
         enc = self.batch_norm_1(enc)
@@ -226,7 +228,7 @@ class PyramidNet(tf.keras.Model):
         output = self.avgpool(output)
         output = self.flatten(output)
         output = self.dense(output)
-        return output
+        return self.reshape(output)
 
     def train_step(self, data):
         data1, data2 = data
@@ -282,9 +284,13 @@ class PyramidNet(tf.keras.Model):
         return result
 
     def _compute_supervised_loss(self, label, pred):
-        label_4 = tf.math.maximum(label[:, 3], label[:, 5])
-        pred_4 = tf.math.maximum(pred[:, 3], pred[:, 5])
-        return self.compiled_loss(label, pred) + self.compiled_loss(label_4, pred_4)
+        loss = self.compiled_loss(label, pred)
+        empahsize_channel = [1, 2, 4]
+        weight = 0.7
+        emp_loss = 0
+        for channel in empahsize_channel:
+            emp_loss += self.compiled_loss(label[:, :, channel], pred[:, :, channel])
+        return loss * (1 - weight) + emp_loss * weight
 
     def _compute_unsupervised_loss(self, unsup_feat):
         """Computes VAT loss.

@@ -21,6 +21,25 @@ def create_batches(feature, ctx_len=9, batch_size=64):
     return np.array(batches, dtype=np.float32), pad_size
 
 
+def merge_batches(batch_pred):
+    assert len(batch_pred.shape) == 4
+
+    batches, batch_size, frm_len, out_classes = batch_pred.shape
+    total_len = batches * batch_size + frm_len - 1
+    output = np.zeros((total_len, out_classes))
+    for bidx, batch in enumerate(batch_pred):
+        for fidx, frame in enumerate(batch):
+            start_idx = bidx * batch_size + fidx
+            output[start_idx:start_idx + frm_len] += frame
+
+    max_len = min(frm_len - 1, len(output) - frm_len)
+    output[max_len:-max_len] /= max_len + 1
+    for idx in range(max_len):
+        output[idx] /= idx + 1
+        output[-1 - idx] /= idx + 1
+    return output
+
+
 def predict(feature, model, ctx_len=9, batch_size=16):
     assert feature.shape[1:] == (174, 9)
     batches, pad_size = create_batches(feature, ctx_len=ctx_len, batch_size=batch_size)
@@ -28,5 +47,5 @@ def predict(feature, model, ctx_len=9, batch_size=16):
     for idx, batch in enumerate(batches):
         print(f"Progress: {idx+1}/{len(batches)}", end="\r")
         batch_pred.append(model.predict(batch))
-    pred = np.concatenate(batch_pred)
-    return pred[:-pad_size]
+    pred = merge_batches(np.array(batch_pred))  # np.concatenate(batch_pred)
+    return pred[ctx_len:-pad_size-ctx_len]

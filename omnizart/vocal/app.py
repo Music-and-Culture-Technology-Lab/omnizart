@@ -42,23 +42,34 @@ class VocalTranscription(BaseTranscription):
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         logger.info("Separating vocal track from the audio...")
+
+        # Load model configurations
+        logger.info("Loading model...")
         separator = Separator('spleeter:2stems')
 
-        # Tricky way to bypass the annoying tensorflow graph was finalized issue.
+        # Tricky way to avoid the annoying tensorflow graph being finalized issue.
         separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
 
         wav, fs = load_audio(input_audio, mono=False)
         pred = separator.separate(wav)
 
-        logger.info("Extracting feature...")
-        wav = librosa.to_mono(pred["vocals"].squeeze().T)
-        feature = _extract_vocal_cfp(wav, fs)
-
-        # Load model configurations
-        logger.info("Loading model...")
+        logger.info("Predicting...")
         model, model_settings = self._load_model(model_path)
 
-        logger.info("Predicting...")
+        logger.info("Extracting feature...")
+        wav = librosa.to_mono(pred["vocals"].squeeze().T)
+        feature = _extract_vocal_cfp(
+            wav,
+            fs,
+            down_fs=model_settings.feature.sampling_rate,
+            hop=model_settings.feature.hop_size,
+            fr=model_settings.feature.frequency_resolution,
+            fc=model_settings.feature.frequency_center,
+            tc=model_settings.feature.time_center,
+            g=model_settings.feature.gamma,
+            bin_per_octave=model_settings.feature.bins_per_octave
+        )
+
         pred = predict(feature, model)
         return pred, feature
 
@@ -146,7 +157,7 @@ class VocalTranscription(BaseTranscription):
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
         output_types = (tf.float32, tf.float32)
-        output_shapes = ((settings.training.context_length*2 + 1, 174, 9), (6))  # noqa: E226
+        output_shapes = ((settings.training.context_length*2 + 1, 174, 9), (19, 6))  # noqa: E226
         train_dataset = VocalDatasetLoader(
                 ctx_len=settings.training.context_length,
                 feature_files=train_feat_files,
@@ -174,7 +185,8 @@ class VocalTranscription(BaseTranscription):
             logger.info("Constructing new model")
             model = self.get_model(settings)
 
-        optimizer = tfa.optimizers.AdamW(weight_decay=0.01, learning_rate=settings.training.init_learning_rate)
+        # optimizer = tfa.optimizers.AdamW(weight_decay=0.01, learning_rate=settings.training.init_learning_rate)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
         model.compile(optimizer=optimizer, loss='bce', metrics=['accuracy', 'binary_accuracy'])
 
         logger.info("Resolving model output path")
@@ -253,6 +265,7 @@ def _vocal_separation(wav_list, out_folder):
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
         separator = Separator('spleeter:2stems')
+        separator._params["stft_backend"] = "librosa"
         for idx, wav_path in enumerate(wav_list, 1):
             logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
             separator.separate_to_file(wav_path, out_folder)
@@ -351,18 +364,40 @@ class VocalDatasetLoader(BaseDatasetLoader):
 
         return feat  # Time x Freq x 9
 
+    def _get_label(self, hdf_name, slice_start):
+        label = self.hdf_refs[hdf_name]["label"]
+
+        pad_left = 0
+        if slice_start - self.ctx_len < 0:
+            pad_left = self.ctx_len - slice_start
+
+        pad_right = 0
+        if slice_start + self.ctx_len + 1 > len(label):
+            pad_right = slice_start + self.ctx_len + 1 - len(label)
+
+        start = max(slice_start - self.ctx_len, 0)
+        end = min(slice_start + self.ctx_len + 1, len(label))
+        label = label[start:end]
+        if (pad_left > 0) or (pad_right > 0):
+            label = np.pad(label, ((pad_left, pad_right), (0, 0)))
+
+        return label  # Time x 6
+
 
 if __name__ == "__main__":
     # pylint: disable=W0621,C0103
     app = VocalTranscription()
     tonas_train = "/data/TONAS/train_feature"
-    mir1k_train = "/data/MIR-1K/train_feature"
+    mir1k_train = None #"/data/MIR-1K/train_feature"
+    #app.generate_feature("/data/TONAS")
+    #app.generate_feature("/data/MIR-1K")
     settings = VocalSettings()
     settings.training.steps = 1500
     settings.training.val_steps = 100
     settings.training.epoch = 20
     settings.model.shake_drop = False
-    # app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
+    app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
     audio = "/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
     audio = "/data/omnizart/checkpoints/Ava.wav"
-    pred, feat = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_test")
+    audio = "/data/TONAS/Deblas/01-D_AMairena.wav"
+    #pred, feat = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_test")
