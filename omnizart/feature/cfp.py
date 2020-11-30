@@ -224,6 +224,10 @@ def _extract_cfp(
        Music," in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2015.
     """
 
+    if fs != down_fs:
+        x = scipy.signal.resample_poly(x, down_fs, fs)
+        fs = down_fs
+
     Hop = round(down_fs * hop)
     x = x.astype("float32")
     h = scipy.signal.blackmanharris(win_size)  # window size
@@ -274,9 +278,9 @@ def _extract_vocal_cfp(
     **kwargs
 ):
     logger.debug("Extract three types of CFP with different window sizes.")
-    high_z, high_spec, _, _, _ = _extract_cfp(x, fs, win_size=743, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
-    med_z, med_spec, _, _, _ = _extract_cfp(x, fs, win_size=372, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
-    low_z, low_spec, _, _, _ = _extract_cfp(x, fs, win_size=186, hop=hop, fr=fr, fc=fc, tc=tc, down_fs=fs, **kwargs)
+    high_z, high_spec, _, _, _ = _extract_cfp(x, fs, win_size=743, hop=hop, fr=fr, fc=fc, tc=tc, **kwargs)
+    med_z, med_spec, _, _, _ = _extract_cfp(x, fs, win_size=372, hop=hop, fr=fr, fc=fc, tc=tc, **kwargs)
+    low_z, low_spec, _, _, _ = _extract_cfp(x, fs, win_size=186, hop=hop, fr=fr, fc=fc, tc=tc, **kwargs)
 
     # Normalize Z
     high_z_norm = (high_z - np.mean(high_z)) / np.std(high_z)

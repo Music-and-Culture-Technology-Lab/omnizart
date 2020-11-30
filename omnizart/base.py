@@ -64,9 +64,10 @@ class BaseTranscription(metaclass=ABCMeta):
             if not os.path.exists(arch_path):
                 model = self.get_model(settings)
                 weight_path = weight_path.replace(".h5", "")
+                model.load_weights(weight_path).expect_partial()
             else:
                 model = self._get_model_from_yaml(arch_path, custom_objects=custom_objects)
-            model.load_weights(weight_path).expect_partial()
+                model.load_weights(weight_path)
         except (OSError, tf.python.framework.errors_impl.OpError):
             raise FileNotFoundError(
                 f"Checkpoint file not found: {weight_path}. Perhaps not yet downloaded?\n"
