@@ -162,6 +162,8 @@ grpcio==1.33.2; python_version >= "3.6" and python_full_version < "3.0.0" and py
     --hash=sha256:7f727b8b6d9f92fcab19dbc62ec956d8352c6767b97b8ab18754b2dfa84d784f \
     --hash=sha256:2d5124284f9d29e4f06f674a12ebeb23fc16ce0f96f78a80a6036930642ae5ab \
     --hash=sha256:eff55d318a114742ed2a06972f5daacfe3d5ad0c0c0d9146bcaf10acb427e6be \
+    --hash=sha256:dd47fac2878f6102efa211461eb6fa0a6dd7b4899cd1ade6cdcb9fa9748363eb \
+    --hash=sha256:89add4f4cda9546f61cb8a6988bc5b22101dd8ca4af610dff6f28105d1f78695 \
     --hash=sha256:21265511880056d19ce4f809ce3fbe2a3fa98ec1fc7167dbdf30a80d3276202e
 h5py==2.10.0; python_version >= "3.6" and python_version < "3.9" \
     --hash=sha256:ecf4d0b56ee394a0984de15bceeb97cbe1fe485f1ac205121293fc44dcf3f31f \
@@ -248,6 +250,8 @@ markdown==3.3.3; python_version >= "3.6" and python_full_version < "3.0.0" or py
 mido==1.2.9 \
     --hash=sha256:fc6364efa028c8405166f63e6a83cbc6c17aaeac2c28680abe64ae48703a89dd \
     --hash=sha256:c4a7d5528fefa3d3dcaa2056d4bc873e2c96a395658d15af5a89c8c3fa7c7acc
+mir-eval==0.6 \
+    --hash=sha256:f87310e326ad9f80ba65e3f0d1ced2013a2845016fc51d7af56c79195668d216
 norbert==0.2.1; python_version >= "3.6" and python_version < "3.9" \
     --hash=sha256:409ac3f173cfb1fdaad21563b8f730d7cbe01af81349bcd96fb2b8b9d5f74339 \
     --hash=sha256:bd4cbc2527f0550b81bf4265c1a64b352cab7f71e4e3c823d30b71a7368de74e
@@ -428,6 +432,8 @@ pyyaml==5.3.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (p
     --hash=sha256:73f099454b799e05e5ab51423c7bcf361c58d3206fa7b0d555426b1f4d9a3eaf \
     --hash=sha256:06a0d7ba600ce0b2d2fe2e78453a470b5a6e000a985dd4a4e54e436cc36b0e97 \
     --hash=sha256:95f71d2af0ff4227885f7a6605c37fd53d3a106fcab511b8860ecca9fcf400ee \
+    --hash=sha256:ad9c67312c84def58f3c04504727ca879cb0013b2517c85a9a253f0cb6380c0a \
+    --hash=sha256:6034f55dab5fea9e53f436aa68fa3ace2634918e8b5994d82f3621c04ff5ed2e \
     --hash=sha256:b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d
 requests-oauthlib==1.3.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.6" \
     --hash=sha256:b4261601a71fd721a8bd6d7aa1cc1d6a8a93b4a9f5e96626f8e4d91e8beeaa6a \
