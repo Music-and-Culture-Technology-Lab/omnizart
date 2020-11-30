@@ -38,6 +38,7 @@ pyfluidsynth = "^1.2.5"
 vamp = "^1.1.0"
 urllib3 = "^1.25.11"
 spleeter = "^2.0.1"
+mir_eval = "^0.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
