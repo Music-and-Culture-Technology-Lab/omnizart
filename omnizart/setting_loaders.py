@@ -216,10 +216,10 @@ class VocalContourSettings(Settings):
     def __init__(self, conf_path=None):
         self.transcription_mode: str = None
         self.checkpoint_path: str = None
-        self.feature = self.VocalFrameFeature()
-        self.dataset = self.VocalFrameDatasetset()
-        self.model = self.VocalFrameModel()
-        self.training = self.VocalFrameTraining()
+        self.feature = self.VocalContourFeature()
+        self.dataset = self.VocalContourDataset()
+        self.model = self.VocalContourModel()
+        self.training = self.VocalContourTraining()
 
         super().__init__(conf_path=conf_path)
 
@@ -231,7 +231,7 @@ class VocalContourSettings(Settings):
             self.window_size: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalContourDatasetset():
+    class VocalContourDataset():
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None

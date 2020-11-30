@@ -2,7 +2,7 @@ import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_GEN_FEATURE_OPTIONS
 from omnizart.vocal_contour import app
-from omnizart.setting_loaders import VocalFrameSettings
+from omnizart.setting_loaders import VocalContourSettings
 
 
 @click.command()
@@ -32,7 +32,7 @@ def generate_feature(dataset_path, output_path, num_threads, hop_size, sampling_
     * MIR-1K
     * MedleyDB (not supported yet)
     """
-    settings = VocalFrameSettings()
+    settings = VocalContourSettings()
     settings.feature.hop_size = hop_size
     settings.feature.sampling_rate = sampling_rate
     if output_path is not None:
