@@ -10,7 +10,7 @@ COPY poetry.lock ./
 COPY README.md ./
 
 RUN apt-get update
-RUN apt-get install --assume-yes libsndfile1 libgl1-mesa-glx ffmpeg vim
+RUN apt-get install --assume-yes libsndfile1 libgl1-mesa-glx ffmpeg vim fluidsynth
 RUN scripts/install.sh
 
 # Upgrade this for avoiding mysterious import module not found 'keyrings'

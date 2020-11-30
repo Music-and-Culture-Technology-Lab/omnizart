@@ -290,6 +290,14 @@ class VocalSettings(Settings):
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+            self.min_kernel_size: int = None
+            self.depth: int = None
+            self.shake_drop: bool = True
+            self.alpha: int = None
+            self.semi_loss_weight: float = None
+            self.semi_xi: float = None
+            self.semi_epsilon: float = None
+            self.semi_iterations: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class VocalTraining():

@@ -32,6 +32,24 @@ class BaseTranscription(metaclass=ABCMeta):
     def transcribe(self, input_audio, model_path, output="./"):
         raise NotImplementedError
 
+    def get_model(self, settings):
+        """Get the model from the python source file.
+
+        This is only for those customized models that can't export arch.yaml file,
+        and hence need to instanitiate the model from python class, which is not
+        that desirable as the architecture is not recorded in a stand-alone file.
+
+        Another way is using model.save() method to export .pb format architecture
+        file, but there could be troubles if you want continue to train on these
+        models in such format when these are customized models.
+
+        Returns
+        -------
+        model: tf.keras.Model
+            The initialized keras model.
+        """
+        raise NotImplementedError
+
     def _load_model(self, model_path=None, custom_objects=None):
         if model_path in self.settings.checkpoint_path:
             # The given model_path is actually the 'transcription_mode'.
@@ -40,21 +58,22 @@ class BaseTranscription(metaclass=ABCMeta):
             logger.info("Using built-in model %s for transcription.", model_path)
 
         arch_path, weight_path, conf_path = self._resolve_model_path(model_path)
+        settings = self.setting_class(conf_path=conf_path)
 
         try:
             if not os.path.exists(arch_path):
-                actual_model_path = os.path.dirname(conf_path)
-                model = tf.keras.models.load_model(actual_model_path)
+                model = self.get_model(settings)
+                weight_path = weight_path.replace(".h5", "")
+                model.load_weights(weight_path).expect_partial()
             else:
                 model = self._get_model_from_yaml(arch_path, custom_objects=custom_objects)
                 model.load_weights(weight_path)
-        except (OSError, ValueError):
+        except (OSError, tf.python.framework.errors_impl.OpError):
             raise FileNotFoundError(
                 f"Checkpoint file not found: {weight_path}. Perhaps not yet downloaded?\n"
                 "Try execute 'omnizart download-checkpoints'"
             )
 
-        settings = self.setting_class(conf_path=conf_path)
         return model, settings
 
     def _resolve_model_path(self, model_path=None):

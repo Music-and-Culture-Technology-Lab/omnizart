@@ -3,10 +3,11 @@ from functools import partial
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
-from omnizart.vocal_contour import app
 from omnizart.setting_loaders import VocalContourSettings
+from omnizart.utils import LazyLoader
 
 
+vocal_contour = LazyLoader("vocal_contour", globals(), "omnizart.vocal_contour")
 click.option = partial(click.option, show_default=True)
 
 
@@ -41,4 +42,4 @@ def train_model(
     if early_stop is not None:
         settings.training.early_stop = early_stop
 
-    app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalcontour_settings=settings)
+    vocal_contour.app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalcontour_settings=settings)

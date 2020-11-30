@@ -15,7 +15,6 @@ from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
-from omnizart.callbacks import TFModelCheckpoint
 from omnizart.models.chord_model import ChordModel, ReduceSlope
 
 
@@ -198,18 +197,7 @@ class ChordTranscription(BaseTranscription):
 
         if input_model_path is None:
             logger.info("Constructing new model")
-            model = ChordModel(
-                out_classes=26,
-                num_enc_attn_blocks=settings.model.num_enc_attn_blocks,
-                num_dec_attn_blocks=settings.model.num_dec_attn_blocks,
-                segment_width=settings.feature.segment_width,
-                n_steps=settings.feature.num_steps,
-                freq_size=settings.model.freq_size,
-                enc_input_emb_size=settings.model.enc_input_emb_size,
-                dec_input_emb_size=settings.model.dec_input_emb_size,
-                dropout_rate=settings.model.dropout_rate,
-                annealing_rate=settings.model.annealing_rate
-            )
+            model = self.get_model(settings)
 
         learninig_rate = tf.keras.optimizers.schedules.ExponentialDecay(
             settings.training.init_learning_rate,
@@ -232,7 +220,9 @@ class ChordTranscription(BaseTranscription):
 
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            TFModelCheckpoint(jpath(model_save_path, "weights"), save_weights_only=True, monitor="val_loss"),
+            tf.keras.callbacks.ModelCheckpoint(
+                jpath(model_save_path, "weights"), save_weights_only=True, monitor="val_loss"
+            ),
             ReduceSlope()
         ]
 
@@ -246,11 +236,14 @@ class ChordTranscription(BaseTranscription):
         )
         return history
 
-    def _load_model_old(self, model_path=None):
-        _, weight_path, conf_path = self._resolve_model_path(model_path)
-        weight_path = weight_path.replace(".h5", "")
-        settings = self.setting_class(conf_path=conf_path)
-        model = ChordModel(
+    def get_model(self, settings):
+        """Get the chord model.
+
+        More comprehensive reasons to having this method, please refer to
+        ``omnizart.base.BaseTranscription.get_model``.
+        """
+        return ChordModel(
+            out_classes=26,
             num_enc_attn_blocks=settings.model.num_enc_attn_blocks,
             num_dec_attn_blocks=settings.model.num_dec_attn_blocks,
             segment_width=settings.feature.segment_width,
@@ -261,16 +254,6 @@ class ChordTranscription(BaseTranscription):
             dropout_rate=settings.model.dropout_rate,
             annealing_rate=settings.model.annealing_rate
         )
-
-        try:
-            model.load_weights(weight_path).expect_partial()
-        except tf.python.framework.errors_impl.OpError:
-            raise FileNotFoundError(
-                f"Weight file not found: {weight_path}. Perhaps not yet downloaded?\n"
-                "Try execute 'omnizart download-checkpoints'"
-            )
-
-        return model, settings
 
 
 def _extract_feature_arg_wrapper(input_tup, **kwargs):

@@ -79,6 +79,13 @@ def test_load_audio_with_librosa():
     assert len(data) == 749252
 
 
+def test_load_audio():
+    audio = "./tests/resource/sample.wav"
+    data, fs = io.load_audio(audio, sampling_rate=44100, mono=False)
+    assert fs == 44100
+    assert data.shape == (2065124, 2)
+
+
 @utils.json_serializable()
 class DataA:
     invisible = "You cant't see me"

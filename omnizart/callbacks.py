@@ -177,6 +177,7 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
     """
     def set_model(self, model):
         self.model = model
+        self._saved = False
 
         # ## Below are the original implementation, which will do some checks
         # ## and implicitly turn on the 'save_weights_only' flag, leading to
@@ -216,7 +217,10 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
             filepath = self._get_file_path(epoch, logs)
 
             try:
-                if self.save_best_only:
+                if not self._saved and self.save_weights_only:
+                    self.model.save(os.path.dirname(filepath), overwrite=True, include_optimizer=False)
+                    self._saved = True
+                elif self.save_best_only:
                     current = logs.get(self.monitor)
                     if current is None:
                         logger.warning('Can save best model only with %s available, skipping.', self.monitor)
