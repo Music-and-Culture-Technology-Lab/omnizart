@@ -42,4 +42,6 @@ def train_model(
     if early_stop is not None:
         settings.training.early_stop = early_stop
 
-    vocal_contour.app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalcontour_settings=settings)
+    vocal_contour.app.train(
+        feature_path, model_name=model_name, input_model_path=input_model, vocalcontour_settings=settings
+    )
