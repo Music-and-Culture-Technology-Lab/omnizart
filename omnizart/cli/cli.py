@@ -15,7 +15,7 @@ import click
 
 import omnizart.constants.datasets as dset
 from omnizart import MODULE_PATH
-from omnizart.remote import download, download_large_file_from_google_drive
+from omnizart.remote import download_large_file_from_google_drive
 from omnizart.utils import ensure_path_exists, synth_midi
 from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music
@@ -72,38 +72,38 @@ def entry():
 
 @click.command()
 @click.argument(
-    "dataset", type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su"], case_sensitive=False)
+    "dataset",
+    type=click.Choice(["Maestro", "MusicNet", "McGill", "BPS-FH", "Ext-Su", "MIR1K", "CMedia"], case_sensitive=False)
 )
 @click.option(
     "-o", "--output", default="./", help="Path for saving the downloaded dataset.", type=click.Path(writable=True)
 )
-@click.option("--unzip", help="Whether to unzip the downloaded dataset", is_flag=True)
-def download_dataset(dataset, output, unzip):
+def download_dataset(dataset, output):
     """A quick command for downloading datasets."""
-    url = {
-        "maestro": dset.MaestroStructure.url,
-        "musicnet": dset.MusicNetStructure.url,
-        "mcgill": dset.McGillBillBoard.url,
-        "bps-fh": dset.BeethovenSonatas.url,
-        "ext-su": dset.ExtSuStructure.url
+    struct = {
+        "maestro": dset.MaestroStructure,
+        "musicnet": dset.MusicNetStructure,
+        "mcgill": dset.McGillBillBoard,
+        "bps-fh": dset.BeethovenSonatasStructure,
+        "ext-su": dset.ExtSuStructure,
+        "mir1k": dset.MIR1KStructure,
+        "cmedia": dset.CMediaStructure
     }[dataset.lower()]
     ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
-    if "drive.google.com" in url:
-        download_large_file_from_google_drive(url, save_path=output, save_name=dataset + ".zip", unzip=unzip)
-    else:
-        download(url, save_path=output, unzip=unzip)
+    struct.download()
 
 
 @click.command()
 @click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
 def download_checkpoints(output_path):
-    """Downlaod the archived checkpoints of different models."""
+    """Download the archived checkpoints of different models."""
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": "1QX5bBoYzZyC2fvK26YEtF_Hqt3DzhiHk",
-            "save_as": "checkpoints/chord/chord_v1/weights.data-00000-of-00001",
-            "file_length": 132717707
+            "fid": "1sz83HC_bkA0Gp9G0TtX7cy3jKkANbR8R",
+            "save_as": "checkpoints/chord/chord_v1.zip",
+            "file_length": 87005425,
+            "unzip": True
         },
         "drum_keras": {
             "fid": "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
@@ -138,9 +138,12 @@ def download_checkpoints(output_path):
         save_name = os.path.basename(info["save_as"])
         save_path = os.path.dirname(info["save_as"])
         save_path = os.path.join(output_path, save_path)
+        unzip = info.get("unzip", False)
         download_large_file_from_google_drive(
-            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name
+            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name, unzip=unzip
         )
+        if unzip:
+            os.remove(os.path.join(save_path, save_name))
 
 
 @click.command()

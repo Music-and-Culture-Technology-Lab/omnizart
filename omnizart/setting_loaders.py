@@ -7,7 +7,8 @@ concept in MVVC, and instead of access values key by key.
 import os
 
 from omnizart import SETTING_DIR
-from omnizart.utils import json_serializable, load_yaml
+from omnizart.io import load_yaml
+from omnizart.utils import json_serializable
 from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
 
@@ -244,6 +245,14 @@ class VocalSettings(Settings):
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+            self.min_kernel_size: int = None
+            self.depth: int = None
+            self.shake_drop: bool = True
+            self.alpha: int = None
+            self.semi_loss_weight: float = None
+            self.semi_xi: float = None
+            self.semi_epsilon: float = None
+            self.semi_iterations: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class VocalTraining():
@@ -255,3 +264,4 @@ class VocalSettings(Settings):
             self.val_batch_size: int = None
             self.early_stop: int = None
             self.init_learning_rate: float = None
+            self.context_length: int = None

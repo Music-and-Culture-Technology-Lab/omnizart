@@ -179,7 +179,7 @@ def spectral_flux(spec, invert=False, norm=True):
     if invert:
         flux *= -1.0
 
-    flux[flux<0] = 0.0
+    flux[flux < 0] = 0.0
     if norm:
         flux = (flux - np.mean(flux)) / np.std(flux)
 
