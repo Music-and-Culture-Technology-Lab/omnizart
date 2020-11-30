@@ -8,12 +8,7 @@ def sigmoid(tensor):
     return 1 / (1 + np.exp(-tensor))
 
 
-def generation_prog(model,
-                    score_48,
-                    score_12,
-                    time_index,
-                    timesteps,
-                    batch_size):
+def generation_prog(model, score_48, score_12, time_index, timesteps, batch_size):
 
     feature_48 = score_48[time_index:time_index + batch_size, :, :]
     feature_48 = np.reshape(feature_48, (batch_size, timesteps, 384, 1))
@@ -21,22 +16,14 @@ def generation_prog(model,
     feature_12 = score_12[time_index:time_index + batch_size, :, :]
     feature_12 = np.reshape(feature_12, (batch_size, timesteps, 128, 1))
 
-    input_features = {'input_score_48': feature_48,
-                      'input_score_12': feature_12
-                      }
+    input_features = {'input_score_48': feature_48, 'input_score_12': feature_12}
 
     probas = model.predict(input_features, batch_size=batch_size)
 
     return probas
 
 
-def inference(feature,
-              model,
-              timestep=128,
-              batch_size=10,
-              feature_num_12=128,
-              feature_num_48=384,
-              channel=1):
+def inference(feature, model, timestep=128, batch_size=10, feature_num_12=128, feature_num_48=384, channel=1):
 
     f_12 = note_res_downsampling(feature)
     f_12_p = padding(f_12, feature_num_12, timestep)

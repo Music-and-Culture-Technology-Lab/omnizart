@@ -320,9 +320,6 @@ class MIR1KStructure(BaseStructure):
     #: Label extension
     label_ext = ".pv"
 
-    #: Folder to labels
-    labels = ["PitchLabel"]
-
     #: Folder to train wavs
     train_wavs = ["train_data"]
 

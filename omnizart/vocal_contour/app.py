@@ -11,12 +11,12 @@ import tensorflow as tf
 from mir_eval import sonify
 
 from omnizart.base import BaseTranscription
-from omnizart.setting_loaders import VocalFrameSettings
+from omnizart.setting_loaders import VocalContourSettings
 from omnizart.feature.wrapper_func import extract_cfp_feature
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.io import write_yaml
 from omnizart.vocal_contour.inference import inference
-from omnizart.models.utils import matrix_parser
+from omnizart.models.utils import get_contour
 from omnizart.constants.datasets import MIR1KStructure, _get_file_list
 from omnizart.vocal_contour.dataset_hdf import generator_audio
 from omnizart.models.u_net import semantic_segmentation
@@ -26,10 +26,10 @@ from omnizart.music.losses import focal_loss
 logger = get_logger("Vocal frame")
 
 
-class VocalFrameTranscription(BaseTranscription):
+class VocalContourTranscription(BaseTranscription):
     """Application class for vocal_seg transcription."""
     def __init__(self, conf_path=None):
-        super().__init__(VocalFrameSettings, conf_path=conf_path)
+        super().__init__(VocalContourSettings, conf_path=conf_path)
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe frame-level fundamental frequency of vocal (vocal f0) from the given audio.
@@ -74,31 +74,31 @@ class VocalFrameTranscription(BaseTranscription):
             timestep=model_settings.training.timesteps
         )
 
-        r = matrix_parser(pred)
-        f0 = r[:, 1].astype(float)
-        t = np.arange(len(f0)) * model_settings.feature.hop_size
-        y = sonify.pitch_contour(t, f0, model_settings.feature.sampling_rate)
+        mat_contour = get_contour(pred)
+        f0 = mat_contour[:, 1].astype(float)
+        timestamp = np.arange(len(f0)) * model_settings.feature.hop_size
+        wav = sonify.pitch_contour(timestamp, f0, model_settings.feature.sampling_rate)
 
         if output is not None:
             base = os.path.basename(input_audio)
             filename, ext = os.path.splitext(base)
-            f0_out = filename + '_f0' + '.txt'
-            audio_trans = filename + '_trans' + '.wav'
+            f0_out = f'{filename}_f0.txt'
+            wav_trans = f'{filename}_trans.wav'
             save_to = output
             if os.path.isdir(save_to):
                 f0_save_to = jpath(save_to, f0_out)
-                at_save_to = jpath(save_to, audio_trans)
+                wav_save_to = jpath(save_to, wav_trans)
             else:
                 f0_save_to = f0_out
-                at_save_to = audio_trans
+                wav_save_to = wav_trans
             np.savetxt(f0_save_to, f0)
-            wavwrite(at_save_to, model_settings.feature.sampling_rate, y)
-            logger.info("Text and audio files have been written to %s", save_to)
+            wavwrite(wav_save_to, model_settings.feature.sampling_rate, wav)
+            logger.info("Text and Wav files have been written to %s", save_to)
 
         logger.info("Transcription finished")
-        return y
+        return wav
 
-    def generate_feature(self, dataset_path, vocalframe_settings=None, num_threads=4):
+    def generate_feature(self, dataset_path, vocalcontour_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.
 
         To train the model, the first thing is to pre-process the data into feature
@@ -107,7 +107,7 @@ class VocalFrameTranscription(BaseTranscription):
         will do all the rest of things.
 
         To specify the output path, modify the attribute
-        ``vocalframe_settings.dataset.feature_save_path`` to the value you want.
+        ``vocalcontour_settings.dataset.feature_save_path`` to the value you want.
         It defaults to the folder in which the dataset is stored, and generates
         two folders: ``train_feature`` and ``test_feature``.
 
@@ -115,7 +115,7 @@ class VocalFrameTranscription(BaseTranscription):
         ----------
         dataset_path: Path
             Path to the downloaded dataset.
-        music_settings: MusicSettings
+        vocalcontour_settings: VocalContourSettings
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         num_threads:
@@ -126,7 +126,7 @@ class VocalFrameTranscription(BaseTranscription):
         omnizart.constants.datasets:
             Supported dataset that can be applied and the split of training/testing pieces.
         """
-        settings = self._validate_and_get_settings(vocalframe_settings)
+        settings = self._validate_and_get_settings(vocalcontour_settings)
 
         # Resolve feature output path
         train_feat_out_path, test_feat_out_path = self._resolve_feature_output_path(dataset_path, settings)
@@ -139,7 +139,7 @@ class VocalFrameTranscription(BaseTranscription):
         logger.info("Inferred dataset name: %s", dataset_name)
 
         # Dirty way to retrieve labels with the current MIR1KStructure
-        label_paths = _get_file_list(dataset_path, struct.labels, struct.label_ext)
+        label_paths = _get_file_list(dataset_path, struct.train_labels, struct.label_ext)
 
         train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
         logger.info(
@@ -164,7 +164,7 @@ class VocalFrameTranscription(BaseTranscription):
         write_yaml(settings.to_json(), jpath(test_feat_out_path, ".success.yaml"))
         logger.info("All done")
 
-    def train(self, feature_folder, model_name=None, input_model_path=None, vocalframe_settings=None):
+    def train(self, feature_folder, model_name=None, input_model_path=None, vocalcontour_settings=None):
         """Model training.
 
         Train a new vocal_contour model or continue to train on a pre-trained model.
@@ -179,11 +179,11 @@ class VocalFrameTranscription(BaseTranscription):
         input_model_path: Path
             Specify the path to the pre-trained model if you want to continue
             to fine-tune on the model.
-        vocalframe_settings: VocalFrameSettings
+        vocalcontour_settings: VocalContourSettings
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-        settings = self._validate_and_get_settings(vocalframe_settings)
+        settings = self._validate_and_get_settings(vocalcontour_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train one model: %s", input_model_path)
@@ -215,10 +215,7 @@ class VocalFrameTranscription(BaseTranscription):
             # NOTE: The default value of dropout rate for ConvBlock is different
             # in VocalSeg which is 0.2.
             model = semantic_segmentation(
-                multi_grid_layer_n=1,
-                feature_num=384,
-                ch_num=1,
-                timesteps=settings.training.timesteps
+                multi_grid_layer_n=1, feature_num=384, ch_num=1, timesteps=settings.training.timesteps
             )
 
         model.compile(optimizer="adam", loss={'prediction': focal_loss}, metrics=['accuracy'])
@@ -337,8 +334,8 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, target_datase
     print("")
 
 
-# Brought the original repo
-# https://github.com/s603122001/Vocal-Melody-Extraction/blob/c243754bdd01442be649953f5cfb93a23f3cb7f6/project/dataset_manage.py#L58
+# Brought from the original repo
+# https://github.com/s603122001/Vocal-Melody-Extraction/blob/master/project/dataset_manage.py#L58
 def label_parser(label, target_data, vocal_track_list=None):
     # parser label for mir1k
     if target_data == 'mir-1k':

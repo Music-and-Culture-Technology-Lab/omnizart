@@ -4,7 +4,7 @@ import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
 from omnizart.vocal_contour import app
-from omnizart.setting_loaders import VocalFrameSettings
+from omnizart.setting_loaders import VocalContourSettings
 
 
 click.option = partial(click.option, show_default=True)
@@ -26,7 +26,7 @@ def train_model(
     timesteps
 ):
     """Train a new model or continue to train on a pre-trained model"""
-    settings = VocalFrameSettings()
+    settings = VocalContourSettings()
     settings.training.timesteps = timesteps
     if epochs is not None:
         settings.training.epoch = epochs
@@ -41,4 +41,4 @@ def train_model(
     if early_stop is not None:
         settings.training.early_stop = early_stop
 
-    app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalframe_settings=settings)
+    app.train(feature_path, model_name=model_name, input_model_path=input_model, vocalcontour_settings=settings)

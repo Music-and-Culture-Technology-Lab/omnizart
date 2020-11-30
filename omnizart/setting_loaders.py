@@ -210,7 +210,7 @@ class ChordSettings(Settings):
 
 
 @json_serializable(key_path="./General", value_path="./Value")
-class VocalFrameSettings(Settings):
+class VocalContourSettings(Settings):
     default_setting_file: str = "vocal_contour.yaml"
 
     def __init__(self, conf_path=None):
@@ -224,26 +224,26 @@ class VocalFrameSettings(Settings):
         super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameFeature():
+    class VocalContourFeature():
         def __init__(self):
             self.hop_size: float = None
             self.sampling_rate: int = None
             self.window_size: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameDatasetset():
+    class VocalContourDatasetset():
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameModel():
+    class VocalContourModel():
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameTraining():
+    class VocalContourTraining():
         def __init__(self):
             self.epoch: int = None
             self.early_stop: int = None

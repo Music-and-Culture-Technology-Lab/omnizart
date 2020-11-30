@@ -3,7 +3,7 @@
 import numpy as np
 import tensorflow as tf
 
-from omnizart.utils import midi2freq
+from librosa.core import midi_to_hz
 
 
 def shape_list(input_tensor):
@@ -25,35 +25,33 @@ def shape_list(input_tensor):
     return ret
 
 
-def matrix_parser(pred):
-    """Prediction parser for vocal_contour."""
+def get_contour(pred):
     output = np.zeros(shape=(pred.shape[0], 2))
 
     for i, pred_i in enumerate(pred):
         if np.sum(pred_i) != 0:
             output[i][0] = 1
-            output[i][1] = midi2freq(np.argmax(pred_i) / 4 + 21)
+            output[i][1] = midi_to_hz(np.argmax(pred_i) / 4 + 21)
 
     return output
 
 
 def note_res_downsampling(score):
-    # filter
-    f = [0.1, 0.2, 0.4, 0.2, 0.1]
-    r = len(f) // 2
+    note_filter = [0.1, 0.2, 0.4, 0.2, 0.1]
+    cent_res = len(note_filter) // 2
 
     new_score = np.zeros((score.shape[0], 88))
 
     pad = np.zeros((new_score.shape[0], 2))
     score = np.concatenate([pad, score], axis=1)
 
-    f_aug = np.tile(f, (new_score.shape[0], 1))
+    note_filter_aug = np.tile(note_filter, (new_score.shape[0], 1))
 
     for i in range(0, 352, 4):
         cent = i + 2
-        lower_bound = max(0, cent - r)
-        upper_bound = min(353, (cent + 1) + r)
-        new_score[:, i // 4] = np.sum(score[:, lower_bound:upper_bound] * f_aug, axis=1)
+        lower_bound = max(0, cent - cent_res)
+        upper_bound = min(353, (cent + 1) + cent_res)
+        new_score[:, i // 4] = np.sum(score[:, lower_bound:upper_bound] * note_filter_aug, axis=1)
 
     return new_score
 

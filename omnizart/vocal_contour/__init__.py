@@ -1,4 +1,4 @@
-from omnizart.vocal_contour.app import VocalFrameTranscription
+from omnizart.vocal_contour.app import VocalContourTranscription
 
 
-app = VocalFrameTranscription()
+app = VocalContourTranscription()

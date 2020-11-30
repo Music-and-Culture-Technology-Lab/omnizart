@@ -4,12 +4,13 @@ import pickle
 import yaml
 import librosa
 
-from omnizart.utils import ensure_path_exists, LazyLoader
+from omnizart.utils import ensure_path_exists, LazyLoader, get_logger
 
 
 # Lazy load the Spleeter pacakge for avoiding pulling large dependencies
 # and boosting the import speed.
 adapter = LazyLoader("adapter", globals(), "spleeter.audio.adapter")
+logger = get_logger("IO")
 
 
 def dump_pickle(data, save_to):
@@ -76,7 +77,10 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
         if mono:
             audio = librosa.to_mono(audio.T)
 
-    except (ImportError, adapter.SpleeterError):
+    except (ImportError, adapter.SpleeterError) as error:
+        logger.warning(
+            "Failed to load audio with Spleeter due to %s, Continue to use Librosa." % str(error)
+        )
         audio, fs = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate)
 
     return audio, fs
