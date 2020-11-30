@@ -5,6 +5,7 @@ import pytest
 from jsonschema import ValidationError
 
 from omnizart import utils
+from omnizart import io
 
 
 def test_logger(caplog):
@@ -27,8 +28,8 @@ def test_pickle_io():
     }
     path = "./tmp/"
     f_name = os.path.join(path, "one_more_level", "test.pickle")
-    utils.dump_pickle(data, f_name)
-    loaded = utils.load_pickle(f_name)
+    io.dump_pickle(data, f_name)
+    loaded = io.load_pickle(f_name)
     assert data == loaded
     shutil.rmtree(path)
 
@@ -45,8 +46,8 @@ def test_yaml_io(tmp_path):
         }
     }
     f_name = tmp_path.joinpath("test.yaml")
-    utils.write_yaml(data, f_name)
-    loaded = utils.load_yaml(f_name)
+    io.write_yaml(data, f_name)
+    loaded = io.load_yaml(f_name)
     assert data == loaded
 
 
@@ -73,9 +74,16 @@ def test_camel_to_snake(name, expected):
 def test_load_audio_with_librosa():
     audio = "./tests/resource/sample.wav"
     samp = 16000
-    data, sampling_rate = utils.load_audio_with_librosa(audio, sampling_rate=samp)
+    data, sampling_rate = io.load_audio_with_librosa(audio, sampling_rate=samp)
     assert sampling_rate == samp
     assert len(data) == 749252
+
+
+def test_load_audio():
+    audio = "./tests/resource/sample.wav"
+    data, fs = io.load_audio(audio, sampling_rate=44100, mono=False)
+    assert fs == 44100
+    assert data.shape == (2065124, 2)
 
 
 @utils.json_serializable()

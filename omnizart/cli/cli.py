@@ -100,9 +100,9 @@ def download_checkpoints(output_path):
     """Download the archived checkpoints of different models."""
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": "1bgjI3hx49osFgzYD9Z5-Lx2WXZTJ1Jsj",
+            "fid": "1sz83HC_bkA0Gp9G0TtX7cy3jKkANbR8R",
             "save_as": "checkpoints/chord/chord_v1.zip",
-            "file_length": 37692102,
+            "file_length": 87005425,
             "unzip": True
         },
         "drum_keras": {
