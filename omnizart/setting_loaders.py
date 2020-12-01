@@ -171,20 +171,20 @@ class ChordSettings(Settings):
         super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordFeature():
+    class ChordFeature:
         def __init__(self):
             self.segment_width: int = None
             self.segment_hop: int = None
             self.num_steps: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordDataset():
+    class ChordDataset:
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordModel():
+    class ChordModel:
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
@@ -197,7 +197,7 @@ class ChordSettings(Settings):
             self.annealing_rate: float = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordTraining():
+    class ChordTraining:
         def __init__(self):
             self.epoch: int = None
             self.steps: int = None
@@ -219,12 +219,13 @@ class VocalSettings(Settings):
         self.feature = self.VocalFeature()
         self.dataset = self.VocalDataset()
         self.model = self.VocalModel()
+        self.inference = self.VocalInference()
         self.training = self.VocalTraining()
 
         super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFeature():
+    class VocalFeature:
         def __init__(self):
             self.hop_size: float = None
             self.sampling_rate: int = None
@@ -235,13 +236,13 @@ class VocalSettings(Settings):
             self.bins_per_octave: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalDataset():
+    class VocalDataset:
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalModel():
+    class VocalModel:
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
@@ -255,7 +256,14 @@ class VocalSettings(Settings):
             self.semi_iterations: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalTraining():
+    class VocalInference:
+        def __init__(self):
+            self.context_length: int = None
+            self.threshold: float = None
+            self.min_duration: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalTraining:
         def __init__(self):
             self.epoch: int = None
             self.steps: int = None

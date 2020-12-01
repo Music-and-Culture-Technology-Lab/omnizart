@@ -94,6 +94,21 @@ General:
                 Description: Number of iterations when generating the adversarial perturbation.
                 Type: Integer
                 Value: 2
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            ContextLength:
+                Description: Length of context that will be used to find the peaks.
+                Type: Integer
+                Value: 2
+            Threshold:
+                Description: Threshold that will be applied to the predicted values.
+                Type: Float
+                Value: 0.5
+            MinDuration:
+                Description: Minimum required length of each note, in seconds.
+                Type: Float
+                Value: 0.1
     Training:
         Description: Hyper parameters for training
         Settings:

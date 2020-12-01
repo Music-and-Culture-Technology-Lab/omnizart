@@ -21,6 +21,7 @@ from omnizart.feature.cfp import extract_vocal_cfp, _extract_vocal_cfp
 from omnizart.setting_loaders import VocalSettings
 from omnizart.vocal import labels as lextor
 from omnizart.vocal.prediction import predict
+from omnizart.vocal.inference import infer_interval
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.pyramid_net import PyramidNet
 
@@ -42,9 +43,6 @@ class VocalTranscription(BaseTranscription):
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         logger.info("Separating vocal track from the audio...")
-
-        # Load model configurations
-        logger.info("Loading model...")
         separator = Separator('spleeter:2stems')
 
         # Tricky way to avoid the annoying tensorflow graph being finalized issue.
@@ -53,7 +51,7 @@ class VocalTranscription(BaseTranscription):
         wav, fs = load_audio(input_audio, mono=False)
         pred = separator.separate(wav)
 
-        logger.info("Predicting...")
+        logger.info("Loading model...")
         model, model_settings = self._load_model(model_path)
 
         logger.info("Extracting feature...")
@@ -70,10 +68,43 @@ class VocalTranscription(BaseTranscription):
             bin_per_octave=model_settings.feature.bins_per_octave
         )
 
+        logger.info("Predicting...")
         pred = predict(feature, model)
-        return pred, feature
+
+        logger.info("Infering notes...")
+        interval = infer_interval(
+            pred,
+            ctx_len=model_settings.inference.context_length,
+            threshold=model_settings.inference.threshold,
+            min_dura=model_settings.inference.min_duration,
+            t_unit=model_settings.feature.hop_size
+        )
+
+        logger.info("Transcription finished")
+        return pred, interval
 
     def generate_feature(self, dataset_path, vocal_settings=None, num_threads=4):
+        """Extract the feature of the whole dataset.
+
+        Currently supports MIR-1K and TONAS datasets. To train the model, you have to prepare the training
+        data first, then process it into feature representations. After downloading the dataset,
+        use this function to do the pre-processing and transform the raw data into features.
+
+        To specify the output path, modify the attribute
+        ``vocal_settings.dataset.feature_save_path`` to the value you want.
+        It will default to the folder under where the dataset stored, generating
+        two folders: ``train_feature`` and ``test_feature``.
+
+        Parameters
+        ----------
+        dataset_path: Path
+            Path to the downloaded dataset.
+        vocal_settings: VocalSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        num_threads:
+            Number of threads for parallel extracting the features.
+        """
         settings = self._validate_and_get_settings(vocal_settings)
 
         dataset_type = resolve_dataset_type(
@@ -145,6 +176,26 @@ class VocalTranscription(BaseTranscription):
     def train(
         self, feature_folder, semi_feature_folder=None, model_name=None, input_model_path=None, vocal_settings=None
     ):
+        """Model training.
+
+        Train a new model or continue to train on a previously trained model.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the folder containing generated feature.
+        semi_feature_folder: Path
+            If specified, semi-supervise learning will be leveraged, and the feature
+            files contained in this folder will be used as unsupervised data.
+        model_name: str
+            The name for storing the trained model. If not given, will default to the
+            current timesamp.
+        input_model_path: Path
+            Continue to train on the pre-trained model by specifying the path.
+        vocal_settings: VocalSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        """
         settings = self._validate_and_get_settings(vocal_settings)
 
         if input_model_path is not None:
@@ -185,7 +236,9 @@ class VocalTranscription(BaseTranscription):
             logger.info("Constructing new model")
             model = self.get_model(settings)
 
-        # optimizer = tfa.optimizers.AdamW(weight_decay=0.01, learning_rate=settings.training.init_learning_rate)
+        # Notice: the original implementation uses AdamW as the optimizer, which is also viable through
+        # tensorflow_addons.optimizers.AdamW. However we found that by using AdamW, the model would fail
+        # to converge, and instead the training loss will get higher and higher.
         optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
         model.compile(optimizer=optimizer, loss='bce', metrics=['accuracy', 'binary_accuracy'])
 
@@ -333,7 +386,7 @@ def _parallel_feature_extraction(
 class VocalDatasetLoader(BaseDatasetLoader):
     """Dataset loader of 'vocal' module.
 
-    Defines an additional parameter 'ctx_len' to detemine the context length
+    Defines an additional parameter 'ctx_len' to determine the context length
     of the input feature with repect to the current timestamp.
     """
     def __init__(self, ctx_len=9, feature_folder=None, feature_files=None, num_samples=100, slice_hop=1):
@@ -386,18 +439,19 @@ class VocalDatasetLoader(BaseDatasetLoader):
 
 if __name__ == "__main__":
     # pylint: disable=W0621,C0103
+
     app = VocalTranscription()
     tonas_train = "/data/TONAS/train_feature"
-    mir1k_train = None #"/data/MIR-1K/train_feature"
-    #app.generate_feature("/data/TONAS")
-    #app.generate_feature("/data/MIR-1K")
+    mir1k_train = "/data/MIR-1K/train_feature"
+    # app.generate_feature("/data/TONAS")
+    # app.generate_feature("/data/MIR-1K")
     settings = VocalSettings()
     settings.training.steps = 1500
     settings.training.val_steps = 100
     settings.training.epoch = 20
     settings.model.shake_drop = False
-    app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
+    # app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
     audio = "/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
-    audio = "/data/omnizart/checkpoints/Ava.wav"
-    audio = "/data/TONAS/Deblas/01-D_AMairena.wav"
-    #pred, feat = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_test")
+    audio = "/data/omnizart/checkpoints/mud.wav"
+    # audio = "/data/TONAS/Deblas/01-D_AMairena.wav"
+    pred, interval = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_test")
