@@ -24,6 +24,7 @@ htmlcov/
 # Transcription results
 *.mid
 *.csv
+*.txt
 
 # Built files
 dist/
@@ -40,4 +41,5 @@ pretrained_models/
 # Other files
 checkpoints/
 test.sh
+*.ipynb
 soundfonts.sf2

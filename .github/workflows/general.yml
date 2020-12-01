@@ -46,7 +46,8 @@ jobs:
           mv resource/* tests/resource
       - name: Install dependencies
         run: |
-          sudo apt-get install libsndfile1
+          sudo apt-get update
+          sudo apt-get install libsndfile1 ffmpeg
           if [ ${{ matrix.python-version }} = "3.6" ]; then
             export DEFAULT_INSTALL_APPROACH=pip
           fi

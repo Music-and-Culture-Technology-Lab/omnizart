@@ -86,6 +86,9 @@ class MusicTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
+        # TODO: The feature parameters are not passed as in `generate_feature`;
+        # this might cause problem due to the mismatch between the generated feature (for training)
+        # and the extracted feature (for transcription)
         feature = extract_cfp_feature(input_audio, harmonic=model_settings.feature.harmonic)
 
         logger.info("Predicting...")
@@ -299,7 +302,7 @@ class MusicTranscription(BaseTranscription):
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
-            model_save_path = jpath(settings.model.save_path, model_name)
+        model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)

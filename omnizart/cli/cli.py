@@ -21,6 +21,7 @@ from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music
 from omnizart.cli.drum import drum
 from omnizart.cli.chord import chord
+from omnizart.cli.vocal_contour import vocal_contour
 from omnizart.cli.transcribe import transcribe
 
 
@@ -89,9 +90,8 @@ def download_dataset(dataset, output):
         "mir1k": dset.MIR1KStructure,
         "cmedia": dset.CMediaStructure
     }[dataset.lower()]
-    ensure_path_exists(output)
     click.echo(f"Downloading {dataset} dataset and save to {output}")
-    struct.download()
+    struct.download(save_path=output)
 
 
 @click.command()
@@ -130,6 +130,11 @@ def download_checkpoints(output_path):
             "save_as": "checkpoints/vocal/vocal_semi.zip",
             "file_length": 213112805,
             "unzip": True
+        },
+        "vocal_contour": {
+            "fid": "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
+            "save_as": "checkpoints/vocal/contour/weights.h5",
+            "file_length": 50732192
         }
     }
 
@@ -197,6 +202,7 @@ def synth(input_midi, output_path, sf2_path):
 entry.add_command(music)
 entry.add_command(drum)
 entry.add_command(chord)
+entry.add_command(vocal_contour)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)
 entry.add_command(download_checkpoints)

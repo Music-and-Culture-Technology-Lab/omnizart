@@ -210,7 +210,7 @@ class DrumTranscription(BaseTranscription):
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
-            model_save_path = jpath(settings.model.save_path, model_name)
+        model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)

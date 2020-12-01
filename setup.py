@@ -8,36 +8,34 @@ packages = \
  'omnizart.cli.chord',
  'omnizart.cli.drum',
  'omnizart.cli.music',
+ 'omnizart.cli.vocal_contour',
  'omnizart.constants',
  'omnizart.constants.schema',
  'omnizart.drum',
  'omnizart.feature',
  'omnizart.models',
  'omnizart.music',
- 'omnizart.vocal']
+ 'omnizart.vocal',
+ 'omnizart.vocal_contour']
 
 package_data = \
 {'': ['*'],
- 'omnizart': ['checkpoints/chord/chord_v1/checkpoint',
-              'checkpoints/chord/chord_v1/configurations.yaml',
-              'checkpoints/chord/chord_v1/weights.index',
-              'checkpoints/drum/drum_keras/arch.yaml',
-              'checkpoints/drum/drum_keras/configurations.yaml',
-              'checkpoints/music/music_note_stream/arch.yaml',
-              'checkpoints/music/music_note_stream/configurations.yaml',
-              'checkpoints/music/music_piano/arch.yaml',
-              'checkpoints/music/music_piano/configuration.json',
-              'checkpoints/music/music_piano/configurations.yaml',
-              'checkpoints/music/music_pop/arch.yaml',
-              'checkpoints/music/music_pop/configurations.yaml',
+ 'omnizart': ['checkpoints/chord/chord_v1/*',
+              'checkpoints/drum/drum_keras/*',
+              'checkpoints/music/music_note_stream/*',
+              'checkpoints/music/music_piano/*',
+              'checkpoints/music/music_pop/*',
+              'checkpoints/vocal/contour/*',
               'defaults/*',
-              'resource/vamp/*']}
+              'resource/vamp/*'],
+ 'omnizart.vocal_contour': ['.ipynb_checkpoints/*']}
 
 install_requires = \
 ['click>=7.1.2,<8.0.0',
  'jsonschema>=3.2.0,<4.0.0',
  'librosa>=0.8.0,<0.9.0',
  'madmom>=0.16.1,<0.17.0',
+ 'mir_eval>=0.6,<0.7',
  'numba==0.48',
  'opencv-python>=4.4.0,<5.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
