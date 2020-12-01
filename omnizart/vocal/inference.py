@@ -147,8 +147,12 @@ def infer_interval(pred, ctx_len=2, threshold=0.5, min_dura=0.1, t_unit=0.02):
         on_id = on_peaks[on_peak_id]
         next_on_id = on_peaks[on_peak_id + 1]
 
-        off_peak_id = np.where(np.array(off_peaks) >= on_id + min_len)[0][0]
-        off_id = off_peaks[off_peak_id]
+        off_peak_id = np.where(np.array(off_peaks) >= on_id + min_len)[0]
+        if len(off_peak_id) == 0:
+            off_id = _find_first_bellow_th(pred[on_id:, 0], threshold=threshold)
+        else:
+            off_id = off_peaks[off_peak_id[0]]
+
         if on_id < next_on_id < off_id \
             and np.mean(pred[on_id:next_on_id, 1]) > np.mean(pred[on_id:next_on_id, 0]):
             # Discard current onset, since the duration between current and

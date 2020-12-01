@@ -22,6 +22,7 @@ from omnizart.setting_loaders import VocalSettings
 from omnizart.vocal import labels as lextor
 from omnizart.vocal.prediction import predict
 from omnizart.vocal.inference import infer_interval
+from omnizart.vocal_contour import app as vcapp
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.pyramid_net import PyramidNet
 
@@ -79,6 +80,15 @@ class VocalTranscription(BaseTranscription):
             min_dura=model_settings.inference.min_duration,
             t_unit=model_settings.feature.hop_size
         )
+
+        # logger.info("Extracting pitch contour")
+        # vcapp.transcribe(input_audio)
+        # basename = os.path.basename(input_audio)
+        # filename, _ = os.path.splitext(basename)
+        # contour_filename = f"{filename}_f0.txt"
+        # contour_path = jpath(os.path.dirname(input_audio), contour_filename)
+        # with open(contour_path, "r") as cin:
+        #     contour = cin.readlines()
 
         logger.info("Transcription finished")
         return pred, interval
@@ -452,6 +462,7 @@ if __name__ == "__main__":
     settings.model.shake_drop = False
     # app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
     audio = "/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
-    audio = "/data/omnizart/checkpoints/mud.wav"
+    audio = "/data/omnizart/checkpoints/Ava.wav"
     # audio = "/data/TONAS/Deblas/01-D_AMairena.wav"
-    pred, interval = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_test")
+    pred, interval = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_semi")
+    np.save("/data/omnizart/omnizart/test_ava.npy", pred)
