@@ -40,12 +40,12 @@ def note_res_downsampling(score):
     note_filter = [0.1, 0.2, 0.4, 0.2, 0.1]
     cent_res = len(note_filter) // 2
 
-    new_score = np.zeros((score.shape[0], 88))
+    new_score = np.zeros((len(score), 88))
 
-    pad = np.zeros((new_score.shape[0], 2))
+    pad = np.zeros((len(new_score), 2))
     score = np.concatenate([pad, score], axis=1)
 
-    note_filter_aug = np.tile(note_filter, (new_score.shape[0], 1))
+    note_filter_aug = np.tile(note_filter, (len(new_score), 1))
 
     for i in range(0, 352, 4):
         cent = i + 2
@@ -56,10 +56,7 @@ def note_res_downsampling(score):
     return new_score
 
 
-def padding(x,
-            feature_num,
-            timesteps,
-            dimension=False):
+def padding(x, feature_num, timesteps, dimension=False):
 
     extended_chorale = np.array(x)
 
@@ -70,8 +67,8 @@ def padding(x,
         p_t = (feature_num - x.shape[1]) // 2
         p_b = p_t + 1
 
-    top = np.zeros((extended_chorale.shape[0], p_t))
-    bottom = np.zeros((extended_chorale.shape[0], p_b))
+    top = np.zeros((len(extended_chorale), p_t))
+    bottom = np.zeros((len(extended_chorale), p_b))
     extended_chorale = np.concatenate([top, extended_chorale, bottom], axis=1)
 
     padding_dimensions = (timesteps,) + extended_chorale.shape[1:]
@@ -82,10 +79,9 @@ def padding(x,
     padding_start[:, :p_t] = 1
     padding_end[:, -p_b:] = 1
 
-    extended_chorale = np.concatenate((padding_start,
-                                       extended_chorale,
-                                       padding_end),
-                                      axis=0)
+    extended_chorale = np.concatenate(
+        (padding_start, extended_chorale, padding_end), axis=0
+    )
 
     if dimension:
         return extended_chorale, p_t, p_b

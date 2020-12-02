@@ -137,9 +137,7 @@ class VocalContourTranscription(BaseTranscription):
         dataset_name, struct = _resolve_dataset_type(dataset_path)
 
         logger.info("Inferred dataset name: %s", dataset_name)
-
-        # Dirty way to retrieve labels with the current MIR1KStructure
-        label_paths = _get_file_list(dataset_path, struct.train_labels, struct.label_ext)
+        label_paths = get_train_labels(dataset_path)
 
         train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
         logger.info(

@@ -12,7 +12,7 @@ from omnizart.models.utils import note_res_downsampling, padding
 def generator_audio(feature_folder, batch_size, timesteps, phase='train', percentage_train=0.8):
     hdf_files = glob.glob(f"{feature_folder}/*.hdf")
     if len(hdf_files) == 0:
-        print("Warning! No feature files found in the given path")
+        print("Warning! No feature files found in the given path.")
 
     X_48 = []
     X_12 = []
@@ -32,6 +32,7 @@ def generator_audio(feature_folder, batch_size, timesteps, phase='train', percen
     if phase == 'all':
         chorale_indices = np.arange(int(len(X_48)))
 
+    # Padding for both input X and label Y
     for clip_ind, clip in enumerate(X_48):
         if clip_ind in chorale_indices:
             new_x = np.array(clip[:, :, 0])
@@ -57,7 +58,7 @@ def generator_audio(feature_folder, batch_size, timesteps, phase='train', percen
     batch = 0
 
     while True:
-        # control the training percentage between datasets(we use 1/2 mir1k and 1/2 medleydb)
+        # control the training percentage between datasets (we use 1/2 mir1k and 1/2 medleydb)
         if (np.random.choice(np.arange(10)) < 5 and phase == 'train'):
             chorale_index = np.random.choice(np.arange(48))
         else:

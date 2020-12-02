@@ -1,3 +1,4 @@
+from functools import partial
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_GEN_FEATURE_OPTIONS
@@ -6,6 +7,7 @@ from omnizart.utils import LazyLoader
 
 
 vocal_contour = LazyLoader("vocal_contour", globals(), "omnizart.vocal_contour")
+click.option = partial(click.option, show_default=True)
 
 
 @click.command()
@@ -15,16 +17,14 @@ vocal_contour = LazyLoader("vocal_contour", globals(), "omnizart.vocal_contour")
     "--hop-size",
     help="Hop size in seconds with respect to sampling rate.",
     type=float,
-    default=0.02,
-    show_default=True
+    default=0.02
 )
 @click.option(
     "-s",
     "--sampling-rate",
     help="Adjust input sampling rate to this value.",
     type=int,
-    default=16000,
-    show_default=True
+    default=16000
 )
 def generate_feature(dataset_path, output_path, num_threads, hop_size, sampling_rate):
     """Extract the feature of the whole dataset for training.

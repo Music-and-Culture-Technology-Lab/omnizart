@@ -8,12 +8,10 @@ from omnizart.utils import LazyLoader
 
 
 vocal_contour = LazyLoader("vocal_contour", globals(), "omnizart.vocal_contour")
-click.option = partial(click.option, show_default=True)
 
 
 @click.command()
 @add_common_options(COMMON_TRAIN_MODEL_OPTIONS)
-@click.option("-t", "--timesteps", help="Time width of each input feature", type=int, default=128)
 def train_model(
     feature_path,
     model_name,
@@ -28,7 +26,6 @@ def train_model(
 ):
     """Train a new model or continue to train on a pre-trained model"""
     settings = VocalContourSettings()
-    settings.training.timesteps = timesteps
     if epochs is not None:
         settings.training.epoch = epochs
     if steps is not None:
