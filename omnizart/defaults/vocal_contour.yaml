@@ -1,0 +1,79 @@
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart vocal-contour transribe` command.
+        Type: String 
+        Value: VocalContour
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value: 
+            VocalContour: checkpoints/vocal/contour
+    Feature:
+        Description: Default settings of feature extraction
+        Settings:
+            HopSize:
+                Description: Hop size in seconds with respect to sampling rate.
+                Type: Float
+                Value: 0.02
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 16000
+            WindowSize:
+                Type: Integer
+                Value: 2049
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: vocal-contour
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/vocal_contour
+    Training:
+        Description: Parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 5
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 3
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 6000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 200    
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 12
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 12
+            Timesteps:
+                Description: Length of time axis of the input feature.
+                Type: Integer
+                Value: 128
+  

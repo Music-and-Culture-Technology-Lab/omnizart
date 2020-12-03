@@ -10,9 +10,9 @@ config:
     config:
       batch_input_shape: !!python/tuple
       - null
-      - 256
+      - 128
       - 352
-      - 2
+      - 3
       dtype: float32
       name: input_score_48
       ragged: false
@@ -3070,7 +3070,7 @@ config:
       name: attn_1
       out_channel: 64
       query_shape: !!python/tuple
-      - 80
+      - 100
       - 32
       trainable: true
     inbound_nodes:

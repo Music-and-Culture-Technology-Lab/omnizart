@@ -10,23 +10,25 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 
 # pylint: disable=C0103,W0621,E0611
 import os
+import pickle
 from os.path import join as jpath
 from datetime import datetime
 
 import h5py
+import numpy as np
 import tensorflow as tf
 
 from omnizart.feature.wrapper_func import extract_cfp_feature
 from omnizart.models.u_net import MultiHeadAttention, semantic_segmentation, semantic_segmentation_attn
 from omnizart.music.inference import multi_inst_note_inference
 from omnizart.music.prediction import predict
-from omnizart.music.dataset import get_dataset
 from omnizart.music.labels import (
     LabelType, MaestroLabelExtraction, MapsLabelExtraction, MusicNetLabelExtraction, PopLabelExtraction
 )
 from omnizart.music.losses import focal_loss, smooth_loss
-from omnizart.base import BaseTranscription
-from omnizart.utils import get_logger, dump_pickle, write_yaml, parallel_generator, ensure_path_exists
+from omnizart.base import BaseTranscription, BaseDatasetLoader
+from omnizart.utils import get_logger, parallel_generator, ensure_path_exists, resolve_dataset_type
+from omnizart.io import dump_pickle, write_yaml
 from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.setting_loaders import MusicSettings
@@ -84,6 +86,9 @@ class MusicTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
+        # TODO: The feature parameters are not passed as in `generate_feature`;
+        # this might cause problem due to the mismatch between the generated feature (for training)
+        # and the extracted feature (for transcription)
         feature = extract_cfp_feature(input_audio, harmonic=model_settings.feature.harmonic)
 
         logger.info("Predicting...")
@@ -147,13 +152,12 @@ class MusicTranscription(BaseTranscription):
         omnizart.constants.datasets:
             Supported dataset that can be applied and the split of training/testing pieces.
         """
-        if music_settings is not None:
-            assert isinstance(music_settings, MusicSettings)
-            settings = music_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(music_settings)
 
-        dataset_type = _resolve_dataset_type(dataset_path)
+        dataset_type = resolve_dataset_type(
+            dataset_path,
+            keywords={"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
+        )
         if dataset_type is None:
             logger.warning(
                 "The given path %s does not match any built-in processable dataset. Do nothing...",
@@ -164,10 +168,10 @@ class MusicTranscription(BaseTranscription):
 
         # Build instance mapping
         struct = {
-            "maps": d_struct.MapsStructure(),
-            "musicnet": d_struct.MusicNetStructure(),
-            "maestro": d_struct.MaestroStructure(),
-            "pop": d_struct.PopStructure()
+            "maps": d_struct.MapsStructure,
+            "musicnet": d_struct.MusicNetStructure,
+            "maestro": d_struct.MaestroStructure,
+            "pop": d_struct.PopStructure
         }[dataset_type]
         label_extractor = {
             "maps": MapsLabelExtraction,
@@ -183,15 +187,7 @@ class MusicTranscription(BaseTranscription):
         logger.info("Number of total testing wavs: %d", len(test_wav_files))
 
         # Resolve feature output path
-        if settings.dataset.feature_save_path == "+":
-            base_output_path = dataset_path
-            settings.dataset.save_path = dataset_path
-        else:
-            base_output_path = settings.dataset.feature_save_path
-        train_feat_out_path = jpath(base_output_path, "train_feature")
-        test_feat_out_path = jpath(base_output_path, "test_feature")
-        ensure_path_exists(train_feat_out_path)
-        ensure_path_exists(test_feat_out_path)
+        train_feat_out_path, test_feat_out_path = self._resolve_feature_output_path(dataset_path, settings)
         logger.info("Output training feature to %s", train_feat_out_path)
         logger.info("Output testing feature to %s", test_feat_out_path)
 
@@ -244,11 +240,7 @@ class MusicTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         """
-        if music_settings is not None:
-            assert isinstance(music_settings, MusicSettings)
-            settings = music_settings
-        else:
-            settings = self.settings
+        settings = self._validate_and_get_settings(music_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train on model: %s", input_model_path)
@@ -264,24 +256,26 @@ class MusicTranscription(BaseTranscription):
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
-        train_dataset = get_dataset(
-            l_type.get_conversion_func(),
-            feature_files=train_feat_files,
-            batch_size=settings.training.batch_size,
-            steps=settings.training.steps,
-            timesteps=settings.training.timesteps,
-            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
-            feature_num=settings.training.feature_num
-        )
-        val_dataset = get_dataset(
-            l_type.get_conversion_func(),
-            feature_files=val_feat_files,
-            batch_size=settings.training.val_batch_size,
-            steps=settings.training.val_steps,
-            timesteps=settings.training.timesteps,
-            channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
-            feature_num=settings.training.feature_num
-        )
+
+        output_types = (tf.float32, tf.float32)
+        train_dataset = MusicDatasetLoader(
+                l_type.get_conversion_func(),
+                feature_files=train_feat_files,
+                num_samples=settings.training.batch_size * settings.training.steps,
+                timesteps=settings.training.timesteps,
+                channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
+                feature_num=settings.training.feature_num
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types)
+        val_dataset = MusicDatasetLoader(
+                l_type.get_conversion_func(),
+                feature_files=val_feat_files,
+                num_samples=settings.training.val_batch_size * settings.training.val_steps,
+                timesteps=settings.training.timesteps,
+                channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
+                feature_num=settings.training.feature_num
+            ) \
+            .get_dataset(settings.training.val_batch_size, output_types=output_types)
 
         if input_model_path is None:
             logger.info("Creating new model with type: %s", settings.model.model_type)
@@ -308,7 +302,7 @@ class MusicTranscription(BaseTranscription):
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
-            model_save_path = jpath(settings.model.save_path, model_name)
+        model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
@@ -383,37 +377,116 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
     print("")
 
 
-def _resolve_dataset_type(dataset_path):
-    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
-    keywords = {"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
-    d_type = [val for key, val in keywords.items() if key in low_path]
-    if len(d_type) == 0:
-        return None
+class MusicDatasetLoader(BaseDatasetLoader):
+    """Feature loader for training ``music`` model.
 
-    assert len(set(d_type)) == 1
-    return d_type[0]
+    Load feature and label for training. Also converts the custom format of
+    label into piano roll representation.
 
+    Parameters
+    ----------
+    label_conversion_func: callable
+        The function that will be used for converting the customized label format
+        into numpy array.
+    feature_folder: Path
+        Path to the extracted feature files, including `*.hdf` and `*.pickle` pairs,
+        which refers to feature and label files, respectively.
+    feature_files: list[Path]
+        List of path of `*.hdf` feature files. Corresponding label files should also
+        under the same folder.
+    num_samples: int
+        Total number of samples to yield.
+    timesteps: int
+        Time length of the feature.
+    channels: list[int]
+        Channels to be used for training. Allowed values are [1, 2, 3].
+    feature_num: int
+        Target input size of feature dimension. Padding zeros to the bottom and top
+        if the input feature size and target size is inconsistent.
 
-def model_training_test():
-    feature_folder = "/data/omnizart/tf_dataset_experiment/feature"
+    Yields
+    ------
+    feature:
+        Input feature for training the model.
+    label:
+        Coressponding label representation.
+    """
+    def __init__(
+        self,
+        label_conversion_func,
+        feature_folder=None,
+        feature_files=None,
+        num_samples=100,
+        timesteps=128,
+        channels=[1, 3],
+        feature_num=352
+    ):
+        super().__init__(
+            feature_folder=feature_folder, feature_files=feature_files, num_samples=num_samples, slice_hop=timesteps
+        )
 
-    settings = MusicSettings()
-    settings.model.model_type = "aspp"
-    settings.training.epoch = 3
-    settings.training.steps = 15
-    settings.training.val_steps = 15
-    settings.training.batch_size = 8
-    settings.training.val_batch_size = 8
-    settings.training.timesteps = 128
-    settings.training.label_type = "note-stream"
-    settings.training.loss_function = "smooth"
-    settings.training.early_stop = 1
+        self.conv_func = label_conversion_func
+        self.feature_folder = feature_folder
+        self.feature_files = feature_files
+        self.num_samples = num_samples
+        self.timesteps = timesteps
+        self.channels = channels
 
-    app = MusicTranscription()
-    model_path, history = app.train(
-        feature_folder, music_settings=settings, model_name="test2", input_model_path="checkpoints/music/music_test"
-    )
-    return model_path, history
+        self.hdf_refs = {}
+        self.pkls = {}
+        for hdf in self.hdf_files:
+            ref = h5py.File(hdf, "r")
+            self.hdf_refs[hdf] = ref
+            self.pkls[hdf] = pickle.load(open(hdf.replace(".hdf", ".pickle"), "rb"))
+
+        ori_feature_num = list(self.hdf_refs.values())[0]["feature"]
+        diff = feature_num - ori_feature_num.shape[1]
+        pad_b = diff // 2
+        pad_t = diff - pad_b
+        self.pad = ((pad_b != 0) or (pad_t != 0))
+        self.pad_shape = ((0, 0), (pad_b, pad_t), (0, 0))
+
+    def _get_feature(self, hdf_name, slice_start):
+        feat = self.hdf_refs[hdf_name]["feature"]
+        feat = feat[slice_start:slice_start + self.slice_hop, :, self.channels].squeeze()
+        if self.pad:
+            feat = np.pad(feat, self.pad_shape, constant_values=0)
+        return feat
+
+    def _get_label(self, hdf_name, slice_start):
+        ll = self.pkls[hdf_name][slice_start:slice_start + self.slice_hop]
+        label = self.conv_func(ll)
+        if self.pad:
+            label = np.pad(label, self.pad_shape, constant_values=0)
+        return label
+
+    def _pre_yield(self, feature, label):
+        feat_len = len(feature)
+        label_len = len(label)
+
+        if (feat_len == self.timesteps) and (label_len == self.timesteps):
+            # All normal
+            return feature, label
+
+        # The length of feature and label are inconsistent. Trim to the same size as the shorter one.
+        if feat_len > label_len:
+            feature = feature[:label_len]
+            feat_len = len(feature)
+        else:
+            label = label[:feat_len]
+            label_len = len(label)
+
+        # Padding zeros to the end if the squence length is shorter than 'timesteps'.
+        if feat_len != self.timesteps:
+            assert feat_len < self.timesteps
+            diff = self.timesteps - feat_len
+            feature = np.pad(feature, ((0, diff), (0, 0), (0, 0)))
+        if label_len != self.timesteps:
+            assert label_len < self.timesteps
+            diff = self.timesteps - label_len
+            label = np.pad(label, ((0, diff), (0, 0), (0, 0)))
+
+        return feature, label
 
 
 if __name__ == "__main__":

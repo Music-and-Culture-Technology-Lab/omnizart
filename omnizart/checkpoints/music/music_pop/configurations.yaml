@@ -1,8 +1,9 @@
 General:
   CheckpointPath:
     Value:
-      Piano: ./checkpoints/music/music_piano
-      Pop: ./checkpoints/music/music_pop
+      Piano: checkpoints/music/music_piano
+      Pop: checkpoints/music/music_pop
+      Stream: checkpoints/music/music_note_stream
   Dataset:
     Settings:
       FeatureSavePath:
@@ -64,10 +65,13 @@ General:
         Value:
         - Spec
         - Ceps
+        - GCoS
       EarlyStop:
         Value: 6
       Epoch:
         Value: 20
+      FeatureNum:
+        Value: 352
       LabelType:
         Value: pop-note-stream
       LossFunction:
@@ -75,12 +79,10 @@ General:
       Steps:
         Value: 3000
       Timesteps:
-        Value: 256
+        Value: 128
       ValBatchSize:
         Value: 8
       ValSteps:
         Value: 500
-      FeatureNum:
-        Value: 352
   TranscriptionMode:
-    Value: Pop
+    Value: Piano

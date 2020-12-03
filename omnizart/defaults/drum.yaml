@@ -1,15 +1,15 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart transribe drum` command.
+        Description: Mode of transcription by executing the `omnizart drum transcribe` command.
         Type: String
-        Value: keras
+        Value: Keras
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
         SubType: [String, String]
         Value:
-            keras: ./checkpoints/drum/drum_keras
+            Keras: checkpoints/drum/drum_keras
     Feature:
         Description: Default settings of feature extraction for drum transcription.
         Settings:

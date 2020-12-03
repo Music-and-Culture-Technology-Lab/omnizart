@@ -1,5 +1,8 @@
 """Chord transcription for both MIDI and audio domain.
 
+Re-implementation from the repository
+`Tsung-Ping/Harmony-Transformer <https://github.com/Tsung-Ping/Harmony-Transformer>`_.
+
 Feature Storage Format
 ----------------------
 Processed feature will be stored in ``.hdf`` file format, one file per piece.

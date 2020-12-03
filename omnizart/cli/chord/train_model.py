@@ -1,8 +1,12 @@
 import click
 
+from omnizart.cli import silence_tensorflow
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
-from omnizart.chord import app
 from omnizart.setting_loaders import ChordSettings
+from omnizart.utils import LazyLoader
+
+
+chord = LazyLoader("chord", globals(), "omnizart.chord")
 
 
 @click.command()
@@ -38,4 +42,5 @@ def train_model(
     if learning_rate_decay is not None:
         settings.training.learning_rate_decay = learning_rate_decay
 
-    app.train(feature_path, model_name=model_name, input_model_path=input_model, chord_settings=settings)
+    silence_tensorflow()
+    chord.app.train(feature_path, model_name=model_name, input_model_path=input_model, chord_settings=settings)

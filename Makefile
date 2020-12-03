@@ -2,7 +2,7 @@ CHECK_SRC := ./omnizart
 
 
 .PHONY: all
-all: check test
+all: lint test
 
 # --------------------------------------------------------------
 # Linter

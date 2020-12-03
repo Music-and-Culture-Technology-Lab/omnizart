@@ -1,7 +1,7 @@
 
 General:
     TranscriptionMode:
-        Description: Mode of transcription by executing the `omnizart transribe drum` command.
+        Description: Mode of transcription by executing the `omnizart chord transcribe` command.
         Type: String
         Value: ChordV1
     CheckpointPath:
@@ -9,7 +9,7 @@ General:
         Type: Map
         SubType: [String, String]
         Value:
-            ChordV1: ./checkpoints/chord/chord_v1
+            ChordV1: checkpoints/chord/chord_v1
     Feature:
         Description: Default settings of feature extraction for drum transcription.
         Settings:

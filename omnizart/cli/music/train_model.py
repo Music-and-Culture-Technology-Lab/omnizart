@@ -2,11 +2,13 @@ from functools import partial
 
 import click
 
+from omnizart.cli import silence_tensorflow
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
-from omnizart.music import app
 from omnizart.setting_loaders import MusicSettings
+from omnizart.utils import LazyLoader
 
 
+music = LazyLoader("music", globals(), "omnizart.music")
 click.option = partial(click.option, show_default=True)
 
 
@@ -83,4 +85,5 @@ def train_model(
     if model_type is not None:
         settings.model.model_type = model_type
 
-    app.train(feature_path, model_name=model_name, input_model_path=input_model, music_settings=settings)
+    silence_tensorflow()
+    music.app.train(feature_path, model_name=model_name, input_model_path=input_model, music_settings=settings)

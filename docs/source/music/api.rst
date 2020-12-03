@@ -7,15 +7,16 @@ Music Transcription
 
 App
 ###
-.. automodule:: omnizart.music.app
+.. autoclass:: omnizart.music.app.MusicTranscription
     :members:
     :show-inheritance:
 
 
 Dataset
 #######
-.. automodule:: omnizart.music.dataset
+.. autoclass:: omnizart.music.app.MusicDatasetLoader
     :members:
+    :show-inheritance:
 
 
 Inference

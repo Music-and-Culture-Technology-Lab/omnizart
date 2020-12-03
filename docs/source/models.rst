@@ -33,6 +33,24 @@ Spectral Normalization Model
     :show-inheritance:
 
 
+Chord Transformer
+#################
+
+.. automodule:: omnizart.models.chord_model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Pyramid Net
+###########
+
+.. automodule:: omnizart.models.pyramid_net
+    :members:
+    :undoc-members:
+    :show-inferitance:
+
+
 Utils
 #####
 
