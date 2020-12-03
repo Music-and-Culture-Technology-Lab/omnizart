@@ -52,7 +52,30 @@ Result of drum transcription.
    </audio>
 
 
-All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
+Result of vocal transcription.
+
+.. raw:: html
+
+   <audio controls="controls">
+      <source src="_audio/high_vocal_synth.mp3" type="audio/mpeg">
+      Your browser does not support the <code>audio</code> element.
+   </audio>
+
+
+Result of vocal pitch contour transcription.
+
+.. raw:: html
+
+   <audio controls="controls">
+      <source src="_audio/high_vocal_contour.mp3" type="audio/mpeg">
+      Your browser does not support the <code>audio</code> element.
+   </audio>
+
+
+Source files can be downloaded `here <https://drive.google.com/file/d/15VqHearznV9L83cyl61ccACsXXJ4vBHo/view?usp=sharing>`_.
+You can use *Audacity* to open it.
+
+All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`_.
 
 
 .. toctree::
@@ -64,6 +87,7 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    music/cli.rst
    drum/cli.rst
    chord/cli.rst
+   vocal/cli.rst
 
 
 .. toctree::
@@ -73,6 +97,7 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    music/api.rst
    drum/api.rst
    chord/api.rst
+   vocal/api.rst
    feature.rst
    models.rst
    training.rst

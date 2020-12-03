@@ -42,6 +42,15 @@ Chord Transformer
     :show-inheritance:
 
 
+Pyramid Net
+###########
+
+.. automodule:: omnizart.models.pyramid_net
+    :members:
+    :undoc-members:
+    :show-inferitance:
+
+
 Utils
 #####
 
