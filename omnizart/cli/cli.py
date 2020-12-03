@@ -21,12 +21,13 @@ from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music
 from omnizart.cli.drum import drum
 from omnizart.cli.chord import chord
+from omnizart.cli.vocal import vocal
 from omnizart.cli.vocal_contour import vocal_contour
 from omnizart.cli.transcribe import transcribe
 
 
 SUB_COMMAND_GROUP = [
-    {"Transcription": ["music", "chord", "drum", "transcribe"]},
+    {"Transcription": ["music", "chord", "drum", "vocal", "vocal-contour", "transcribe"]},
     {"Utilities": ["download-checkpoints", "download-dataset", "synth"]}
 ]
 
@@ -202,6 +203,7 @@ def synth(input_midi, output_path, sf2_path):
 entry.add_command(music)
 entry.add_command(drum)
 entry.add_command(chord)
+entry.add_command(vocal)
 entry.add_command(vocal_contour)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)
