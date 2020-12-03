@@ -102,13 +102,17 @@ General:
                 Type: Integer
                 Value: 2
             Threshold:
-                Description: Threshold that will be applied to the predicted values.
+                Description: Threshold that will be applied to clip the predicted values to either 0 or 1.
                 Type: Float
                 Value: 0.5
             MinDuration:
                 Description: Minimum required length of each note, in seconds.
                 Type: Float
                 Value: 0.1
+            PitchModel:
+                Description: The model for predicting the pitch contour. Default to use vocal-contour modeul. Could be path or mode name.
+                Type: String
+                Value: VocalContour
     Training:
         Description: Hyper parameters for training
         Settings:

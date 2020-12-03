@@ -9,25 +9,24 @@ import h5py
 import librosa
 import numpy as np
 import tensorflow as tf
-import tensorflow_addons as tfa
 from spleeter.separator import Separator
 from spleeter.utils.logging import get_logger as sp_get_logger
 
 from omnizart.io import load_audio, write_yaml
-from omnizart.utils import get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists
+from omnizart.utils import get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader
 from omnizart.constants import datasets as d_struct
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.feature.cfp import extract_vocal_cfp, _extract_vocal_cfp
 from omnizart.setting_loaders import VocalSettings
 from omnizart.vocal import labels as lextor
 from omnizart.vocal.prediction import predict
-from omnizart.vocal.inference import infer_interval
-from omnizart.vocal_contour import app as vcapp
+from omnizart.vocal.inference import infer_interval, infer_midi
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.pyramid_net import PyramidNet
 
 
 logger = get_logger("Vocal Transcription")
+vcapp = LazyLoader("vacpp", globals(), "omnizart.vocal_contour")
 
 
 class VocalTranscription(BaseTranscription):
@@ -43,6 +42,39 @@ class VocalTranscription(BaseTranscription):
         sp_logger.setLevel(40)  # logging.ERROR
 
     def transcribe(self, input_audio, model_path=None, output="./"):
+        """Transcribe vocal notes in the audio.
+
+        This function transcribes onset, offset, and pitch of the vocal in the audio.
+        This module is reponsible for predicting onset and offset time of each note,
+        and pitches are estimated by the `vocal-contour` submodule.
+
+        Parameters
+        ----------
+        input_audio: Path
+            Path to the raw audio file (.wav).
+        model_path: Path
+            Path to the trained model or the supported transcription mode.
+        output: Path (optional)
+            Path for writing out the transcribed MIDI file. Default to the current path.
+
+        Returns
+        -------
+        midi: pretty_midi.PrettyMIDI
+            The transcribed vocal notes.
+
+        Outputs
+        -------
+        This function will outputs three files as listed below:
+
+        - <song>.mid: the MIDI file with complete transcription results in piano sondfount.
+        - <song>_f0.csv: pitch contour information of the vocal.
+        - <song>_trans.wav: the rendered pitch contour audio.
+
+        See Also
+        --------
+        omnizart.cli.vocal.transcribe: CLI entry point of this function.
+        omnizart.vocal_contour.transcribe: Pitch estimation function.
+        """
         logger.info("Separating vocal track from the audio...")
         separator = Separator('spleeter:2stems')
 
@@ -81,17 +113,20 @@ class VocalTranscription(BaseTranscription):
             t_unit=model_settings.feature.hop_size
         )
 
-        # logger.info("Extracting pitch contour")
-        # vcapp.transcribe(input_audio)
-        # basename = os.path.basename(input_audio)
-        # filename, _ = os.path.splitext(basename)
-        # contour_filename = f"{filename}_f0.txt"
-        # contour_path = jpath(os.path.dirname(input_audio), contour_filename)
-        # with open(contour_path, "r") as cin:
-        #     contour = cin.readlines()
+        logger.info("Extracting pitch contour")
+        _, agg_f0 = vcapp.app.transcribe(input_audio, model_path=model_settings.inference.pitch_model)
+
+        logger.info("Inferencing MIDI...")
+        midi = infer_midi(interval, agg_f0, t_unit=model_settings.feature.hop_size)
+
+        if output is not None:
+            if os.path.isdir(output):
+                output = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
+            midi.write(output)
+            logger.info("MIDI file has been written to %s", output)
 
         logger.info("Transcription finished")
-        return pred, interval
+        return agg_f0, interval, midi
 
     def generate_feature(self, dataset_path, vocal_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.
@@ -328,7 +363,7 @@ def _vocal_separation(wav_list, out_folder):
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
         separator = Separator('spleeter:2stems')
-        separator._params["stft_backend"] = "librosa"
+        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-acces
         for idx, wav_path in enumerate(wav_list, 1):
             logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
             separator.separate_to_file(wav_path, out_folder)
@@ -445,24 +480,3 @@ class VocalDatasetLoader(BaseDatasetLoader):
             label = np.pad(label, ((pad_left, pad_right), (0, 0)))
 
         return label  # Time x 6
-
-
-if __name__ == "__main__":
-    # pylint: disable=W0621,C0103
-
-    app = VocalTranscription()
-    tonas_train = "/data/TONAS/train_feature"
-    mir1k_train = "/data/MIR-1K/train_feature"
-    # app.generate_feature("/data/TONAS")
-    # app.generate_feature("/data/MIR-1K")
-    settings = VocalSettings()
-    settings.training.steps = 1500
-    settings.training.val_steps = 100
-    settings.training.epoch = 20
-    settings.model.shake_drop = False
-    # app.train(feature_folder=tonas_train, semi_feature_folder=mir1k_train, model_name="test", vocal_settings=settings)
-    audio = "/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav"
-    audio = "/data/omnizart/checkpoints/Ava.wav"
-    # audio = "/data/TONAS/Deblas/01-D_AMairena.wav"
-    pred, interval = app.transcribe(audio, model_path="/data/omnizart/omnizart/checkpoints/vocal/vocal_semi")
-    np.save("/data/omnizart/omnizart/test_ava.npy", pred)

@@ -48,4 +48,4 @@ def predict(feature, model, ctx_len=9, batch_size=16):
         print(f"Progress: {idx+1}/{len(batches)}", end="\r")
         batch_pred.append(model.predict(batch))
     pred = merge_batches(np.array(batch_pred))  # np.concatenate(batch_pred)
-    return pred[ctx_len:-pad_size-ctx_len]
+    return pred[ctx_len:-pad_size - ctx_len]

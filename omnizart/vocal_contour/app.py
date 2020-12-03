@@ -1,6 +1,7 @@
 # pylint: disable=C0103,W0612,E0611,W0613
 
 import os
+import csv
 from os.path import join as jpath
 from datetime import datetime
 
@@ -68,21 +69,19 @@ class VocalContourTranscription(BaseTranscription):
         )
 
         logger.info("Predicting...")
-        pred = inference(
-            feature[:, :, 0],
-            model,
-            timestep=model_settings.training.timesteps
-        )
+        pred = inference(feature[:, :, 0], model, timestep=model_settings.training.timesteps)
 
         mat_contour = get_contour(pred)
         f0 = mat_contour[:, 1].astype(float)
         timestamp = np.arange(len(f0)) * model_settings.feature.hop_size
-        wav = sonify.pitch_contour(timestamp, f0, model_settings.feature.sampling_rate)
+        wav = sonify.pitch_contour(
+            timestamp, f0, model_settings.feature.sampling_rate, amplitudes=0.5 * np.ones(len(f0))
+        )
 
         if output is not None:
             base = os.path.basename(input_audio)
             filename, ext = os.path.splitext(base)
-            f0_out = f'{filename}_f0.txt'
+            f0_out = f'{filename}_f0.csv'
             wav_trans = f'{filename}_trans.wav'
             save_to = output
             if os.path.isdir(save_to):
@@ -91,12 +90,12 @@ class VocalContourTranscription(BaseTranscription):
             else:
                 f0_save_to = f0_out
                 wav_save_to = wav_trans
-            np.savetxt(f0_save_to, f0)
+            aggregated_f0 = _write_pitch_contour(f0, f0_save_to, model_settings.feature.hop_size)
             wavwrite(wav_save_to, model_settings.feature.sampling_rate, wav)
             logger.info("Text and Wav files have been written to %s", save_to)
 
         logger.info("Transcription finished")
-        return wav
+        return f0, aggregated_f0
 
     def generate_feature(self, dataset_path, vocalcontour_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.
@@ -364,3 +363,42 @@ def get_fn_to_path(list_paths):
         fname = get_filename(path)
         fname_to_path[fname] = path
     return fname_to_path
+
+
+def _write_pitch_contour(pred, output_path, t_unit):
+    results = []
+    with open(output_path, "w", newline='') as out:
+        writer = csv.DictWriter(out, fieldnames=["start_time", "end_time", "pitch"])
+        writer.writeheader()
+
+        cur_idx = 0
+        start_idx = 0
+        last_hz = pred[0]
+        eps = 1e-6
+        while cur_idx < len(pred):
+            cur_hz = pred[cur_idx]
+            if abs(cur_hz - last_hz) < eps:
+                # Skip to the next index with different frequency.
+                last_hz = cur_hz
+                cur_idx += 1
+                continue
+
+            if last_hz < eps:
+                # Almost equals to zero. Ignored.
+                last_hz = cur_hz
+                start_idx = cur_idx
+                cur_idx += 1
+                continue
+
+            info = {
+                "start_time": round(start_idx * t_unit, 6),
+                "end_time": round(cur_idx * t_unit, 6),
+                "pitch": last_hz
+            }
+            writer.writerow(info)
+            results.append(info)
+
+            start_idx = cur_idx
+            cur_idx += 1
+            last_hz = cur_hz
+    return results

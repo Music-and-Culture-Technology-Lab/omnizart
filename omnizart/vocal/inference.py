@@ -1,4 +1,11 @@
 import numpy as np
+import pretty_midi
+from scipy.stats import norm
+
+from omnizart.utils import get_logger
+
+
+logger = get_logger("Vocal Inference")
 
 
 def _conv(seq, window):
@@ -22,9 +29,9 @@ def _find_peaks(seq, ctx_len=2, threshold=0.5):
         cur_val = seq[idx]
         if cur_val < threshold:
             continue
-        if not all(cur_val > seq[idx-ctx_len:idx]):
+        if not all(cur_val > seq[idx - ctx_len:idx]):
             continue
-        if not all(cur_val >= seq[idx+1:idx+ctx_len+1]):
+        if not all(cur_val >= seq[idx + 1:idx + ctx_len + 1]):
             continue
         peaks.append(idx)
     return peaks
@@ -154,7 +161,7 @@ def infer_interval(pred, ctx_len=2, threshold=0.5, min_dura=0.1, t_unit=0.02):
             off_id = off_peaks[off_peak_id[0]]
 
         if on_id < next_on_id < off_id \
-            and np.mean(pred[on_id:next_on_id, 1]) > np.mean(pred[on_id:next_on_id, 0]):
+                and np.mean(pred[on_id:next_on_id, 1]) > np.mean(pred[on_id:next_on_id, 0]):
             # Discard current onset, since the duration between current and
             # next onset shows an inactive status.
             on_peak_id += 1
@@ -187,10 +194,91 @@ def infer_interval(pred, ctx_len=2, threshold=0.5, min_dura=0.1, t_unit=0.02):
     return np.array(est_interval)
 
 
-if __name__ == "__main__":
-    pred = np.load("/data/omnizart/omnizart/test.npy")
-    data = np.copy(pred)
-    interval = infer_interval(pred)
-    for on, off in interval:
-        data[int(round(on*50)), :3] = 0
-        data[int(round(off*50)), 3:] = 0
+def _conclude_freq(freqs, std=2, min_count=3):
+    """Conclude the average frequency with gaussian distribution weighting.
+
+    Compute the average frequency with the given frequency list. Weighting each frequency
+    with gaussian distribution. The mean is set to the center position of the frequency
+    list, making sure that the center frequency has the highest weight. The assumption is
+    that for each note, the frequency should be the most stable and accurate at the middle
+    position.
+
+    Number of non-zero frequency should equal or greater than *min_count*, or the return
+    value will be zero, considering that there is not enough frequency information to
+    be concluded.
+    """
+    # Expect freqs contains zero
+    half_len = len(freqs) // 2
+    prob_func = lambda x: norm(0, std).pdf(x - half_len)
+    weights = [prob_func(idx) for idx in range(len(freqs))]
+    avg_freq = 0
+    count = 0
+    total_weight = 1e-8
+    for weight, freq in zip(weights, freqs):
+        if freq < 1e-6:
+            continue
+
+        avg_freq += weight * freq
+        total_weight += weight
+        count += 1
+
+    return avg_freq / total_weight if count >= min_count else 0
+
+
+def infer_midi(interval, agg_f0, t_unit=0.02):
+    """Inference the given interval and aggregated F0 to MIDI file.
+
+    Parameters
+    ----------
+    interval: list[tuple[float, float]]
+        The return value of ``infer_interval`` function.
+    agg_f0: list[dict]
+        Aggregated f0 information. Each elements in the list should contain three columns:
+        *start_time*, *end_time*, and *pitch*. Time units should be in seonds, and pitch
+        should be Hz.
+    t_unit: float
+        Time unit of each frame.
+
+    Returns
+    -------
+    midi: pretty_midi.PrettyMIDI
+        The inferred MIDI object.
+    """
+    fs = round(1 / t_unit)
+    max_secs = max(record["end_time"] for record in agg_f0)
+    total_frames = round(max_secs) * fs + 10
+    flat_f0 = np.zeros(total_frames)
+    for record in agg_f0:
+        start_idx = int(round(record["start_time"] * fs))
+        end_idx = int(round(record["end_time"] * fs))
+        flat_f0[start_idx:end_idx] = record["pitch"]
+
+    notes = []
+    drum_notes = []
+    skip_num = 0
+    for onset, offset in interval:
+        start_idx = int(round(onset * fs))
+        end_idx = int(round(offset * fs))
+        freqs = flat_f0[start_idx:end_idx]
+        avg_hz = _conclude_freq(freqs)
+        if avg_hz < 1e-6:
+            skip_num += 1
+            note = pretty_midi.Note(velocity=80, pitch=77, start=onset, end=offset)
+            drum_notes.append(note)
+            continue
+
+        note_num = int(round(pretty_midi.hz_to_note_number(avg_hz)))
+        note = pretty_midi.Note(velocity=80, pitch=note_num, start=onset, end=offset)
+        notes.append(note)
+
+    if skip_num > 0:
+        logger.warning("A total of %d notes are skipped due to lack of corressponding pitch information.", skip_num)
+
+    inst = pretty_midi.Instrument(program=0)
+    inst.notes += notes
+    drum_inst = pretty_midi.Instrument(program=1, is_drum=True, name="Missing Notes")
+    drum_inst.notes += drum_notes
+    midi = pretty_midi.PrettyMIDI()
+    midi.instruments.append(inst)
+    midi.instruments.append(drum_inst)
+    return midi

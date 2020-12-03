@@ -306,6 +306,7 @@ class VocalSettings(Settings):
             self.context_length: int = None
             self.threshold: float = None
             self.min_duration: float = None
+            self.pitch_model: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class VocalTraining:
