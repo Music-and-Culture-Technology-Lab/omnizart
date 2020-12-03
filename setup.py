@@ -8,6 +8,7 @@ packages = \
  'omnizart.cli.chord',
  'omnizart.cli.drum',
  'omnizart.cli.music',
+ 'omnizart.cli.vocal',
  'omnizart.cli.vocal_contour',
  'omnizart.constants',
  'omnizart.constants.schema',
