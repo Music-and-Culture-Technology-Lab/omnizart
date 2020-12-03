@@ -79,7 +79,7 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
 
     except (ImportError, adapter.SpleeterError) as error:
         logger.warning(
-            "Failed to load audio with Spleeter due to '%s', Continue to use Librosa." % str(error)
+            "Failed to load audio with Spleeter due to '%s', Continue to use Librosa.", str(error)
         )
         audio, fs = load_audio_with_librosa(audio_path, sampling_rate=sampling_rate, mono=mono)
         if not mono:

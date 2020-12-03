@@ -199,31 +199,6 @@ def _extract_cfp(
     down_fs=44100,
     max_sample=2000,
 ):
-    """CFP feature extraction function.
-
-    Given the audio path, returns the CFP feature.
-
-    Returns
-    -------
-    Z
-        Multiplication of spectrum and cepstrum
-    tfrL0
-        Spectrum of the audio.
-    tfrLF
-        Generalized Cepstrum of Spectrum (GCoS).
-    tfrLQ
-        Cepstrum of the audio
-    cen_freq
-        Central frequencies of the feature dimension.
-
-    References
-    ----------
-    The CFP approach was first proposed in [1]_
-
-    .. [1] L. Su and Y. Yang, "Combining Spectral and Temporal Representations for Multipitch Estimation of Polyphonic
-       Music," in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2015.
-    """
-
     if fs != down_fs:
         x = scipy.signal.resample_poly(x, down_fs, fs)
         fs = down_fs
@@ -259,9 +234,54 @@ def _extract_cfp(
 
 
 def extract_cfp(filename, down_fs=44100, **kwargs):
-    """Wrap around _extract_cfp.
+    """CFP feature extraction function.
 
-    Separate load audio from the actual CFP extraction.
+    Given the audio path, returns the CFP feature. Will automatically process
+    the feature in parallel to accelerate the computation.
+
+    Parameters
+    ----------
+    filename: Path
+        Path to the audio.
+    hop: float
+        Hop size in seconds, with regard to the sampling rate.
+    win_size: int
+        Window size.
+    fr: float
+        Frequency resolution.
+    fc: float
+        Lowest start frequency.
+    tc: float
+        Inverse number of the highest frequency bound.
+    g: list[float]
+        Power factor of the output STFT results.
+    bin_per_octave: int
+        Number of bins in each octave.
+    down_fs: int
+        Resample to this sampling rate, if the loaded audio has a different value.
+    max_sample: int
+        Maximum number of frames to be processed for each computation. Adjust to
+        a smaller number if your RAM is not enough.
+
+    Returns
+    -------
+    Z
+        Multiplication of spectrum and cepstrum
+    tfrL0
+        Spectrum of the audio.
+    tfrLF
+        Generalized Cepstrum of Spectrum (GCoS).
+    tfrLQ
+        Cepstrum of the audio
+    cen_freq
+        Central frequencies to each feature.
+
+    References
+    ----------
+    The CFP approach was first proposed in [1]_
+
+    .. [1] L. Su and Y. Yang, "Combining Spectral and Temporal Representations for Multipitch Estimation of Polyphonic
+       Music," in IEEE/ACM Transactions on Audio, Speech, and Language Processing, 2015.
     """
     logger.debug("Loading audio: %s", filename)
     x, fs = load_audio(filename, sampling_rate=down_fs)
@@ -307,6 +327,7 @@ def _extract_vocal_cfp(
 
 
 def extract_vocal_cfp(filename, down_fs=16000, **kwargs):
+    """Specialized CFP feature extraction for vocal submodule."""
     logger.debug("Loading audio: %s", filename)
     x, fs = load_audio(filename, sampling_rate=down_fs)
     logger.debug("Extracting vocal feature")
