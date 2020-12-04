@@ -23,7 +23,8 @@ References
 See Also
 ########
 
-omnizart.feature.cfp.extract_vocal_cfp: Function to extract specialized CFP feature for ``vocal``.
+``omnizart.feature.cfp.extract_vocal_cfp``:
+    Function to extract specialized CFP feature for ``vocal``.
 
 """
 from omnizart.vocal.app import VocalTranscription
