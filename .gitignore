@@ -33,6 +33,7 @@ build/
 
 # Large files
 sample_feature.hdf
+soundfonts.sf2
 
 # Spleeter's models
 pretrained_models/
@@ -40,4 +41,5 @@ pretrained_models/
 # Other files
 checkpoints/
 test.sh
-soundfonts.sf2
+*.ipynb
+*.pptx
