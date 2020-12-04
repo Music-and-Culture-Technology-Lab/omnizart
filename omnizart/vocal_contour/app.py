@@ -8,17 +8,19 @@ import numpy as np
 from scipy.io.wavfile import write as wavwrite
 import h5py
 import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 from mir_eval import sonify
 
-from omnizart.base import BaseTranscription
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import VocalContourSettings
 from omnizart.feature.wrapper_func import extract_cfp_feature
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.io import write_yaml
+from omnizart.train import train_epochs, get_train_val_feat_file_list
+from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.vocal_contour.inference import inference
-from omnizart.models.utils import get_contour
-from omnizart.constants.datasets import MIR1KStructure, _get_file_list
-from omnizart.vocal_contour.dataset_hdf import generator_audio
+from omnizart.models.utils import get_contour, padding
+from omnizart.constants.datasets import MIR1KStructure
 from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
 
@@ -137,7 +139,7 @@ class VocalContourTranscription(BaseTranscription):
         dataset_name, struct = _resolve_dataset_type(dataset_path)
 
         logger.info("Inferred dataset name: %s", dataset_name)
-        label_paths = get_train_labels(dataset_path)
+        label_paths = struct.get_train_labels(dataset_path)
 
         train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
         logger.info(
@@ -190,23 +192,21 @@ class VocalContourTranscription(BaseTranscription):
             settings.model.save_path = prev_set.model.save_path
 
         logger.info("Constructing dataset instance")
-        train_dataset = (
-            ({'input_score_48': features_48, 'input_score_12': features_12}, {'prediction': labels})
-            for (features_48, features_12, labels) in generator_audio(
-                feature_folder,
-                batch_size=settings.training.batch_size,
-                timesteps=settings.training.timesteps
-            )
-        )
-        val_dataset = (
-            ({'input_score_48': features_48, 'input_score_12': features_12}, {'prediction': labels})
-            for (features_48, features_12, labels) in generator_audio(
-                feature_folder,
-                batch_size=settings.training.val_batch_size,
-                timesteps=settings.training.timesteps,
-                phase='test'
-            )
-        )
+        split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
+        train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
+
+        output_types = (tf.float32, tf.float32)
+        train_dataset = VocalContourDatasetLoader(
+            feature_files=train_feat_files,
+            num_samples=settings.training.batch_size * settings.training.steps,
+            timesteps=settings.training.timesteps
+        ).get_dataset(settings.training.batch_size, output_types=output_types)
+
+        val_dataset = VocalContourDatasetLoader(
+            feature_files=val_feat_files,
+            num_samples=settings.training.val_batch_size * settings.training.val_steps,
+            timesteps=settings.training.timesteps
+        ).get_dataset(settings.training.val_batch_size, output_types=output_types)
 
         if input_model_path is None:
             logger.info("Constructing new model")
@@ -215,8 +215,7 @@ class VocalContourTranscription(BaseTranscription):
             model = semantic_segmentation(
                 multi_grid_layer_n=1, feature_num=384, ch_num=1, timesteps=settings.training.timesteps
             )
-
-        model.compile(optimizer="adam", loss={'prediction': focal_loss}, metrics=['accuracy'])
+        model.compile(optimizer="adam", loss=focal_loss, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
         if model_name is None:
@@ -232,22 +231,20 @@ class VocalContourTranscription(BaseTranscription):
 
         logger.info("Constructing callbacks")
         callbacks = [
-            tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            tf.keras.callbacks.ModelCheckpoint(jpath(model_save_path, "weights.h5"), save_weights_only=True)
+            EarlyStopping(patience=settings.training.early_stop),
+            ModelCheckpoint(model_save_path, save_weights_only=True)
         ]
         logger.info("Callback list: %s", callbacks)
 
         logger.info("Start training")
-        history = model.fit(
+        history = train_epochs(
+            model,
             train_dataset,
-            validation_data=val_dataset,
+            validate_dataset=val_dataset,
             epochs=settings.training.epoch,
-            steps_per_epoch=settings.training.steps,
-            validation_steps=settings.training.val_steps,
-            max_queue_size=100,
-            callbacks=callbacks,
-            use_multiprocessing=False,
-            workers=1
+            steps=settings.training.steps,
+            val_steps=settings.training.val_steps,
+            callbacks=callbacks
         )
 
         return model_save_path, history
@@ -348,6 +345,94 @@ def label_parser(label, target_data, vocal_track_list=None):
         raise NotImplementedError
 
     return score_mat
+
+
+class VocalContourDatasetLoader(BaseDatasetLoader):
+    """Feature loader for training ``vocal-contour`` model.
+
+    Load feature and label for training. Also converts the custom format of
+    label into piano roll representation.
+
+    Parameters
+    ----------
+    feature_folder: Path
+        Path to the extracted feature files, including `*.hdf` and `*.pickle` pairs,
+        which refers to feature and label files, respectively.
+    feature_files: list[Path]
+        List of path of `*.hdf` feature files. Corresponding label files should also
+        under the same folder.
+    num_samples: int
+        Total number of samples to yield.
+    timesteps: int
+        Time length of the feature.
+    channels: list[int]
+        Channels to be used for training. Allowed values are [1, 2, 3].
+    feature_num: int
+        Target input size of feature dimension. Padding zeros to the bottom and top
+        if the input feature size and target size is inconsistent.
+
+    Yields
+    ------
+    feature:
+        Input feature for training the model.
+    label:
+        Coressponding label representation.
+    """
+    def __init__(
+        self,
+        feature_folder=None,
+        feature_files=None,
+        num_samples=100,
+        timesteps=128,
+        channels=0,
+        feature_num=384
+    ):
+        super().__init__(
+            feature_folder=feature_folder, feature_files=feature_files, num_samples=num_samples, slice_hop=timesteps
+        )
+
+        self.feature_folder = feature_folder
+        self.feature_files = feature_files
+        self.num_samples = num_samples
+        self.timesteps = timesteps
+        self.channels = channels
+        self.feature_num = feature_num
+
+        self.hdf_refs = {}
+        for hdf in self.hdf_files:
+            ref = h5py.File(hdf, "r")
+            self.hdf_refs[hdf] = ref
+
+    def _get_feature(self, hdf_name, slice_start):
+        feat = self.hdf_refs[hdf_name]["feature"]
+        feat = feat[:, :, self.channels]
+        feat = padding(feat, self.feature_num, self.slice_hop)
+        feat = feat[slice_start:slice_start + self.slice_hop]
+        return feat.reshape(self.timesteps, self.feature_num, 1)
+
+    def _get_label(self, hdf_name, slice_start):
+        label = self.hdf_refs[hdf_name]["label"]
+        label = padding(label, self.feature_num, self.slice_hop)
+        label = label[slice_start:slice_start + self.slice_hop]
+        return to_categorical(label, num_classes=2)
+
+    def _pre_yield(self, feature, label):
+        feat_len = len(feature)
+        label_len = len(label)
+
+        if (feat_len == self.timesteps) and (label_len == self.timesteps):
+            # All normal
+            return feature, label
+
+        # The length of feature and label are inconsistent. Trim to the same size as the shorter one.
+        if feat_len > label_len:
+            feature = feature[:label_len]
+            feat_len = len(feature)
+        else:
+            label = label[:feat_len]
+            label_len = len(label)
+
+        return feature, label
 
 
 def get_filename(filepath):

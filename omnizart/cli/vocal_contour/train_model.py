@@ -1,5 +1,3 @@
-from functools import partial
-
 import click
 
 from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
@@ -21,8 +19,7 @@ def train_model(
     val_steps,
     batch_size,
     val_batch_size,
-    early_stop,
-    timesteps
+    early_stop
 ):
     """Train a new model or continue to train on a pre-trained model"""
     settings = VocalContourSettings()
