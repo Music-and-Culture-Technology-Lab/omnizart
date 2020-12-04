@@ -114,7 +114,7 @@ class VocalTranscription(BaseTranscription):
         )
 
         logger.info("Extracting pitch contour")
-        _, agg_f0 = vcapp.app.transcribe(input_audio, model_path=model_settings.inference.pitch_model)
+        agg_f0 = vcapp.app.transcribe(input_audio, model_path=model_settings.inference.pitch_model)
 
         logger.info("Inferencing MIDI...")
         midi = infer_midi(interval, agg_f0, t_unit=model_settings.feature.hop_size)
@@ -363,7 +363,7 @@ def _vocal_separation(wav_list, out_folder):
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
         separator = Separator('spleeter:2stems')
-        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-acces
+        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
         for idx, wav_path in enumerate(wav_list, 1):
             logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
             separator.separate_to_file(wav_path, out_folder)
