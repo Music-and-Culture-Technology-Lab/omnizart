@@ -34,6 +34,7 @@ build/
 
 # Large files
 sample_feature.hdf
+soundfonts.sf2
 
 # Spleeter's models
 pretrained_models/
@@ -42,4 +43,4 @@ pretrained_models/
 checkpoints/
 test.sh
 *.ipynb
-soundfonts.sf2
+*.pptx
