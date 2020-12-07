@@ -268,6 +268,10 @@ def infer_midi(interval, agg_f0, t_unit=0.02):
             continue
 
         note_num = int(round(pretty_midi.hz_to_note_number(avg_hz)))
+        if not (0 <= note_num <= 127):
+            logger.warning("Catched invalid note number: %d (should be in range 0~127). Skipping.", note_num)
+            skip_num += 1
+            continue
         note = pretty_midi.Note(velocity=80, pitch=note_num, start=onset, end=offset)
         notes.append(note)
 
