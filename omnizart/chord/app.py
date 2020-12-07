@@ -6,14 +6,13 @@ import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.base import BaseTranscription
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import ChordSettings
 from omnizart.io import write_yaml
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
 from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
-from omnizart.chord.dataset import get_dataset
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.chord_model import ChordModel, ReduceSlope
@@ -183,33 +182,22 @@ class ChordTranscription(BaseTranscription):
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
-        train_dataset = get_dataset(
-            feature_files=train_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.batch_size,
-            steps=settings.training.steps
-        )
-        val_dataset = get_dataset(
-            feature_files=val_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.val_batch_size,
-            steps=settings.training.val_steps
-        )
+        output_types = (tf.float32, (tf.int32, tf.int32))
+        output_shapes = ([100, 504], ([100], [100]))
+        train_dataset = McGillDatasetLoader(
+                feature_files=train_feat_files,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
+        val_dataset = McGillDatasetLoader(
+                feature_files=val_feat_files,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Constructing new model")
-            model = ChordModel(
-                out_classes=26,
-                num_enc_attn_blocks=settings.model.num_enc_attn_blocks,
-                num_dec_attn_blocks=settings.model.num_dec_attn_blocks,
-                segment_width=settings.feature.segment_width,
-                n_steps=settings.feature.num_steps,
-                freq_size=settings.model.freq_size,
-                enc_input_emb_size=settings.model.enc_input_emb_size,
-                dec_input_emb_size=settings.model.dec_input_emb_size,
-                dropout_rate=settings.model.dropout_rate,
-                annealing_rate=settings.model.annealing_rate
-            )
+            model = self.get_model(settings)
 
         learninig_rate = tf.keras.optimizers.schedules.ExponentialDecay(
             settings.training.init_learning_rate,
@@ -248,11 +236,14 @@ class ChordTranscription(BaseTranscription):
         )
         return history
 
-    def _load_model(self, model_path=None, custom_objects=None):
-        _, weight_path, conf_path = self._resolve_model_path(model_path)
-        weight_path = weight_path.replace(".h5", "")
-        settings = self.setting_class(conf_path=conf_path)
-        model = ChordModel(
+    def get_model(self, settings):
+        """Get the chord model.
+
+        More comprehensive reasons to having this method, please refer to
+        ``omnizart.base.BaseTranscription.get_model``.
+        """
+        return ChordModel(
+            out_classes=26,
             num_enc_attn_blocks=settings.model.num_enc_attn_blocks,
             num_dec_attn_blocks=settings.model.num_dec_attn_blocks,
             segment_width=settings.feature.segment_width,
@@ -263,16 +254,6 @@ class ChordTranscription(BaseTranscription):
             dropout_rate=settings.model.dropout_rate,
             annealing_rate=settings.model.annealing_rate
         )
-
-        try:
-            model.load_weights(weight_path).expect_partial()
-        except tf.python.framework.errors_impl.OpError:
-            raise FileNotFoundError(
-                f"Weight file not found: {weight_path}. Perhaps not yet downloaded?\n"
-                "Try execute 'omnizart download-checkpoints'"
-            )
-
-        return model, settings
 
 
 def _extract_feature_arg_wrapper(input_tup, **kwargs):
@@ -286,6 +267,37 @@ def _write_feature(feature, out_path):
             data = np.concatenate([feat[key] for feat in feature])
             out_hdf.create_dataset(key, data=data, compression="gzip", compression_opts=3)
         out_hdf.create_dataset("num_sequence", data=feature[0]["num_sequence"])
+
+
+class McGillDatasetLoader(BaseDatasetLoader):
+    """McGill BillBoard dataset loader.
+
+    The feature column name stored in the .hdf files is slightly different from
+    others, which the name is ``chroma``, not ``feature``.
+    Also the returned label should be a tuple of two different ground-truth labels
+    to fit the training scenario.
+
+    Yields
+    ------
+    feature:
+        Input feature for training the model.
+    label: tuple
+        gt_chord -> Ground-truth chord label.
+        gt_chord_change -> Ground-truth chord change label.
+    """
+    def __init__(self, feature_folder=None, feature_files=None, num_samples=100, slice_hop=1):
+        super().__init__(
+            feature_folder=feature_folder,
+            feature_files=feature_files,
+            num_samples=num_samples,
+            slice_hop=slice_hop,
+            feat_col_name="chroma"
+        )
+
+    def _get_label(self, hdf_name, slice_start):
+        gt_chord = self.hdf_refs[hdf_name]["chord"][slice_start:slice_start + self.slice_hop].squeeze()
+        gt_chord_change = self.hdf_refs[hdf_name]["chord_change"][slice_start:slice_start + self.slice_hop].squeeze()
+        return gt_chord, gt_chord_change
 
 
 def chord_loss_func(

@@ -6,16 +6,17 @@ from datetime import datetime
 import asyncio
 
 import h5py
+import numpy as np
 import tensorflow as tf
 
 from omnizart.feature.wrapper_func import extract_patch_cqt
 from omnizart.drum.prediction import predict
 from omnizart.drum.labels import extract_label_13_inst
-from omnizart.drum.dataset import get_dataset
 from omnizart.drum.inference import inference
 from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, write_yaml
-from omnizart.base import BaseTranscription
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
+from omnizart.io import write_yaml
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import DrumSettings
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.constants.datasets import PopStructure
@@ -126,26 +127,22 @@ class DrumTranscription(BaseTranscription):
         logger.info("Output testing feature to %s", test_feat_out_path)
 
         struct = PopStructure
-        train_wavs = struct.get_train_wavs(dataset_path=dataset_path)
-        train_labels = struct.get_train_labels(dataset_path=dataset_path)
+        train_data_pair = struct.get_train_data_pair(dataset_path=dataset_path)
         logger.info(
             "Start extract training feature of the dataset. "
             "This may take time to finish and affect the computer's performance"
         )
-        assert len(train_wavs) == len(train_labels)
         _parallel_feature_extraction_v2(
-            train_wavs, train_labels, train_feat_out_path, settings.feature, num_threads=num_threads
+            train_data_pair, train_feat_out_path, settings.feature, num_threads=num_threads
         )
 
-        test_wavs = struct.get_test_wavs(dataset_path=dataset_path)
-        test_labels = struct.get_test_labels(dataset_path=dataset_path)
+        test_data_pair = struct.get_test_data_pair(dataset_path=dataset_path)
         logger.info(
             "Start extract testing feature of the dataset. "
             "This may take time to finish and affect the computer's performance"
         )
-        assert len(test_wavs) == len(test_labels)
         _parallel_feature_extraction_v2(
-            test_wavs, test_labels, test_feat_out_path, settings.feature, num_threads=num_threads
+            test_data_pair, test_feat_out_path, settings.feature, num_threads=num_threads
         )
 
         # Writing out the settings
@@ -183,18 +180,19 @@ class DrumTranscription(BaseTranscription):
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
-        train_dataset = get_dataset(
-            feature_files=train_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.batch_size,
-            steps=settings.training.steps
-        )
-        val_dataset = get_dataset(
-            feature_files=val_feat_files,
-            epochs=settings.training.epoch,
-            batch_size=settings.training.val_batch_size,
-            steps=settings.training.val_steps
-        )
+
+        output_types = (tf.float32, tf.float32)
+        output_shapes = ([120, 120, 4], [4, 13])
+        train_dataset = PopDatasetLoader(
+                feature_files=train_feat_files,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
+        val_dataset = PopDatasetLoader(
+                feature_files=val_feat_files,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+            ) \
+            .get_dataset(settings.training.val_batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Constructing new model")
@@ -228,7 +226,7 @@ class DrumTranscription(BaseTranscription):
         logger.info("Start training")
         history = model.fit(
             train_dataset,
-            validate_data=val_dataset,
+            validation_data=val_dataset,
             epochs=settings.training.epoch,
             steps_per_epoch=settings.training.steps,
             validation_steps=settings.training.val_steps,
@@ -282,24 +280,23 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings
     print("")
 
 
-def _parallel_feature_extraction_v2(wav_paths, label_paths, out_path, feat_settings, num_threads=5):
-    iter_num = len(wav_paths) / num_threads
+def _parallel_feature_extraction_v2(data_pair, out_path, feat_settings, num_threads=5):
+    iter_num = len(data_pair) / num_threads
     if int(iter_num) < iter_num:
         iter_num += 1
     iter_num = int(iter_num)
 
-    label_path_mapping = _gen_wav_label_path_mapping(label_paths)
     for iter_idx in range(iter_num):
         loop = asyncio.get_event_loop()
         tasks = []
         for chunk in range(num_threads):
             wav_idx = num_threads*iter_idx + chunk  # noqa: E226
-            if wav_idx >= len(wav_paths):
+            if wav_idx >= len(data_pair):
                 break
-            logger.info("%s/%s - %s", wav_idx+1, len(wav_paths), wav_paths[wav_idx])  # noqa: E226
+            logger.info("%s/%s - %s", wav_idx+1, len(data_pair), data_pair[wav_idx][0])  # noqa: E226
             tasks.append(
                 loop.create_task(_async_all_in_one_extract(
-                    wav_paths[wav_idx], label_path_mapping, feat_settings
+                    data_pair[wav_idx][0], data_pair[wav_idx][1], feat_settings
                 ))
             )
 
@@ -318,20 +315,18 @@ def _parallel_feature_extraction_v2(wav_paths, label_paths, out_path, feat_setti
                 out_f.create_dataset("mini_beat_arr", data=m_beat_arr, compression="gzip", compression_opts=3)
 
 
-async def _async_all_in_one_extract(wav_path, label_path_mapping, feat_settings):
+async def _async_all_in_one_extract(wav_path, label_path, feat_settings):
     loop = asyncio.get_event_loop()
     patch_cqt, m_beat_arr, label_128, label_13 = await loop.run_in_executor(
-        None, _all_in_one_extract, wav_path, label_path_mapping, feat_settings
+        None, _all_in_one_extract, wav_path, label_path, feat_settings
     )
     return patch_cqt, m_beat_arr, label_128, label_13, wav_path
 
 
-def _all_in_one_extract(wav_path, label_path_mapping, feat_settings):
+def _all_in_one_extract(wav_path, label_path, feat_settings):
     patch_cqt, m_beat_arr = extract_patch_cqt(
         wav_path, sampling_rate=feat_settings.sampling_rate, hop_size=feat_settings.hop_size
     )
-
-    label_path = label_path_mapping[os.path.basename(wav_path)]
     label_128, label_13 = extract_label_13_inst(label_path, m_beat_arr)
     return patch_cqt, m_beat_arr, label_128, label_13
 
@@ -343,6 +338,26 @@ def _gen_wav_label_path_mapping(label_paths):
         wav_name = f_name.replace("align_mid", "ytd_audio")
         mapping[wav_name] = label_path
     return mapping
+
+
+class PopDatasetLoader(BaseDatasetLoader):
+    """Pop dataset loader for training drum model."""
+    def __init__(self, mini_beat_per_seg=4, feature_folder=None, feature_files=None, num_samples=100, slice_hop=1):
+        super().__init__(
+            feature_folder=feature_folder,
+            feature_files=feature_files,
+            num_samples=num_samples,
+            slice_hop=slice_hop
+        )
+        self.mini_beat_per_seg = mini_beat_per_seg
+
+    def _get_feature(self, hdf_name, slice_start):
+        feat = self.hdf_refs[hdf_name]["feature"][slice_start:slice_start + self.mini_beat_per_seg].squeeze()
+        return np.transpose(feat, axes=[1, 2, 0])  # dim: 120 x 120 x mini_beat_per_seg
+
+    def _get_label(self, hdf_name, slice_start):
+        label = self.hdf_refs["label"][slice_start:slice_start + self.mini_beat_per_seg].squeeze()
+        return label.T  # dim: 13 x mini_beat_per_seg
 
 
 def loss_func(target, pred, soft_loss_range=20):

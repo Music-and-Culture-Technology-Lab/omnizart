@@ -1,6 +1,7 @@
 # pylint: disable=C0303,W1401
 import click
 
+from omnizart.cli import silence_tensorflow
 from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
 from omnizart.utils import LazyLoader
 
@@ -25,6 +26,7 @@ def transcribe(input_audio, model_path, output):
         --model-path path/to/model \ 
         --output example.mid
     """
+    silence_tensorflow()
     music.app.transcribe(input_audio, model_path, output=output)
 
 

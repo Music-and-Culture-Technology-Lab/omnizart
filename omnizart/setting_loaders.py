@@ -210,40 +210,40 @@ class ChordSettings(Settings):
 
 
 @json_serializable(key_path="./General", value_path="./Value")
-class VocalFrameSettings(Settings):
+class VocalContourSettings(Settings):
     default_setting_file: str = "vocal_contour.yaml"
 
     def __init__(self, conf_path=None):
         self.transcription_mode: str = None
         self.checkpoint_path: str = None
-        self.feature = self.VocalFrameFeature()
-        self.dataset = self.VocalFrameDatasetset()
-        self.model = self.VocalFrameModel()
-        self.training = self.VocalFrameTraining()
+        self.feature = self.VocalContourFeature()
+        self.dataset = self.VocalContourDataset()
+        self.model = self.VocalContourModel()
+        self.training = self.VocalContourTraining()
 
         super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameFeature():
+    class VocalContourFeature():
         def __init__(self):
             self.hop_size: float = None
             self.sampling_rate: int = None
             self.window_size: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameDatasetset():
+    class VocalContourDataset():
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameModel():
+    class VocalContourModel():
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class VocalFrameTraining():
+    class VocalContourTraining():
         def __init__(self):
             self.epoch: int = None
             self.early_stop: int = None
@@ -290,6 +290,14 @@ class VocalSettings(Settings):
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
+            self.min_kernel_size: int = None
+            self.depth: int = None
+            self.shake_drop: bool = True
+            self.alpha: int = None
+            self.semi_loss_weight: float = None
+            self.semi_xi: float = None
+            self.semi_epsilon: float = None
+            self.semi_iterations: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class VocalTraining():
@@ -301,3 +309,4 @@ class VocalSettings(Settings):
             self.val_batch_size: int = None
             self.early_stop: int = None
             self.init_learning_rate: float = None
+            self.context_length: int = None

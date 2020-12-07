@@ -281,10 +281,6 @@ def synth_midi(midi_path, output_path, sampling_rate=44100, sf2_path=SOUNDFONT_P
     wave.write(output_path, sampling_rate, raw_wav)
 
 
-def midi2freq(midi_number):
-    return 2 ** ((midi_number - 69) / 12) * 440
-
-
 def resolve_dataset_type(dataset_path, keywords):
     low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
     d_type = [val for key, val in keywords.items() if key in low_path]
