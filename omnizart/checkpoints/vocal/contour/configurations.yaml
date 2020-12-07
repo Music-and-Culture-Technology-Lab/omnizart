@@ -1,0 +1,42 @@
+General:
+  TranscriptionMode:
+    Value: VocalContour
+  CheckpointPath:
+    Value:
+      VocalContour: checkpoints/vocal/contour
+  Dataset:
+    Settings:
+      FeatureSavePath:
+        Value: +
+      SavePath:
+        Value: ./
+  Feature:
+    Settings:
+      HopSize:
+        Value: 0.02
+      SamplingRate:
+        Value: 16000
+      WindowSize:
+        Value: 2049
+  Model:
+    Settings:
+      SavePath:
+        Value: ./checkpoints/vocal_frame
+      SavePrefix:
+        Value: vocal-frame
+  Training:
+    Settings:
+      BatchSize:
+        Value: 12
+      EarlyStop:
+        Value: 3
+      Epoch:
+        Value: 5
+      Steps:
+        Value: 6000
+      Timesteps:
+        Value: 128
+      ValBatchSize:
+        Value: 12
+      ValSteps:
+        Value: 200

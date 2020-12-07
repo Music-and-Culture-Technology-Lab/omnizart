@@ -24,6 +24,7 @@ htmlcov/
 # Transcription results
 *.mid
 *.csv
+*.txt
 
 # Built files
 dist/

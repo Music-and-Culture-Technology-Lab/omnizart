@@ -32,7 +32,7 @@ class BaseStructure:
     label_ext = None
 
     train_wavs = None
-    """Records folders that contains trainig wav files.
+    """Record folders that contain trainig wav files.
 
     The path to sub-folders should be the relative path to root folder of the dataset.
 
@@ -46,20 +46,20 @@ class BaseStructure:
     |  └── MAPS_AkPnBcht_2
     |      └── AkPnBcht
 
-    Where ``AkPnCGdD`` and ``AkPnBcht`` are the folders store the wav files.
-    The function should return a list like:
+    where ``AkPnCGdD`` and ``AkPnBcht`` are the folders that store the wav files.
+    The function should then return a list like:
 
     |  >>> ['MAPS_AkPnCGdD_2/AkPnCGdD', 'MAPS_AkPnBcht_2/AkPnBcht']
     """
 
     test_wavs = None
-    """Records folders that contains testing wav files.
+    """Record folders that contain testing wav files.
 
     Same as what `train_wavs` does, but for testing wav files.
     """
 
     train_labels = None
-    """Records folders that contains training labels.
+    """Record folders that contains training labels.
 
     Similar to the `train_wavs` function, records information of where the corresponding
     ground-truth files are stored.

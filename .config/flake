@@ -5,6 +5,7 @@ ignore = E731
 per-file-ignores = 
     omnizart/cli/music/transcribe.py: W605,W291 \
     omnizart/cli/drum/transcribe.py: W605,W291 \
+    omnizart/cli/vocal_contour/transcribe.py: W605,W291 \
     omnizart/cli/transcribe.py: W605,W291 \
     omnizart/feature/cfp.py: E226 \
     omnizart/constants/feature.py: E266 \
