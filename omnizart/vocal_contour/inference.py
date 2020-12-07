@@ -1,5 +1,5 @@
 import numpy as np
-import tqdm
+from scipy.special import expit
 
 from omnizart.models.utils import padding
 
@@ -29,7 +29,8 @@ def inference(feature, model, timestep=128, batch_size=10, feature_num=384):
 
     iter_num = int(np.ceil(((len(f_48_s) - timestep) / batch_size)))
 
-    for i in tqdm.tqdm(range(iter_num)):
+    for i in range(1, iter_num + 1):
+        print("batch: {}/{}".format(i, iter_num), end="\r")
         time_index = i * batch_size
         probs = generation_prog(
             model, f_48_s,
@@ -37,7 +38,7 @@ def inference(feature, model, timestep=128, batch_size=10, feature_num=384):
             timesteps=timestep,
             batch_size=batch_size
         )
-        probs = 1 / (1 + np.exp(-probs))
+        probs = 1 / (1 + np.exp(-expit(probs)))
         extract_result_seg[time_index:time_index + batch_size] = probs
 
     for i in range(len(f_48_s) - timestep):

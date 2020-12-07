@@ -36,34 +36,32 @@ def get_contour(pred):
     return output
 
 
-def padding(x, feature_num, timesteps, dimension=False):
+def padding(feature, feature_num, timesteps, dimension=False):
 
-    extended_chorale = np.array(x)
+    f_len = len(feature)
 
-    if ((feature_num - x.shape[1]) % 2) == 0:
-        p_t = (feature_num - x.shape[1]) // 2
-        p_b = p_t
+    if ((feature_num - feature.shape[1]) % 2) == 0:
+        pad_top = (feature_num - feature.shape[1]) // 2
+        pad_bottom = pad_top
     else:
-        p_t = (feature_num - x.shape[1]) // 2
-        p_b = p_t + 1
+        pad_top = (feature_num - feature.shape[1]) // 2
+        pad_bottom = pad_top + 1
 
-    top = np.zeros((len(extended_chorale), p_t))
-    bottom = np.zeros((len(extended_chorale), p_b))
-    extended_chorale = np.concatenate([top, extended_chorale, bottom], axis=1)
+    pbb = np.zeros((f_len, pad_bottom))
+    ptt = np.zeros((f_len, pad_top))
+    feature = np.hstack([ptt, feature, pbb])
 
-    padding_dimensions = (timesteps,) + extended_chorale.shape[1:]
+    padding_dimensions = (timesteps,) + feature.shape[1:]
 
     padding_start = np.zeros(padding_dimensions)
     padding_end = np.zeros(padding_dimensions)
 
-    padding_start[:, :p_t] = 1
-    padding_end[:, -p_b:] = 1
+    padding_start[:, :pad_top] = 1
+    padding_end[:, -pad_bottom:] = 1
 
-    extended_chorale = np.concatenate(
-        (padding_start, extended_chorale, padding_end), axis=0
-    )
+    feature = np.vstack([padding_start, feature, padding_end])
 
     if dimension:
-        return extended_chorale, p_t, p_b
+        return feature, pad_top, pad_bottom
 
-    return extended_chorale
+    return feature
