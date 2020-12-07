@@ -64,6 +64,7 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    music/cli.rst
    drum/cli.rst
    chord/cli.rst
+   vocal-contour/cli.rst
 
 
 .. toctree::
@@ -73,6 +74,7 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    music/api.rst
    drum/api.rst
    chord/api.rst
+   vocal-contour/api.rst
    feature.rst
    models.rst
    training.rst
