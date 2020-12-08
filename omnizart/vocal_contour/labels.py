@@ -2,6 +2,7 @@ import csv
 import abc
 
 import numpy as np
+from librosa.core import hz_to_midi
 
 from omnizart.base import Label
 from omnizart.constants.midi import LOWEST_MIDI_NOTE
@@ -39,9 +40,9 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         max_time = max(label.end_time for label in labels)
         output = np.zeros((round(max_time * fs), 352))
         for label in labels:
-            start_idx = label.start_time * fs
-            end_idx = label.end_time * fs
-            pitch = (label.note - LOWEST_MIDI_NOTE) * 4
+            start_idx = round(label.start_time * fs)
+            end_idx = round(label.end_time * fs)
+            pitch = round((label.note - LOWEST_MIDI_NOTE) * 4)
             output[start_idx:end_idx, pitch] = 1
         return output
 
@@ -61,4 +62,24 @@ class MIR1KlabelExtraction(BaseLabelExtraction):
             start_t = 0.01 * idx + 0.02  # The first frame starts from 20ms.
             end_t = start_t + 0.01
             labels.append(Label(start_time=start_t, end_time=end_t, note=note))
+        return labels
+
+
+class MedleyDBLabelExtraction(BaseLabelExtraction):
+    @classmethod
+    def load_label(cls, label_path):
+        with open(label_path, "r") as fin:
+            lines = fin.readlines()
+
+        labels = []
+        t_unit = 256 / 44100  # ~= 0.0058 secs
+        for line in lines:
+            elems = line.strip().split(",")
+            sec, hz = float(elems[0]), float(elems[1])
+            note = float(hz_to_midi(hz))  # Convert return type of np.float64 to float
+            if note < LOWEST_MIDI_NOTE:
+                continue
+            end_t = sec + t_unit
+            labels.append(Label(start_time=sec, end_time=end_t, note=note))
+
         return labels
