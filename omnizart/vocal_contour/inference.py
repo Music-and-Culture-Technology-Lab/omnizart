@@ -4,16 +4,16 @@ from scipy.special import expit
 from omnizart.models.utils import padding
 
 
-def generation_prog(model, score_48, time_index, timesteps, batch_size):
+def predict(model, score_48, time_index, timesteps, batch_size):
 
     feature_48 = score_48[time_index:time_index + batch_size, :, :]
     feature_48 = np.reshape(feature_48, (batch_size, timesteps, 384, 1))
 
     input_features = {'input_score_48': feature_48}
 
-    probas = model.predict(input_features, batch_size=batch_size)
+    prediction = model.predict(input_features, batch_size=batch_size)
 
-    return probas
+    return prediction
 
 
 def inference(feature, model, timestep=128, batch_size=10, feature_num=384):
@@ -32,11 +32,8 @@ def inference(feature, model, timestep=128, batch_size=10, feature_num=384):
     for i in range(1, iter_num + 1):
         print("batch: {}/{}".format(i, iter_num), end="\r")
         time_index = i * batch_size
-        probs = generation_prog(
-            model, f_48_s,
-            time_index=time_index,
-            timesteps=timestep,
-            batch_size=batch_size
+        probs = predict(
+            model, f_48_s, time_index=time_index, timesteps=timestep, batch_size=batch_size
         )
         probs = 1 / (1 + np.exp(-expit(probs)))
         extract_result_seg[time_index:time_index + batch_size] = probs
