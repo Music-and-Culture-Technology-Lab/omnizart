@@ -216,6 +216,51 @@ class ChordSettings(Settings):
 
 
 @json_serializable(key_path="./General", value_path="./Value")
+class VocalContourSettings(Settings):
+    default_setting_file: str = "vocal_contour.yaml"
+
+    def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
+        self.checkpoint_path: str = None
+        self.feature = self.VocalContourFeature()
+        self.dataset = self.VocalContourDataset()
+        self.model = self.VocalContourModel()
+        self.training = self.VocalContourTraining()
+
+        super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalContourFeature():
+        def __init__(self):
+            self.hop_size: float = None
+            self.sampling_rate: int = None
+            self.window_size: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalContourDataset():
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalContourModel():
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class VocalContourTraining():
+        def __init__(self):
+            self.epoch: int = None
+            self.early_stop: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.timesteps: int = None
+
+
+@json_serializable(key_path="./General", value_path="./Value")
 class VocalSettings(Settings):
     default_setting_file: str = "vocal.yaml"
 

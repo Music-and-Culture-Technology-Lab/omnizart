@@ -229,7 +229,7 @@ class BaseDatasetLoader:
             self.hdf_files = feature_files
 
         if len(self.hdf_files) == 0:
-            logger.warning("Warning! No feature files found in the given path")
+            logger.warning("Warning! No feature file was found in the given path.")
 
         self.slice_hop = slice_hop
         self.feat_col_name = feat_col_name
