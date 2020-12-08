@@ -19,9 +19,9 @@ from omnizart.io import write_yaml
 from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.vocal_contour.inference import inference
-from omnizart.vocal_contour.labels import MIR1KlabelExtraction
+from omnizart.vocal_contour import labels as lextor
 from omnizart.models.utils import get_contour, padding
-from omnizart.constants.datasets import MIR1KStructure
+from omnizart.constants import datasets as d_struct
 from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
 
@@ -139,7 +139,7 @@ class VocalContourTranscription(BaseTranscription):
         # Resolve dataset type (TODO: Implement MedleyDB)
         dataset_type = resolve_dataset_type(
             dataset_path,
-            keywords={"MIR-1K": "mir1k", "MIR1K": "mir1k", "MedleyDB": "medlydb"}
+            keywords={"MIR-1K": "mir1k", "MIR1K": "mir1k", "MedleyDB": "medleydb"}
         )
         if dataset_type is None:
             logger.warning(
@@ -150,10 +150,12 @@ class VocalContourTranscription(BaseTranscription):
 
         logger.info("Inferred dataset type: %s", dataset_type)
         struct = {
-            "mir1k": MIR1KStructure
+            "mir1k": d_struct.MIR1KStructure,
+            "medleydb": d_struct.MedleyDBStructure
         }[dataset_type]
-        lextor = {
-            "mir1k": MIR1KlabelExtraction
+        label_extractor = {
+            "mir1k": lextor.MIR1KlabelExtraction,
+            "medleydb": lextor.MedleyDBLabelExtraction
         }[dataset_type]
 
         train_data_pair = struct.get_train_data_pair(dataset_path=dataset_path)
@@ -162,7 +164,7 @@ class VocalContourTranscription(BaseTranscription):
             "This may take time to finish and affect the computer's performance"
         )
         _parallel_feature_extraction(
-            train_data_pair, train_feat_out_path, lextor, settings.feature, num_threads=num_threads
+            train_data_pair, train_feat_out_path, label_extractor, settings.feature, num_threads=num_threads
         )
 
         test_data_pair = struct.get_test_data_pair(dataset_path=dataset_path)
@@ -171,7 +173,7 @@ class VocalContourTranscription(BaseTranscription):
             "This may take time to finish and affect the computer's performance"
         )
         _parallel_feature_extraction(
-            test_data_pair, test_feat_out_path, lextor, settings.feature, num_threads=num_threads
+            test_data_pair, test_feat_out_path, label_extractor, settings.feature, num_threads=num_threads
         )
 
         # Writing out the settings
@@ -265,20 +267,10 @@ class VocalContourTranscription(BaseTranscription):
         return model_save_path, history
 
 
-def _resolve_dataset_type(dataset_path):
-    if not os.path.isdir(dataset_path):
-        raise FileNotFoundError(f"The given dataset directory does not exist. Path: {dataset_path}")
-
-    low_path = os.path.basename(os.path.abspath(dataset_path)).lower()
-
-    msg = "vocal_contour only accepts MIR-1K and MedleyDB as the training data."
-    assert low_path in ['mir-1k', 'medleydb'], msg
-    if low_path == 'medleydb':
-        raise NotImplementedError("Using MedleyDB as the training data is no implemented yet.")
-
-    target_dataset = MIR1KStructure
-
-    return low_path, target_dataset
+def _all_in_one_extract(data_pair, label_extractor, t_unit, **kwargs):
+    feat = extract_cfp_feature(data_pair[0], **kwargs)
+    label = label_extractor.extract_label(data_pair[1], t_unit=t_unit)
+    return feat, label
 
 
 def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_settings, num_threads=4):
@@ -288,25 +280,23 @@ def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_sett
         "win_size": feat_settings.window_size
     }
 
-    wav_paths = [data[0] for data in data_pair]
     iters = enumerate(
         parallel_generator(
-            extract_cfp_feature,
-            wav_paths,
+            _all_in_one_extract,
+            data_pair,
             max_workers=num_threads,
             use_thread=True,
             chunk_size=num_threads,
+            label_extractor=label_extractor,
+            t_unit=feat_settings.hop_size,
             **feat_extract_params
         )
     )
 
-    for idx, (feature, audio_idx) in iters:
+    for idx, ((feature, label), audio_idx) in iters:
         audio = data_pair[audio_idx][0]
-        label_path = data_pair[audio_idx][1]
 
-        print(f"Progress: {idx+1}/{len(wav_paths)} - {audio}" + " "*6, end="\r")  # noqa: E226
-
-        label = label_extractor.extract_label(label_path)
+        print(f"Progress: {idx+1}/{len(data_pair)} - {audio}" + " "*6, end="\r")  # noqa: E226
 
         filename, _ = os.path.splitext(os.path.basename(audio))
         out_hdf = jpath(out_path, filename + ".hdf")
@@ -326,24 +316,6 @@ def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_sett
             logger.error("H5py failed to save the feature file after %d retries.", retry_times)
             raise OSError
     print("")
-
-
-# Brought from the original repo
-# https://github.com/s603122001/Vocal-Melody-Extraction/blob/master/project/dataset_manage.py#L58
-def label_parser(label, target_data, vocal_track_list=None):
-    # parser label for mir1k
-    if target_data == 'mir-1k':
-        score = np.loadtxt(label)
-        score_mat = np.zeros((len(score), 352))
-        for i in range(score_mat.shape[0]):
-            n = score[i]
-            if n != 0:
-                score_mat[i, int(np.round((score[i] - 21) * 4))] = 1
-    # parser label for medleydb
-    else:
-        raise NotImplementedError
-
-    return score_mat
 
 
 class VocalContourDatasetLoader(BaseDatasetLoader):
