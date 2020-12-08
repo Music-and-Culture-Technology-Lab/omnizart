@@ -1,9 +1,34 @@
-"""Information about directory structure of each dataset."""
+"""Information about each dataset.
+
+Supports an easy way to deal with complex folder structure of different
+datasets in a consice interface.
+Partial support for downloading public datasets.
+
+Complete information of supported datasets are as following:
+
++-----------+--------------+-----------+--------------+
+| Dataset   | Downloadable | Dataset   | Downloadable |
++===========+==============+===========+==============+
+| Maps      |              | BPS-FH    | O            |
++-----------+--------------+-----------+--------------+
+| MusicNet  | O            | MIR-1K    | O            |
++-----------+--------------+-----------+--------------+
+| Maestro   | O            | CMedia    |              |
++-----------+--------------+-----------+--------------+
+| Pop       |              | Tonas     |              |
++-----------+--------------+-----------+--------------+
+| Ext-Su    | O            | MedleyDB  |              |
++-----------+--------------+-----------+--------------+
+| BillBoard | O            |           |              |
++-----------+--------------+-----------+--------------+
+
+"""
 # pylint: disable=C0112
 import os
 import glob
 from shutil import copy
 
+from omnizart.io import load_yaml
 from omnizart.utils import ensure_path_exists, get_logger
 from omnizart.remote import download_large_file_from_google_drive
 
@@ -98,6 +123,7 @@ class BaseStructure:
 
     @classmethod
     def _name_transform(cls, basename):
+        # Transform the basename of wav file to the corressponding label file name.
         return basename
 
     @classmethod
@@ -400,3 +426,160 @@ class TonasStructure(BaseStructure):
 
     #: Folder to test labels
     test_labels = []
+
+
+class MedleyDBStructure(BaseStructure):
+    """Constant settings of MedleyDB dataset.
+
+    Notice here that current design of the structure is for getting
+    vocal melody ground-truth files only. All other tracks are ignored
+    when calling to ``get_train_data_pair`` or ``get_test_data_pair``.
+    """
+    #: Folder to train wavs
+    train_wavs = [
+        'Audio/AClassicEducation_NightOwl', 'Audio/AimeeNorwich_Child', 'Audio/AimeeNorwich_Flying',
+        'Audio/AlexanderRoss_GoodbyeBolero', 'Audio/AlexanderRoss_VelvetCurtain', 'Audio/AmarLal_Rest',
+        'Audio/AmarLal_SpringDay1', 'Audio/Auctioneer_OurFutureFaces', 'Audio/AvaLuna_Waterduct',
+        'Audio/BigTroubles_Phantom', 'Audio/BrandonWebster_DontHearAThing', 'Audio/BrandonWebster_YesSirICanFly',
+        'Audio/CelestialShore_DieForUs', 'Audio/ChrisJacoby_BoothShotLincoln',
+        'Audio/ClaraBerryAndWooldog_Boys', 'Audio/ClaraBerryAndWooldog_Stella',
+        'Audio/ClaraBerryAndWooldog_TheBadGuys', 'Audio/ClaraBerryAndWooldog_WaltzForMyVictims',
+        'Audio/Creepoid_OldTree', 'Audio/CroqueMadame_Oil', 'Audio/CroqueMadame_Pilot',
+        'Audio/Debussy_LenfantProdigue', 'Audio/DreamersOfTheGhetto_HeavyLove',
+        'Audio/EthanHein_1930sSynthAndUprightBass', 'Audio/EthanHein_BluesForNofi', 'Audio/EthanHein_GirlOnABridge',
+        'Audio/EthanHein_HarmonicaFigure', 'Audio/FamilyBand_Again', 'Audio/Grants_PunchDrunk',
+        'Audio/Handel_TornamiAVagheggiar', 'Audio/HeladoNegro_MitadDelMundo', 'Audio/HezekiahJones_BorrowedHeart',
+        'Audio/HopAlong_SisterCities', 'Audio/InvisibleFamiliars_DisturbingWildlife',
+        'Audio/JoelHelander_ExcessiveResistancetoChange', 'Audio/JoelHelander_IntheAtticBedroom',
+        'Audio/KarimDouaidy_Hopscotch', 'Audio/KarimDouaidy_Yatora', 'Audio/LizNelson_Coldwar',
+        'Audio/LizNelson_ImComingHome', 'Audio/LizNelson_Rainfall', 'Audio/MatthewEntwistle_AnEveningWithOliver',
+        'Audio/MatthewEntwistle_DontYouEver', 'Audio/MatthewEntwistle_FairerHopes',
+        'Audio/MatthewEntwistle_ImpressionsOfSaturn', 'Audio/MatthewEntwistle_Lontano',
+        'Audio/MatthewEntwistle_TheFlaxenField', 'Audio/Meaxic_TakeAStep', 'Audio/Meaxic_YouListen',
+        'Audio/MichaelKropf_AllGoodThings', 'Audio/Mozart_BesterJungling', 'Audio/Mozart_DiesBildnis',
+        'Audio/MusicDelta_80sRock', 'Audio/MusicDelta_Beatles', 'Audio/MusicDelta_BebopJazz',
+        'Audio/ChrisJacoby_PigsFoot', 'Audio/FacesOnFilm_WaitingForGa', 'Audio/Lushlife_ToynbeeSuite',
+        'Audio/MusicDelta_Beethoven', 'Audio/MusicDelta_Grunge', 'Audio/Phoenix_BrokenPledgeChicagoReel',
+        'Audio/MusicDelta_Britpop', 'Audio/MusicDelta_ChineseChaoZhou', 'Audio/MusicDelta_ChineseDrama',
+        'Audio/MusicDelta_ChineseHenan', 'Audio/MusicDelta_ChineseJiangNan', 'Audio/MusicDelta_ChineseXinJing',
+        'Audio/MusicDelta_ChineseYaoZu', 'Audio/MusicDelta_CoolJazz', 'Audio/MusicDelta_Country1',
+        'Audio/MusicDelta_Country2', 'Audio/MusicDelta_Disco', 'Audio/MusicDelta_FreeJazz',
+        'Audio/MusicDelta_FusionJazz', 'Audio/MusicDelta_Gospel', 'Audio/MusicDelta_GriegTrolltog',
+        'Audio/MusicDelta_Hendrix', 'Audio/MusicDelta_InTheHalloftheMountainKing',
+        'Audio/MusicDelta_LatinJazz', 'Audio/MusicDelta_ModalJazz', 'Audio/MusicDelta_Pachelbel',
+        'Audio/MusicDelta_Punk', 'Audio/MusicDelta_Reggae', 'Audio/MusicDelta_Rock',
+        'Audio/MusicDelta_Shadows', 'Audio/MusicDelta_SpeedMetal', 'Audio/MusicDelta_SwingJazz',
+        'Audio/MusicDelta_Vivaldi', 'Audio/MusicDelta_Zeppelin', 'Audio/NightPanther_Fire',
+        'Audio/Phoenix_ColliersDaughter', 'Audio/Phoenix_ElzicsFarewell',
+        'Audio/Phoenix_ScotchMorris', 'Audio/Phoenix_SeanCaughlinsTheScartaglen', 'Audio/PortStWillow_StayEven',
+        'Audio/PurlingHiss_Lolita', 'Audio/Schubert_Erstarrung', 'Audio/Schumann_Mignon',
+        'Audio/StrandOfOaks_Spacestation', 'Audio/SweetLights_YouLetMeDown',
+        'Audio/TablaBreakbeatScience_CaptainSky', 'Audio/TablaBreakbeatScience_MiloVsMongo',
+        'Audio/TablaBreakbeatScience_MoodyPlucks', 'Audio/TablaBreakbeatScience_PhaseTransition',
+        'Audio/TablaBreakbeatScience_RockSteady', 'Audio/TablaBreakbeatScience_Scorpio',
+        'Audio/TablaBreakbeatScience_Vger', 'Audio/TablaBreakbeatScience_WhoIsIt', 'Audio/TheDistricts_Vermont',
+        'Audio/TheScarletBrand_LesFleursDuMal', 'Audio/TheSoSoGlos_Emergency', 'Audio/Wolf_DieBekherte'
+    ]
+
+    #: Folder to test wavs
+    test_wavs = [
+        'Audio/MusicDelta_FunkJazz',
+        'Audio/Phoenix_LarkOnTheStrandDrummondCastle',
+        'Audio/MatthewEntwistle_TheArch',
+        'Audio/SecretMountains_HighHorse',
+        'Audio/Snowmine_Curfews',
+        'Audio/StevenClark_Bounty',
+        'Audio/TablaBreakbeatScience_Animoog',
+        'Audio/ClaraBerryAndWooldog_AirTraffic',
+        'Audio/MusicDelta_Rockabilly',
+        'Audio/JoelHelander_Definition'
+    ]
+
+    #: Folder to train label files
+    train_labels = ["Annotations/Pitch_Annotations"]
+
+    #: Folder to test label files
+    test_labels = ["Annotations/Pitch_Annotations"]
+
+    #: Folder to pitch-related ground truth files.
+    #: The reason to define another variable for holding the same content
+    #: as ``train_labels`` is to keep the flexibility for extending the
+    #: ability getting other kinds of ground-truth files such as guitar
+    #: tracks or bass tracks.
+    pitch_annotation_folder = "Annotations/Pitch_Annotations"
+
+    #: Extension of pitch label files.
+    label_ext = ".csv"
+
+    #: Postfix of meta files.
+    meta_file_postfix = "_METADATA.yaml"
+
+    #: Postfix of wav files.
+    wav_postfix = "_MIX"
+
+    #: Postfix of pitch label files. Can be formatted with
+    #: ``label_postfix.format(track_num=...)``.
+    label_postfix = "_STEM_{track_num}"
+
+    # Override functions to fit the scenario of getting vocal ground-truth
+    # files only.
+    @classmethod
+    def _get_label_files(cls, dataset_path, wav_paths):
+        # Get only vocal ground-truth files
+        labels = []
+        for wav_path in wav_paths:
+            filename, _ = os.path.splitext(os.path.basename(wav_path))
+            filename = filename.replace(cls.wav_postfix, "")
+            meta_file = filename + cls.meta_file_postfix
+            meta_file = os.path.join(os.path.dirname(wav_path), meta_file)
+            meta = load_yaml(meta_file)
+
+            if meta["instrumental"] == "yes":
+                # Ignore instrumental songs that have no vocals.
+                continue
+
+            for tid, track in meta["stems"].items():
+                if "singer" not in track["instrument"]:
+                    # Ignore instruments
+                    continue
+
+                label_name = filename + cls.label_postfix.format(track_num=tid[1:]) + cls.label_ext
+                label = os.path.join(dataset_path, cls.pitch_annotation_folder, label_name)
+                if not os.path.exists(label):
+                    # Not the main melody vocal
+                    pass
+                else:
+                    labels.append(label)
+                    break
+        return labels
+
+    @classmethod
+    def get_train_labels(cls, dataset_path):
+        return cls._get_label_files(dataset_path, cls.get_train_wavs(dataset_path))
+
+    @classmethod
+    def get_test_labels(cls, dataset_path):
+        return cls._get_label_files(dataset_path, cls.get_test_wavs(dataset_path))
+
+    @classmethod
+    def _get_data_pair(cls, wavs, labels):
+        label_path_mapping = {}
+        for label in labels:
+            basename = os.path.basename(label)
+            true_name = basename.split("_STEM_")[0]
+            label_path_mapping[true_name] = label
+
+        pair = []
+        for wav in wavs:
+            filename, _ = os.path.splitext(os.path.basename(wav))
+            label_name = cls._name_transform(filename)
+            if label_name not in label_path_mapping:
+                # The song has no vocal track, thus skip.
+                continue
+            label_path = label_path_mapping[label_name]
+            pair.append((wav, label_path))
+        return pair
+
+    @classmethod
+    def _name_transform(cls, basename):
+        return basename.replace(cls.wav_postfix, "")

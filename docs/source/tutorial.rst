@@ -23,10 +23,10 @@ Transcribe
 
 Available sub-commands are:
 
-* ``music`` - Trancribes instrument notes, outputs MIDI.
-* ``drum`` - Transcribes drum percussions, outputs MIDI.
-* ``chord`` - Transcribes chord progression, outputs MIDI and CSV.
-* ``vocal`` *(preparing)* - Transcribes vocal melodies.
+* ``music`` - Trancribes instrument notes, outputs MIDI file.
+* ``drum`` - Transcribes drum percussions, outputs MIDI file.
+* ``chord`` - Transcribes chord progression, outputs MIDI and CSV files.
+* ``vocal`` - Transcribes vocal melody in note-level and pitch contour.
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
 Input for the former four should be wav file, and for ``beat`` module
@@ -52,23 +52,27 @@ stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*
 Different module supports a subset of downloadable datasets. Datasets that each module supports
 are listed below:
 
-+-----------+-------+------+-------+------+-------+
-| Module    | music | drum | chord | beat | vocal |
-+===========+=======+======+=======+======+=======+
-| Maestro   |   O   |      |       |      |       |
-+-----------+-------+------+-------+------+-------+
-| Maps      |   O   |      |       |      |       |
-+-----------+-------+------+-------+------+-------+
-| MusicNet  |   O   |      |       |      |       |
-+-----------+-------+------+-------+------+-------+
-| Pop       |   O   |  O   |       |      |       |
-+-----------+-------+------+-------+------+-------+
-| Ext-Su    |   O   |      |       |      |       |
-+-----------+-------+------+-------+------+-------+
-| BillBoard |       |      |   O   |      |       |
-+-----------+-------+------+-------+------+-------+
-| BPS-FH    |       |      |       |      |       |
-+-----------+-------+------+-------+------+-------+
++-------------+-------+------+-------+------+-------+
+| Module      | music | drum | chord | beat | vocal |
++=============+=======+======+=======+======+=======+
+| Maestro     |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Maps        |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| MusicNet    |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Pop         |   O   |  O   |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Ext-Su      |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| BillBoard   |       |      |   O   |      |       |
++-------------+-------+------+-------+------+-------+
+| BPS-FH      |       |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| MIR-1K      |       |      |       |      | O     |
++-------------+-------+------+-------+------+-------+
+| MedleyDB    |       |      |       |      | O     |
++-------------+-------+------+-------+------+-------+
 
 
 Example command for generating the feature is as following:

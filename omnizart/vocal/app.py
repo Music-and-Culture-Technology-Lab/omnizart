@@ -20,13 +20,13 @@ from omnizart.feature.cfp import extract_vocal_cfp, _extract_vocal_cfp
 from omnizart.setting_loaders import VocalSettings
 from omnizart.vocal import labels as lextor
 from omnizart.vocal.prediction import predict
-from omnizart.vocal.inference import infer_interval, infer_interval_original, infer_midi
+from omnizart.vocal.inference import infer_interval, infer_midi
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.pyramid_net import PyramidNet
 
 
 logger = get_logger("Vocal Transcription")
-vcapp = LazyLoader("vacpp", globals(), "omnizart.vocal_contour")
+vcapp = LazyLoader("vcapp", globals(), "omnizart.vocal_contour")
 
 
 class VocalTranscription(BaseTranscription):

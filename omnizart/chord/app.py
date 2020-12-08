@@ -80,7 +80,7 @@ class ChordTranscription(BaseTranscription):
         chord = chord.reshape(np.prod(chord.shape))[:-pad_end]  # Reshape and remove padding
 
         logger.info("Infering chords...")
-        midi, info = inference(chord, t_unit)
+        midi, info = inference(chord, t_unit, min_dura=settings.inference.min_dura)
 
         if output is not None:
             save_to = output
