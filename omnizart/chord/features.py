@@ -87,13 +87,9 @@ def extract_feature_label(feat_path, lab_path, segment_width=21, segment_hop=5, 
     """
     label = load_label(lab_path)
     feature = load_feature(feat_path, label)
-    print(feature["chroma"].shape)
     feature = augment_feature(feature)
-    print(feature[0]["chroma"].shape)
     feature = segment_feature(feature, segment_width=segment_width, segment_hop=segment_hop)
-    print(feature[0]["chroma"].shape)
     feature = reshape_feature(feature, num_steps=num_steps)
-    print(feature[0]["chroma"].shape)
 
     return feature
 
@@ -113,7 +109,7 @@ def load_label(lab_path):
 
 def load_feature(feat_path, label):
     """Load and parse the feature into the desired format."""
-    frames = []
+    frames = {"onset": [], "chroma": [], "chord": [], "chord_change": []}
     pre_chord = None
     for row in np.genfromtxt(feat_path, delimiter=","):
         onset = row[1]
@@ -131,12 +127,11 @@ def load_feature(feat_path, label):
         chord_change = 0 if chord_int == pre_chord else 1
         pre_chord = chord_int
 
-        frames.append((onset, both_chroma, chord_int, chord_change))
-
-    data_types = [
-        ("onset", np.float32), ("chroma", object), ("chord", np.int32), ("chord_change", np.int32)
-    ]
-    return np.array(frames, dtype=data_types)
+        frames["onset"].append(onset)
+        frames["chroma"].append(both_chroma)
+        frames["chord"].append(chord_int)
+        frames["chord_change"].append(chord_change)
+    return frames
 
 
 def augment_feature(feature):
