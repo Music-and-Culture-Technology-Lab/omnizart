@@ -33,11 +33,18 @@ Transcribe
 This action transcribes a given input.
 The sub-commands that follow are the applications:
 
+<<<<<<< HEAD
 * ``music`` - Transcribes polyphonic music, and outputs notes of pitched instruments in MIDI.
 * ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
 * ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
 * ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
 * ``vocal`` *(preparing)* - Transcribes polyphonic music, and outputs note-level vocal melody.
+=======
+* ``music`` - Trancribes instrument notes, outputs MIDI file.
+* ``drum`` - Transcribes drum percussions, outputs MIDI file.
+* ``chord`` - Transcribes chord progression, outputs MIDI and CSV files.
+* ``vocal`` - Transcribes vocal melody in note-level and pitch contour.
+>>>>>>> b2e4f7fe9d837cc5f23dd931102d339117a73d73
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
 Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
@@ -54,6 +61,7 @@ Note that `--model-path` and `--output` can also be left unspecified, and the de
 Generate Feature
 ################
 
+<<<<<<< HEAD
 This action generates the features that are necessary for training and testing.
 The features will be stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*.
 
@@ -80,6 +88,38 @@ Different modules of applications support different downloadable datasets, as fo
 +-----------+-------+------+-------+------+---------------+
 
 Example usage:
+=======
+Generate the training feature of different datasets. Training and testing feature will be
+stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*, respectively.
+
+Different module supports a subset of downloadable datasets. Datasets that each module supports
+are listed below:
+
++-------------+-------+------+-------+------+-------+
+| Module      | music | drum | chord | beat | vocal |
++=============+=======+======+=======+======+=======+
+| Maestro     |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Maps        |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| MusicNet    |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Pop         |   O   |  O   |       |      |       |
++-------------+-------+------+-------+------+-------+
+| Ext-Su      |   O   |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| BillBoard   |       |      |   O   |      |       |
++-------------+-------+------+-------+------+-------+
+| BPS-FH      |       |      |       |      |       |
++-------------+-------+------+-------+------+-------+
+| MIR-1K      |       |      |       |      | O     |
++-------------+-------+------+-------+------+-------+
+| MedleyDB    |       |      |       |      | O     |
++-------------+-------+------+-------+------+-------+
+
+
+Example command for generating the feature is as following:
+>>>>>>> b2e4f7fe9d837cc5f23dd931102d339117a73d73
 
 .. code-block:: bash
 

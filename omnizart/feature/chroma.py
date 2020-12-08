@@ -69,7 +69,7 @@ def extract_chroma(
         "rollon": roll_on,
         "tuningmode": TUNING_MODE[tuning_mode],
         "whitening": spectral_whitening,
-        "s": spectral_whitening,
+        "s": spectral_shape,
         "chromanormalize": CHROMA_NORM[chroma_norm]
     }
 

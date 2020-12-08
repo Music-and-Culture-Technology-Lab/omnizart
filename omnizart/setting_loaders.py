@@ -166,25 +166,26 @@ class ChordSettings(Settings):
         self.feature = self.ChordFeature()
         self.dataset = self.ChordDataset()
         self.model = self.ChordModel()
+        self.inference = self.ChordInference()
         self.training = self.ChordTraining()
 
         super().__init__(conf_path=conf_path)
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordFeature():
+    class ChordFeature:
         def __init__(self):
             self.segment_width: int = None
             self.segment_hop: int = None
             self.num_steps: int = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordDataset():
+    class ChordDataset:
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordModel():
+    class ChordModel:
         def __init__(self):
             self.save_prefix: str = None
             self.save_path: str = None
@@ -197,7 +198,12 @@ class ChordSettings(Settings):
             self.annealing_rate: float = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
-    class ChordTraining():
+    class ChordInference:
+        def __init__(self):
+            self.min_dura: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordTraining:
         def __init__(self):
             self.epoch: int = None
             self.steps: int = None
@@ -310,3 +316,13 @@ class VocalSettings(Settings):
             self.early_stop: int = None
             self.init_learning_rate: float = None
             self.context_length: int = None
+
+
+class BeatSettings(Settings):
+    default_setting_file: str = "beat.yaml"
+
+    def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
+        self.checkpoint_path: dict = None
+
+        super().__init__(conf_path=conf_path)

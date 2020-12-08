@@ -17,7 +17,7 @@ Everything are deliberately designed for the ease of use. We've put a large amou
 and time for making ``omnizart`` comfortable to use.
 
 
-.. figure:: ../../figures/features.png
+.. figure:: ../../figures/features2.png
    :align: center
 
    Omnizart provides a complete solution for managing every stage in the life-cycle of transcription tasks.
