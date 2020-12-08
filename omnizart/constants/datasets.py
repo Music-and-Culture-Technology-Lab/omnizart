@@ -539,7 +539,7 @@ class MedleyDBStructure(BaseStructure):
                 continue
 
             for tid, track in meta["stems"].items():
-                if not "singer" in track["instrument"]:
+                if "singer" not in track["instrument"]:
                     # Ignore instruments
                     continue
 
@@ -547,7 +547,7 @@ class MedleyDBStructure(BaseStructure):
                 label = os.path.join(dataset_path, cls.pitch_annotation_folder, label_name)
                 if not os.path.exists(label):
                     # Not the main melody vocal
-                    continue
+                    pass
                 else:
                     labels.append(label)
                     break

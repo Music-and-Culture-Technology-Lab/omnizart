@@ -1,4 +1,3 @@
-import csv
 import abc
 
 import numpy as np
@@ -48,6 +47,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
 
 
 class MIR1KlabelExtraction(BaseLabelExtraction):
+    """MIR-1K dataset label extraction class."""
     @classmethod
     def load_label(cls, label_path):
         with open(label_path, "r") as lin:
@@ -66,6 +66,7 @@ class MIR1KlabelExtraction(BaseLabelExtraction):
 
 
 class MedleyDBLabelExtraction(BaseLabelExtraction):
+    """MedleyDB dataset label extraction class."""
     @classmethod
     def load_label(cls, label_path):
         with open(label_path, "r") as fin:
@@ -76,9 +77,9 @@ class MedleyDBLabelExtraction(BaseLabelExtraction):
         for line in lines:
             elems = line.strip().split(",")
             sec, hz = float(elems[0]), float(elems[1])
-            note = float(hz_to_midi(hz))  # Convert return type of np.float64 to float
-            if note < LOWEST_MIDI_NOTE:
+            if hz < 1e-10:
                 continue
+            note = float(hz_to_midi(hz))  # Convert return type of np.float64 to float
             end_t = sec + t_unit
             labels.append(Label(start_time=sec, end_time=end_t, note=note))
 

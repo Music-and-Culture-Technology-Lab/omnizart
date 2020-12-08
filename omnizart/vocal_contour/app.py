@@ -20,7 +20,6 @@ from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.vocal_contour.inference import inference
 from omnizart.vocal_contour import labels as lextor
-from omnizart.models.utils import get_contour, padding
 from omnizart.constants import datasets as d_struct
 from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
@@ -71,14 +70,8 @@ class VocalContourTranscription(BaseTranscription):
         )
 
         logger.info("Predicting...")
-        pred = inference(
-            feature[:, :, 0],
-            model,
-            timestep=model_settings.training.timesteps
-        )
+        f0 = inference(feature[:, :, 0], model, timestep=model_settings.training.timesteps)
 
-        mat_contour = get_contour(pred)
-        f0 = mat_contour[:, 1].astype(float)
         timestamp = np.arange(len(f0)) * model_settings.feature.hop_size
         wav = sonify.pitch_contour(timestamp, f0, model_settings.feature.sampling_rate)
 
@@ -136,10 +129,9 @@ class VocalContourTranscription(BaseTranscription):
         logger.info("Output training feature to %s", train_feat_out_path)
         logger.info("Output testing feature to %s", test_feat_out_path)
 
-        # Resolve dataset type (TODO: Implement MedleyDB)
         dataset_type = resolve_dataset_type(
             dataset_path,
-            keywords={"MIR-1K": "mir1k", "MIR1K": "mir1k", "MedleyDB": "medleydb"}
+            keywords={"mir-1k": "mir1k", "mir1k": "mir1k", "medleydb": "medleydb"}
         )
         if dataset_type is None:
             logger.warning(
@@ -270,6 +262,13 @@ class VocalContourTranscription(BaseTranscription):
 def _all_in_one_extract(data_pair, label_extractor, t_unit, **kwargs):
     feat = extract_cfp_feature(data_pair[0], **kwargs)
     label = label_extractor.extract_label(data_pair[1], t_unit=t_unit)
+    flen = len(feat)
+    llen = len(label)
+    if flen > llen:
+        diff = flen - llen
+        label = np.pad(label, ((0, diff), (0, 0)), constant_values=0)
+    elif llen > flen:
+        label = label[:flen]
     return feat, label
 
 
@@ -374,16 +373,24 @@ class VocalContourDatasetLoader(BaseDatasetLoader):
             ref = h5py.File(hdf, "r")
             self.hdf_refs[hdf] = ref
 
+    def _pad(self, data):
+        pad_bottom = (self.feature_num - data.shape[1]) // 2
+        pad_top = self.feature_num - data.shape[1] - pad_bottom
+        paddings = ((0, 0), (pad_bottom, pad_top))
+        if len(data.shape) == 3:
+            paddings += ((0, 0),)
+        return np.pad(data, paddings)
+
     def _get_feature(self, hdf_name, slice_start):
         feat = self.hdf_refs[hdf_name]["feature"]
         feat = feat[:, :, self.channels]
-        feat = padding(feat, self.feature_num, self.slice_hop)
+        feat = self._pad(feat)
         feat = feat[slice_start:slice_start + self.slice_hop]
         return feat.reshape(self.timesteps, self.feature_num, 1)
 
     def _get_label(self, hdf_name, slice_start):
         label = self.hdf_refs[hdf_name]["label"]
-        label = padding(label, self.feature_num, self.slice_hop)
+        label = self._pad(label)
         label = label[slice_start:slice_start + self.slice_hop]
         return to_categorical(label, num_classes=2)
 

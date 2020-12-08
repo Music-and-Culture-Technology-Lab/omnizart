@@ -1,59 +1,54 @@
 import numpy as np
 from scipy.special import expit
+from librosa.core import midi_to_hz
 
-from omnizart.models.utils import padding
-
-
-def generation_prog(model, score_48, time_index, timesteps, batch_size):
-
-    feature_48 = score_48[time_index:time_index + batch_size, :, :]
-    feature_48 = np.reshape(feature_48, (batch_size, timesteps, 384, 1))
-
-    input_features = {'input_score_48': feature_48}
-
-    probas = model.predict(input_features, batch_size=batch_size)
-
-    return probas
+from omnizart.constants.midi import LOWEST_MIDI_NOTE
 
 
 def inference(feature, model, timestep=128, batch_size=10, feature_num=384):
+    assert len(feature.shape) == 2
+    # Padding
+    total_samples = len(feature)
+    pad_bottom = (feature_num - feature.shape[1]) // 2
+    pad_top = feature_num - feature.shape[1] - pad_bottom
+    pad_len = timestep - 1
+    feature = np.pad(feature, ((pad_len, pad_len), (pad_bottom, pad_top)))
 
-    f_48_p, p_t, p_b = padding(feature, feature_num, timestep, dimension=True)
-    f_48_s = np.zeros((len(f_48_p), timestep, feature_num))
+    # Prepare for prediction
+    output = np.zeros(feature.shape + (2,))
+    total_batches = int(np.ceil(total_samples / batch_size))
+    last_batch_idx = len(feature) - pad_len
+    for bidx in range(total_batches):
+        print(f"batch: {bidx+1}/{total_batches}", end="\r")
 
-    for i in range(len(f_48_s) - timestep):
-        f_48_s[i] = f_48_p[i:i + timestep]
+        # Collect batch feature
+        start_idx = bidx * batch_size
+        end_idx = min(start_idx + batch_size, last_batch_idx)
+        batch = np.array([feature[idx:idx+timestep] for idx in range(start_idx, end_idx)])  # noqa: E226
+        batch = np.expand_dims(batch, axis=3)
 
-    extract_result_seg = np.zeros(f_48_s.shape + (2,))
-    extract_result_seg_flatten = np.zeros(f_48_p.shape + (2,))
+        # Predict contour
+        batch_pred = model.predict(batch)
+        batch_pred = 1 / (1 + np.exp(-expit(batch_pred)))
 
-    iter_num = int(np.ceil(((len(f_48_s) - timestep) / batch_size)))
+        # Add the batch results to the output container.
+        for idx, pred in enumerate(batch_pred):
+            slice_start = start_idx + idx
+            slice_end = slice_start + timestep
+            output[slice_start:slice_end] += pred
+    output = output[pad_len:-pad_len, pad_bottom:-pad_top, 1]  # Remove padding
 
-    for i in range(1, iter_num + 1):
-        print("batch: {}/{}".format(i, iter_num), end="\r")
-        time_index = i * batch_size
-        probs = generation_prog(
-            model, f_48_s,
-            time_index=time_index,
-            timesteps=timestep,
-            batch_size=batch_size
-        )
-        probs = 1 / (1 + np.exp(-expit(probs)))
-        extract_result_seg[time_index:time_index + batch_size] = probs
+    # Filter values
+    avg_max_val = np.mean(np.max(output, axis=1))
+    output = np.where(output > avg_max_val, output, 0)
 
-    for i in range(len(f_48_s) - timestep):
-        extract_result_seg_flatten[i:i + timestep] += extract_result_seg[i]
+    # Generate final output F0
+    f0 = []  # pylint: disable=invalid-name
+    for pitches in output:
+        if np.sum(pitches) > 0:
+            pidx = np.argmax(pitches)
+            f0.append(midi_to_hz(pidx / 4 + LOWEST_MIDI_NOTE))
+        else:
+            f0.append(0)
 
-    extract_result_seg = extract_result_seg_flatten[timestep:-timestep, p_t:-p_b, 1]
-    avg = 0
-
-    for i, step in enumerate(extract_result_seg):
-        maximum = np.sort(step)[-1]
-        avg += maximum
-        extract_result_seg[i][extract_result_seg[i] < maximum] = 0
-
-    avg /= extract_result_seg.shape[0]
-    extract_result_seg[extract_result_seg < avg] = 0
-    extract_result_seg[extract_result_seg > avg] = 1
-
-    return extract_result_seg
+    return np.array(f0)
