@@ -2,7 +2,8 @@
 
 This module provides utilities for transcribing pitch and instruments in the audio.
 This module is also an improved version of the original repository
-`BreezeWhite/Music-Transcription-with-Semantic-Segmentation <https://github.com/BreezeWhite/Music-Transcription-with-Semantic-Segmentation>`_,
+`BreezeWhite/Music-Transcription-with-Semantic-Segmentation
+<https://github.com/BreezeWhite/Music-Transcription-with-Semantic-Segmentation>`_,
 with a cleaner architecture and consistent coding style, also provides command line interface
 for easy usage.
 
