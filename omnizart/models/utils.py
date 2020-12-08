@@ -1,6 +1,4 @@
 # pylint: disable=C0103
-
-import numpy as np
 import tensorflow as tf
 
 

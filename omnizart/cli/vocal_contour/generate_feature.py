@@ -33,7 +33,7 @@ def generate_feature(dataset_path, output_path, num_threads, hop_size, sampling_
 
     \b
     * MIR-1K
-    * MedleyDB (not supported yet)
+    * MedleyDB
     """
     settings = VocalContourSettings()
     settings.feature.hop_size = hop_size
