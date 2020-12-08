@@ -75,6 +75,13 @@ General:
                 Description: To be added...
                 Type: Float
                 Value: 1.1
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            MinDura:
+                Description: Minimum duration (in seconds) for each chord. If shorter than expected, will append the duration to the previous chord.
+                Type: Float
+                Value: 0.1
     Training:
         Description: Hyper parameters for training
         Settings:

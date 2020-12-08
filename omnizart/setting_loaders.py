@@ -166,6 +166,7 @@ class ChordSettings(Settings):
         self.feature = self.ChordFeature()
         self.dataset = self.ChordDataset()
         self.model = self.ChordModel()
+        self.inference = self.ChordInference()
         self.training = self.ChordTraining()
 
         super().__init__(conf_path=conf_path)
@@ -195,6 +196,11 @@ class ChordSettings(Settings):
             self.dec_input_emb_size: int = None
             self.dropout_rate: float = None
             self.annealing_rate: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class ChordInference:
+        def __init__(self):
+            self.min_dura: float = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class ChordTraining:
@@ -319,3 +325,13 @@ class VocalSettings(Settings):
             self.early_stop: int = None
             self.init_learning_rate: float = None
             self.context_length: int = None
+
+
+class BeatSettings(Settings):
+    default_setting_file: str = "beat.yaml"
+
+    def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
+        self.checkpoint_path: dict = None
+
+        super().__init__(conf_path=conf_path)
