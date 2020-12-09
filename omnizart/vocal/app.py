@@ -119,14 +119,9 @@ class VocalTranscription(BaseTranscription):
         logger.info("Inferencing MIDI...")
         midi = infer_midi(interval, agg_f0, t_unit=model_settings.feature.hop_size)
 
-        if output is not None:
-            if os.path.isdir(output):
-                output = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(output)
-            logger.info("MIDI file has been written to %s", output)
-
+        self._output_midi(output=output, input_audio=input_audio, midi=midi)
         logger.info("Transcription finished")
-        return agg_f0, interval, midi
+        return midi
 
     def generate_feature(self, dataset_path, vocal_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.

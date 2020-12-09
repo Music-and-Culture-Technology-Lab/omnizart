@@ -88,21 +88,11 @@ class VocalContourTranscription(BaseTranscription):
             timestamp, f0, model_settings.feature.sampling_rate, amplitudes=0.5 * np.ones(len(f0))
         )
 
+        output = self._output_midi(output, input_audio, verbose=False)
         if output is not None:
-            base = os.path.basename(input_audio)
-            filename, ext = os.path.splitext(base)
-            f0_out = f'{filename}_f0.csv'
-            wav_trans = f'{filename}_trans.wav'
-            save_to = output
-            if os.path.isdir(save_to):
-                f0_save_to = jpath(save_to, f0_out)
-                wav_save_to = jpath(save_to, wav_trans)
-            else:
-                f0_save_to = f0_out
-                wav_save_to = wav_trans
-            wavwrite(wav_save_to, model_settings.feature.sampling_rate, wav)
-            _write_f0_results(agg_f0, f0_save_to)
-            logger.info("Text and Wav files have been written to %s", save_to)
+            _write_f0_results(agg_f0, f"{output}_f0.csv")
+            wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
+            logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
         logger.info("Transcription finished")
         return agg_f0

@@ -330,3 +330,8 @@ class LazyLoader(types.ModuleType):
     def __dir__(self):
         module = self._load()
         return dir(module)
+
+
+def get_filename(path):
+    abspath = os.path.abspath(path)
+    return os.path.splitext(os.path.basename(abspath))[0]

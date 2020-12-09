@@ -82,13 +82,10 @@ class ChordTranscription(BaseTranscription):
         logger.info("Infering chords...")
         midi, info = inference(chord, t_unit, min_dura=settings.inference.min_dura)
 
+        output = self._output_midi(output=output, input_audio=input_audio, midi=midi)
         if output is not None:
-            save_to = output
-            if os.path.isdir(save_to):
-                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(save_to)
-            write_csv(info, output=save_to.replace(".mid", ".csv"))
-            logger.info("MIDI and CSV file have been written to %s", save_to)
+            write_csv(info, output=output.replace(".mid", ".csv"))
+            logger.info("MIDI and CSV file have been written to %s", os.path.abspath(os.path.dirname(output)))
 
         logger.info("Transcription finished")
         return midi
