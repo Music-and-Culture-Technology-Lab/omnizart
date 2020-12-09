@@ -10,83 +10,95 @@
 Tutorial
 ========
 
-This page describes the basic concept and usage of ``omnizart`` command. 
+This page describes the workflow and usage of ``omnizart`` command-line interface, 
+covering core and utility.
 
-The root entry is ``omnizart``, and followed by several sub-commands. To see a list of available sub-commands, type ``omnizart --help``.
-All the sub-command follows the same structure (e.g. all have the ``transcribe`` command).
+The root entry is ``omnizart`` followed by sub-commands.
+The available sub-commands can be found by typing ``omnizart --help``.
 
-More detailed descriptions and the usage of each sub-commands can be found from their own page.
+In general, the core sub-commands follow a pipeline of ``application``-``action``-``arguments``:
+
+.. code-block:: bash
+
+   omnizart application action --arguments
+
+where we apply an ``action`` (among ``transcribe``, ``generate-feature``, and ``train-model``) to
+the ``application`` of interest, with corresponding ``arguments``.
+Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each application.
 
 
 Transcribe
 ##########
 
-Available sub-commands are:
+This action transcribes a given input.
+The sub-commands that follow are the applications:
 
-* ``music`` - Trancribes instrument notes, outputs MIDI file.
-* ``drum`` - Transcribes drum percussions, outputs MIDI file.
-* ``chord`` - Transcribes chord progression, outputs MIDI and CSV files.
-* ``vocal`` - Transcribes vocal melody in note-level and pitch contour.
+* ``music`` - Transcribes polyphonic music, and outputs notes of pitched instruments in MIDI.
+* ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
+* ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
+* ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
+* ``vocal`` *(preparing)* - Transcribes polyphonic music, and outputs note-level vocal melody.
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
-Input for the former four should be wav file, and for ``beat`` module
-should be a MIDI file.
+Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
 
-Example Usage:
+Example usage:
 
 .. code-block:: bash
 
-   # Use the default settings and the model
-   omnizart music transcribe example.wav
-
-   # Specify your own model and output path
+   # Transcribe percussive events given pop.wav, with specified model path and output directory
    omnizart drum transcribe pop.wav --model-path ./my-model --output ./trans_pop.mid
 
+Note that `--model-path` and `--output` can also be left unspecified, and the defaults will be applied.
 
 Generate Feature
 ################
 
-Generate the training feature of different datasets. Training and testing feature will be
-stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*, respectively.
+This action generates the features that are necessary for training and testing.
+The features will be stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*.
 
-Different module supports a subset of downloadable datasets. Datasets that each module supports
-are listed below:
+Different modules of applications support different datasets, as follows:
 
-+-------------+-------+------+-------+------+-------+
-| Module      | music | drum | chord | beat | vocal |
-+=============+=======+======+=======+======+=======+
-| Maestro     |   O   |      |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| Maps        |   O   |      |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| MusicNet    |   O   |      |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| Pop         |   O   |  O   |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| Ext-Su      |   O   |      |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| BillBoard   |       |      |   O   |      |       |
-+-------------+-------+------+-------+------+-------+
-| BPS-FH      |       |      |       |      |       |
-+-------------+-------+------+-------+------+-------+
-| MIR-1K      |       |      |       |      | O     |
-+-------------+-------+------+-------+------+-------+
-| MedleyDB    |       |      |       |      | O     |
-+-------------+-------+------+-------+------+-------+
++-------------+-------+------+-------+------+-------+---------------+
+| Module      | music | drum | chord | beat | vocal | vocal-contour |
++=============+=======+======+=======+======+=======+===============+
+| Maestro     |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Maps        |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| MusicNet    |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Pop         |   O   |  O   |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Ext-Su      |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| BillBoard   |       |      |   O   |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| BPS-FH      |       |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| MIR-1K      |       |      |       |      |   O   |       O       |
++-------------+-------+------+-------+------+-------+---------------+
+| MedleyDB    |       |      |       |      |       |       O       |
++-------------+-------+------+-------+------+-------+---------------+
+| Tonas       |       |      |       |      |   O   |               |
++-------------+-------+------+-------+------+-------+---------------+
 
 
-Example command for generating the feature is as following:
+Example usage:
 
 .. code-block:: bash
 
+   # Generate features for the music application
    omnizart music generate-feature --dataset-path <path/to/dataset>
+
+   # Generate features for the drum application
    omnizart drum generate-feature --dataset-path <path/to/dataset>
 
 
 Train Model
 ###########
 
-After feature extraction finished, you can now train your own model~
+This action trains a model from scratch given the generated features.
 
 .. code-block:: bash
 
@@ -98,14 +110,16 @@ After feature extraction finished, you can now train your own model~
 Download Datasets
 #################
 
-Download datasets for training models and evaluation by executing
-``omnizart download-dataset <DATASET>``. Current supported datasets are:
+This sub-command belongs to the utility, used to download the datasets for 
+training and testing the models. 
+Current supported datasets are:
 
 * ``Maestro`` - MIDI and Audio Edited for Synchronous TRacks and Organization dataset.
 * ``MusicNet`` - MusicNet dataset with a collection of 330 freely-licensed classical music recordings.
 * ``McGill`` - McGill BillBoard dataset.
 * ``BPS-FH`` - Beethoven Piano Sonata with Function Harmony dataset.
 * ``Ext-Su`` - Extended Su dataset.
+* ``MIR-1K`` - 1000 clips of Mandarin pop songs, with background music and vocal recorded in separated channels.
 
 Example usage:
 
@@ -124,10 +138,9 @@ Example usage:
 Download Checkpoints
 ####################
 
-Download the archived checkpoints of different pre-trained models.
-This command will download the checkpoints to where ``omnizart`` being installed.
+This is the other sub-command for the utility, used to download the archived checkpoints of pre-trained models.
 
 .. code-block:: bash
 
-   # Simply run the following command, and no other options need to be specified.
+   # Simply run the following command, and no other options are needed to be specified.
    omnizart download-checkpoints

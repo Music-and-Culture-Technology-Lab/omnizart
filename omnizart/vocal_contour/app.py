@@ -1,5 +1,14 @@
-# pylint: disable=C0103,W0612,E0611,W0613
+"""Application class of vocal-contour.
 
+Inludes core functions and interfaces for frame-level vocal transcription: 
+model training, feature pre-processing, and audio transcription.
+
+See Also
+--------
+omnizart.base.BaseTranscription: The base class of all transcription/application classes.
+"""
+
+# pylint: disable=C0103,W0612,E0611,W0613
 import os
 import csv
 from os.path import join as jpath
@@ -26,16 +35,16 @@ from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
 
 
-logger = get_logger("Vocal frame")
+logger = get_logger("Vocal Contour")
 
 
 class VocalContourTranscription(BaseTranscription):
-    """Application class for vocal_seg transcription."""
+    """Application class for vocal-contour transcription."""
     def __init__(self, conf_path=None):
         super().__init__(VocalContourSettings, conf_path=conf_path)
 
     def transcribe(self, input_audio, model_path=None, output="./"):
-        """Transcribe frame-level fundamental frequency of vocal (vocal f0) from the given audio.
+        """Transcribe frame-level fundamental frequency of vocal from the given audio.
 
         Parameters
         ----------
@@ -50,7 +59,7 @@ class VocalContourTranscription(BaseTranscription):
         Returns
         -------
         f0: txt
-            The extracted vocal f0.
+            The transcribed f0 of the vocal contour in Hz.
 
         See Also
         --------
@@ -99,16 +108,15 @@ class VocalContourTranscription(BaseTranscription):
         return agg_f0
 
     def generate_feature(self, dataset_path, vocalcontour_settings=None, num_threads=4):
-        """Extract the feature of the whole dataset.
+        """Extract the feature from the given dataset.
 
-        To train the model, the first thing is to pre-process the data into feature
+        To train the model, the first step is to pre-process the data into feature
         representations. After downloading the dataset, use this function to generate
-        the feature by giving the path to where the dataset stored, and the program
-        will do all the rest of things.
+        the feature by giving the path of the stored dataset.
 
         To specify the output path, modify the attribute
-        ``vocalcontour_settings.dataset.feature_save_path`` to the value you want.
-        It defaults to the folder in which the dataset is stored, and generates
+        ``vocalcontour_settings.dataset.feature_save_path`` (TODO: to confirm).
+        It defaults to the folder of the stored dataset, and creates
         two folders: ``train_feature`` and ``test_feature``.
 
         Parameters
@@ -119,12 +127,12 @@ class VocalContourTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         num_threads:
-            Number of threads for parallel extracting the features.
+            Number of threads for parallel extraction of the feature.
 
         See Also
         --------
         omnizart.constants.datasets:
-            Supported dataset that can be applied and the split of training/testing pieces.
+            The supported datasets and the corresponding training/testing splits.
         """
         settings = self._validate_and_get_settings(vocalcontour_settings)
 
@@ -180,7 +188,7 @@ class VocalContourTranscription(BaseTranscription):
     def train(self, feature_folder, model_name=None, input_model_path=None, vocalcontour_settings=None):
         """Model training.
 
-        Train a new vocal_contour model or continue to train on a pre-trained model.
+        Train the model from scratch or continue training given a model checkpoint.
 
         Parameters
         ----------
@@ -190,11 +198,11 @@ class VocalContourTranscription(BaseTranscription):
             The name of the trained model. If not given, will default to the
             current timestamp.
         input_model_path: Path
-            Specify the path to the pre-trained model if you want to continue
-            to fine-tune on the model.
+            Specify the path to the model checkpoint in order to fine-tune
+            the model.
         vocalcontour_settings: VocalContourSettings
-            The configuration instance that holds all relative settings for
-            the life-cycle of building a model.
+            The configuration that holds all relative settings for
+            the life-cycle of model building.
         """
         settings = self._validate_and_get_settings(vocalcontour_settings)
 
@@ -322,19 +330,16 @@ def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_sett
 
 
 class VocalContourDatasetLoader(BaseDatasetLoader):
-    """Feature loader for training ``vocal-contour`` model.
+    """Data loader for training the mdoel of ``vocal-contour``.
 
-    Load feature and label for training. Also converts the custom format of
-    label into piano roll representation.
+    Load feature and label for training. 
 
     Parameters
     ----------
     feature_folder: Path
-        Path to the extracted feature files, including `*.hdf` and `*.pickle` pairs,
-        which refers to feature and label files, respectively.
+        Path to the extracted feature files in `*.hdf`.
     feature_files: list[Path]
-        List of path of `*.hdf` feature files. Corresponding label files should also
-        under the same folder.
+        List of path to the feature files in`*.hdf`.
     num_samples: int
         Total number of samples to yield.
     timesteps: int
@@ -342,15 +347,15 @@ class VocalContourDatasetLoader(BaseDatasetLoader):
     channels: list[int]
         Channels to be used for training. Allowed values are [1, 2, 3].
     feature_num: int
-        Target input size of feature dimension. Padding zeros to the bottom and top
-        if the input feature size and target size is inconsistent.
+        Target size of feature dimension.
+        Zero padding is done to resolve mismatched input and target size.
 
     Yields
     ------
     feature:
-        Input feature for training the model.
+        Input features for model training.
     label:
-        Coressponding label representation.
+        Coressponding labels.
     """
     def __init__(
         self,

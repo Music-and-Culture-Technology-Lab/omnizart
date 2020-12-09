@@ -88,6 +88,7 @@ All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`
    drum/cli.rst
    chord/cli.rst
    vocal/cli.rst
+   vocal-contour/cli.rst
 
 
 .. toctree::
@@ -98,6 +99,7 @@ All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`
    drum/api.rst
    chord/api.rst
    vocal/api.rst
+   vocal-contour/api.rst
    feature.rst
    models.rst
    training.rst
