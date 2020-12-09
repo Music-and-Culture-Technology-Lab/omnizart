@@ -1,6 +1,6 @@
 """Application class of music.
 
-Inludes core functions and interfaces for music transcription: 
+Inludes core functions and interfaces for music transcription:
 model training, feature pre-processing, and audio transcription.
 
 See Also
@@ -395,7 +395,7 @@ class MusicDatasetLoader(BaseDatasetLoader):
     channels: list[int]
         Channels to be used for training. Allowed values are [1, 2, 3].
     feature_num: int
-        Target size of feature dimension. 
+        Target size of feature dimension.
         Zero padding is done to resolve mismatched input and target size.
 
     Yields
