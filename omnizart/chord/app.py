@@ -80,12 +80,13 @@ class ChordTranscription(BaseTranscription):
         chord = chord.reshape(np.prod(chord.shape))[:-pad_end]  # Reshape and remove padding
 
         logger.info("Infering chords...")
-        midi, info = inference(chord, t_unit)
+        midi, info = inference(chord, t_unit, min_dura=settings.inference.min_dura)
 
         if output is not None:
             save_to = output
             if os.path.isdir(save_to):
-                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
+                filename, _ = os.path.splitext(os.path.basename(input_audio))
+                save_to = jpath(save_to, filename + ".mid")
             midi.write(save_to)
             write_csv(info, output=save_to.replace(".mid", ".csv"))
             logger.info("MIDI and CSV file have been written to %s", save_to)
