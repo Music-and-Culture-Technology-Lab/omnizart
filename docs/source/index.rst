@@ -3,36 +3,40 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Omniscient Mozart
-=================
 
-**Omnizart**, a command line tool for all kinds of transcription tasks, including vocal melody, drum percussion,
-chord progression, notes of instruments, and beat tracking.
-
-Provides a consistent way for managing the life-cycle of transcription tasks, from dataset
-downloading, feature pre-processing, model training, to the final MIDI inference and synthesizing
-the output MIDI to raw audio. Pre-trained models are also provided for immediate use.
-
-Everything are deliberately designed for the ease of use. We've put a large amount of energies
-and time for making ``omnizart`` comfortable to use.
-
+OMNIZART: MUSIC TRANSCRIPTION MADE EASY
+=======================================
 
 .. figure:: ../../figures/features2.png
    :align: center
 
-   Omnizart provides a complete solution for managing every stage in the life-cycle of transcription tasks.
+
+Omnizart is a Python library and a streamlined solution for automatic music transcription.
+This library gathers the research outcomes from `Music and Cultural Technology Lab <https://sites.google.com/view/mctl/home>`_, 
+analyzing polyphonic music and transcribes 
+**musical notes of instruments** :cite:`music`,
+**chord progression** :cite:`chord`,
+**frame-level vocal melody** :cite:`vocalcontour`,
+**note-level vocal melody**  :cite:`vocal`, and
+**beat** :cite:`beat`.
+
+Omnizart provides the main functionalities that construct the life-cycle of deep learning-based music transcription,
+covering from *dataset downloading*, *feature pre-processing*, *model training*, to *transcription* and *sonification*.
+Pre-trained checkpoints are also provided for the immediate usage of transcription.
 
 
 Demo
 ####
 
-Here is an demonstration of the chord and drum transcription using our system.
+Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_ to transcribe your favorite song almost immediately!
+
+Below is a demonstration of chord and drum transcription.
 
 .. raw:: html
 
    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/hjJhweRlE-A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-Result of chord transcription.
+The result of chord transcription
 
 .. raw:: html
 
@@ -42,7 +46,7 @@ Result of chord transcription.
    </audio>
 
 
-Result of drum transcription.
+The result of drum transcription
 
 .. raw:: html
 
@@ -51,8 +55,6 @@ Result of drum transcription.
       Your browser does not support the <code>audio</code> element.
    </audio>
 
-
-All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
 
 
 .. toctree::
@@ -87,3 +89,6 @@ All works are developed by `MCTLab <https://sites.google.com/view/mctl/home>`_.
    * :ref:`genindex`
    * :ref:`modindex`
    * :ref:`search`
+
+.. bibliography::
+   refs.bib

@@ -12,12 +12,6 @@ App
     :show-inheritance:
 
 
-Dataset
-#######
-.. automodule:: omnizart.music.dataset
-    :members:
-
-
 Inference
 #########
 .. automodule:: omnizart.music.inference

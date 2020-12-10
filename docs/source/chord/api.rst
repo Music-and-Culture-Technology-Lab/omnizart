@@ -19,13 +19,6 @@ Feature
     :undoc-members:
 
 
-Dataset
-#######
-.. automodule:: omnizart.chord.dataset
-    :members:
-    :undoc-members:
-
-
 Inference
 #########
 .. automodule:: omnizart.chord.inference

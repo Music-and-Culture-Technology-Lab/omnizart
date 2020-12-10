@@ -33,8 +33,13 @@ release = '0.1.0'
 # ones.
 extensions = [
     'numpydoc',
-    'sphinx_click'
+    'sphinx_click',
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.autosectionlabel'
 ]
+
+bibtex_bibfiles = ['refs.bib']
+
 numpydoc_show_inherited_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
