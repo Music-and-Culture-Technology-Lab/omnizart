@@ -2,10 +2,17 @@
 
 ## 0.2.0 - 2020-
 
-Vocal transcription is available now!
+### Vocal transcription is available now!
 
 ### Features
-- Release `vocal` and `vocal-contour` submodules. 
+- Release `vocal` and `vocal-contour` submodules.
+
+### Enhancement
+- Improve chord transcription results by filtering out chord predictions with short duration.
+- Unify the way of resolving the transcirption results' output path.
+
+### Bug Fix
+- Fix bug of passing the wrong parameter to vamp of chroma feature extraction.
 
 ---
 
