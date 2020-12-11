@@ -327,11 +327,25 @@ class VocalSettings(Settings):
             self.context_length: int = None
 
 
+@json_serializable(key_path="./General", value_path="./Value")
 class BeatSettings(Settings):
     default_setting_file: str = "beat.yaml"
 
     def __init__(self, conf_path=None):
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
+        self.feature = self.BeatFeature()
+        self.dataset = self.BeatDataset()
 
         super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatFeature:
+        def __init__(self):
+            self.time_unit: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatDataset:
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
