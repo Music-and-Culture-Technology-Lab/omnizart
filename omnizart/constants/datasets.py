@@ -160,10 +160,11 @@ class BaseStructure:
         """
         ensure_path_exists(save_path)
         save_name = cls.__name__.replace("Structure", "") + ".zip"
-        dataset_path = download_large_file_from_google_drive(
+        dataset_path, unzip_done = download_large_file_from_google_drive(
             cls.url, save_path=save_path, save_name=save_name, unzip=True
         )
-        os.remove(save_name)
+        if unzip_done:
+            os.remove(save_name)
         cls._post_download(dataset_path=dataset_path)
 
     @classmethod
