@@ -16,28 +16,39 @@ covering core and utility.
 The root entry is ``omnizart`` followed by sub-commands.
 The available sub-commands can be found by typing ``omnizart --help``.
 
+Core
+####
+
 In general, the core sub-commands follow a pipeline of ``application``-``action``-``arguments``:
 
 .. code-block:: bash
 
    omnizart application action --arguments
 
-where we apply an ``action`` (among ``transcribe``, ``generate-feature``, and ``train-model``) to
-the ``application`` of interest, with corresponding ``arguments``.
-Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each application.
+where we apply an ``action`` to the ``application`` of interest, with corresponding ``arguments``.
+Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each ``application``:
 
+* :doc:`music/cli` 
+* :doc:`drum/cli` 
+* :doc:`chord/cli`
+* :doc:`vocal-contour/cli`
+* vocal *(preparing)*
+* beat *(preparing)*
+
+All the applications share a same set of actions: **transcribe**, **generate-feature**, and **train-model**.
+Let's have a walkthrough of each ``action``.
 
 Transcribe
-##########
+**********
 
-This action transcribes a given input.
-The sub-commands that follow are the applications:
+As the name suggests, this action transcribes a given input.
+The supported applications are as follows:
 
 * ``music`` - Transcribes polyphonic music, and outputs notes of pitched instruments in MIDI.
 * ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
 * ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
-* ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
 * ``vocal`` - Transcribes polyphonic music, and outputs note-level vocal melody.
+* ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
 Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
@@ -49,16 +60,18 @@ Example usage:
    # Transcribe percussive events given pop.wav, with specified model path and output directory
    omnizart drum transcribe pop.wav --model-path ./my-model --output ./trans_pop.mid
 
-Note that `--model-path` and `--output` can also be left unspecified, and the defaults will be applied.
+Note: ``--model-path`` can be left unspecified, and the default will be the downloaded checkpoints. 
+Execute ``omnizart download-checkpoints`` if you have not done in the installation from :doc:`quick-start`.
+
 
 Generate Feature
-################
+****************
 
-Generate the training feature of different datasets. Training and testing feature will be
-stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*, respectively.
+This action generates the features that are necessary for training and testing.
+You can definitely skip this if you are only into transcribing with the given checkpoints.
+The processed features will be stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*.
 
-Different module supports a subset of downloadable datasets. Datasets that each module supports
-are listed below:
+The supported datasets for feature processing are application-dependent, summarized as follows:
 
 +-------------+-------+------+-------+------+-------+---------------+
 | Module      | music | drum | chord | beat | vocal | vocal-contour |
@@ -84,7 +97,8 @@ are listed below:
 | Tonas       |       |      |       |      |   O   |               |
 +-------------+-------+------+-------+------+-------+---------------+
 
-Example command for generating the feature is as following:
+Before running the commands below, make sure to download the corresponding datasets first.
+This can be easily done in :ref:`Download Datasets`.
 
 .. code-block:: bash
 
@@ -96,9 +110,10 @@ Example command for generating the feature is as following:
 
 
 Train Model
-###########
+***********
 
-This action trains a model from scratch given the generated features.
+This action trains a model from scratch given the generated features from :ref:`Generate Feature`.
+Once again, you can skip this if you are only up to transcribing music, and use the provided checkpoints.
 
 .. code-block:: bash
 
@@ -107,19 +122,23 @@ This action trains a model from scratch given the generated features.
    omnizart chord train-model -d <path/to/feature/folder> --model-name My-Chord
 
 
-Download Datasets
-#################
+Utility
+#######
 
-This sub-command belongs to the utility, used to download the datasets for 
-training and testing the models. 
+
+Download Datasets
+*****************
+
+This sub-command belongs to the utility, used to download the datasets for training and testing the models. 
 Current supported datasets are:
 
-* ``Maestro`` - MIDI and Audio Edited for Synchronous TRacks and Organization dataset.
-* ``MusicNet`` - MusicNet dataset with a collection of 330 freely-licensed classical music recordings.
-* ``McGill`` - McGill BillBoard dataset.
-* ``BPS-FH`` - Beethoven Piano Sonata with Function Harmony dataset.
-* ``Ext-Su`` - Extended Su dataset.
-* ``MIR-1K`` - 1000 clips of Mandarin pop songs, with background music and vocal recorded in separated channels.
+* `Maestro <https://magenta.tensorflow.org/datasets/maestro>`_ - MIDI and Audio Edited for Synchronous TRacks and Organization dataset.
+* `MusicNet <https://homes.cs.washington.edu/~thickstn/musicnet.html>`_ - MusicNet dataset with a collection of 330 freely-licensed classical music recordings.
+* `McGill <https://ddmal.music.mcgill.ca/research/The_McGill_Billboard_Project_(Chord_Analysis_Dataset)/>`_ - McGill BillBoard dataset.
+* `BPS-FH <https://github.com/Tsung-Ping/functional-harmony>`_ - Beethoven Piano Sonata with Function Harmony dataset.
+* Ext-Su - Extended Su dataset.
+* `MIR-1K <https://sites.google.com/site/unvoicedsoundseparation/mir-1k>`_ - 1000 short clips of Mandarin pop songs.
+* `MedleyDB <http://medleydb.weebly.com/>`_ - 122 multitracks.
 
 Example usage:
 
@@ -136,7 +155,7 @@ Example usage:
 
 
 Download Checkpoints
-####################
+********************
 
 This is the other sub-command for the utility, used to download the archived checkpoints of pre-trained models.
 

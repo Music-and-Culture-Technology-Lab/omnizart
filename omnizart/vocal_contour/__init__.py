@@ -1,8 +1,7 @@
 """Vocal pitch contour transcription.
 
 Transcribes monophonic pitch contour of vocal in given polyphonic audio.
-Re-implementation of the repository
-`s603122001/Vocal-Melody-Extraction <https://github.com/s603122001/Vocal-Melody-Extraction>`_.
+Re-implementation of the repository `Vocal-Melody-Extraction <https://github.com/s603122001/Vocal-Melody-Extraction>`_.
 
 Feature Storage Format
 ----------------------
