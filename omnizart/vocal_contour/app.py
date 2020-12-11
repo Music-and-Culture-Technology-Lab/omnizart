@@ -1,6 +1,6 @@
 """Application class of vocal-contour.
 
-Inludes core functions and interfaces for frame-level vocal transcription: 
+Inludes core functions and interfaces for frame-level vocal transcription:
 model training, feature pre-processing, and audio transcription.
 
 See Also
@@ -328,7 +328,7 @@ def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_sett
 class VocalContourDatasetLoader(BaseDatasetLoader):
     """Data loader for training the mdoel of ``vocal-contour``.
 
-    Load feature and label for training. 
+    Load feature and label for training.
 
     Parameters
     ----------

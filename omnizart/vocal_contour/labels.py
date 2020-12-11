@@ -76,7 +76,7 @@ class MedleyDBLabelExtraction(BaseLabelExtraction):
         t_unit = 256 / 44100  # ~= 0.0058 secs
         for line in lines:
             elems = line.strip().split(",")
-            sec, hz = float(elems[0]), float(elems[1])
+            sec, hz = float(elems[0]), float(elems[1])  # pylint: disable=invalid-name
             if hz < 1e-10:
                 continue
             note = float(hz_to_midi(hz))  # Convert return type of np.float64 to float
