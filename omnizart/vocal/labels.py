@@ -38,7 +38,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
     def extract_label(cls, label_path, t_unit=0.02):
         """Extract SDT label.
 
-        There are 6 types of event as defined in the original paper:
+        There are 6 types of events as defined in the original paper:
         activation, silence, onset, non-onset, offset, and non-offset.
         The corresponding annotations used in the paper are [a, s, o, o', f, f'].
         The 'activation' includes the onset and offset time. And non-onset and
@@ -61,10 +61,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         max_sec = max([ll.end_time for ll in label_list])
         num_frm = int(max_sec / t_unit) + 10  # Reserve additional 10 frames
 
-        # There six types of event in the label: activation, silence, onset, non-onset, offset, non-offset.
-        # Corressponding annotations used in the paper are [a, s, o, o', f, f'].
         sdt_label = np.zeros((num_frm, 6))
-
         frm_per_sec = round(1 / t_unit)
         clip = lambda v: np.clip(v, 0, num_frm - 1)
         for label in label_list:

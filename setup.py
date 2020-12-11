@@ -3,7 +3,6 @@ from setuptools import setup
 
 packages = \
 ['omnizart',
- 'omnizart.beat',
  'omnizart.chord',
  'omnizart.cli',
  'omnizart.cli.chord',
