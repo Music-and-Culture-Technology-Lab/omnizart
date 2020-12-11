@@ -37,7 +37,7 @@ The sub-commands that follow are the applications:
 * ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
 * ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
 * ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
-* ``vocal`` *(preparing)* - Transcribes polyphonic music, and outputs note-level vocal melody.
+* ``vocal`` - Transcribes polyphonic music, and outputs note-level vocal melody.
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
 Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
@@ -54,10 +54,11 @@ Note that `--model-path` and `--output` can also be left unspecified, and the de
 Generate Feature
 ################
 
-This action generates the features that are necessary for training and testing.
-The features will be stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*.
+Generate the training feature of different datasets. Training and testing feature will be
+stored in *<path/to/dataset>/train_feature* and *<path/to/dataset>/test_feature*, respectively.
 
-Different modules of applications support different datasets, as follows:
+Different module supports a subset of downloadable datasets. Datasets that each module supports
+are listed below:
 
 +-------------+-------+------+-------+------+-------+---------------+
 | Module      | music | drum | chord | beat | vocal | vocal-contour |
@@ -83,8 +84,7 @@ Different modules of applications support different datasets, as follows:
 | Tonas       |       |      |       |      |   O   |               |
 +-------------+-------+------+-------+------+-------+---------------+
 
-
-Example usage:
+Example command for generating the feature is as following:
 
 .. code-block:: bash
 
