@@ -26,15 +26,17 @@ In general, the core sub-commands follow a pipeline of ``application``-``action`
    omnizart application action --arguments
 
 where we apply an ``action`` to the ``application`` of interest, with corresponding ``arguments``.
-Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each application
-:doc:`music/cli`, 
-:doc:`drum/cli`, 
-:doc:`chord/cli`,
-:doc:`vocal-contour/cli`,
-and :doc:`vocal/cli`.
+Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each ``application``:
 
-The ``application`` shares a same set of ``action``: **transcribe**, **generate-feature**, and **train-model**.
-Let's have a walkthrough of each `action`. 
+* :doc:`music/cli` 
+* :doc:`drum/cli` 
+* :doc:`chord/cli`
+* :doc:`vocal-contour/cli`
+* vocal *(preparing)*
+* beat *(preparing)*
+
+All the applications share a same set of actions: **transcribe**, **generate-feature**, and **train-model**.
+Let's have a walkthrough of each ``action``.
 
 Transcribe
 **********
@@ -58,8 +60,8 @@ Example usage:
    # Transcribe percussive events given pop.wav, with specified model path and output directory
    omnizart drum transcribe pop.wav --model-path ./my-model --output ./trans_pop.mid
 
-Note: `--model-path` can be left unspecified, and the default will be the downloaded checkpoints. 
-Execute `omnizart download-checkpoints` if you have not done in the installation from :doc:`quick-start`.
+Note: ``--model-path`` can be left unspecified, and the default will be the downloaded checkpoints. 
+Execute ``omnizart download-checkpoints`` if you have not done in the installation from :doc:`quick-start`.
 
 
 Generate Feature

@@ -27,7 +27,7 @@ Use ``pip`` to install the latest stable version.
 Development installation
 ************************
 For the development installation, clone the git repo and the installation 
-creates a virtual environment under the directory ``omnizart/`` by default.
+creates a virtual environment under the directory *omnizart/* by default.
 
 .. code-block:: bash
 

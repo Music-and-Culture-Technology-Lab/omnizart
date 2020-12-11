@@ -98,7 +98,7 @@ class VocalContourTranscription(BaseTranscription):
 
             np.savetxt(f0_out, f0)
             wavwrite(wav_trans, model_settings.feature.sampling_rate, wav)
-            logger.info("Text and Wav files have been written to %s and %s" %(f0_out, wav_trans))
+            logger.info("Text and Wav files have been written to %s and %s", f0_out, wav_trans)
 
         logger.info("Transcription finished")
         return f0
