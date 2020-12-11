@@ -85,20 +85,20 @@ class VocalContourTranscription(BaseTranscription):
         wav = sonify.pitch_contour(timestamp, f0, model_settings.feature.sampling_rate)
 
         if output is not None:
-            base = os.path.basename(input_audio)
-            filename, ext = os.path.splitext(base)
+            if os.path.isdir(output):
+                base = os.path.basename(input_audio)
+                filename, _ = os.path.splitext(base)
+            filename = output
             f0_out = f'{filename}_f0.txt'
             wav_trans = f'{filename}_trans.wav'
-            save_to = output
-            if os.path.isdir(save_to):
-                f0_save_to = jpath(save_to, f0_out)
-                wav_save_to = jpath(save_to, wav_trans)
-            else:
-                f0_save_to = f0_out
-                wav_save_to = wav_trans
-            np.savetxt(f0_save_to, f0)
-            wavwrite(wav_save_to, model_settings.feature.sampling_rate, wav)
-            logger.info("Text and Wav files have been written to %s", save_to)
+
+            if os.path.isdir(output):
+                f0_out = jpath(output, f0_out)
+                wav_trans = jpath(output, wav_trans)
+
+            np.savetxt(f0_out, f0)
+            wavwrite(wav_trans, model_settings.feature.sampling_rate, wav)
+            logger.info("Text and Wav files have been written to %s and %s" %(f0_out, wav_trans))
 
         logger.info("Transcription finished")
         return f0

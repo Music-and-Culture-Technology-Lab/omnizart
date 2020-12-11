@@ -34,15 +34,6 @@ upgrade_pkg() {
 }
 
 
-upgrade_pkg() {
-    python3 -m pip install --upgrade pip
-
-    # Some packages have some problem installing with poetry.
-    # Thus manually install them here.
-    pip install --upgrade setuptools
-    pip install wheel
-}
-
 activate_venv_with_poetry() {
     # Create virtual environment.
     poetry shell
