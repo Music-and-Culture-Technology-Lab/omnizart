@@ -16,6 +16,7 @@ This library gathers the research outcomes from `Music and Cultural Technology L
 analyzing polyphonic music and transcribes 
 **musical notes of instruments** :cite:`music`,
 **chord progression** :cite:`chord`,
+**drum events** :cite:`drum`,
 **frame-level vocal melody** :cite:`vocalcontour`,
 **note-level vocal melody**  :cite:`vocal`, and
 **beat** :cite:`beat`.
@@ -89,6 +90,10 @@ The result of drum transcription
    * :ref:`genindex`
    * :ref:`modindex`
    * :ref:`search`
+
+
+References
+##########
 
 .. bibliography::
    refs.bib
