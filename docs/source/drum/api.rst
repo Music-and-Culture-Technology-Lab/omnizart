@@ -12,12 +12,6 @@ App
     :show-inheritance:
 
 
-Dataset
-#######
-.. automodule:: omnizart.drum.dataset
-    :members:
-
-
 Inference
 #########
 .. automodule:: omnizart.drum.inference
