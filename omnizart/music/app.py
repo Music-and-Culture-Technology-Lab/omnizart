@@ -112,12 +112,7 @@ class MusicTranscription(BaseTranscription):
             channel_program_mapping=self.mode_inst_mapping[model_settings.transcription_mode],
         )
 
-        if output is not None:
-            save_to = output
-            if os.path.isdir(save_to):
-                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(save_to)
-            logger.info("MIDI file has been written to %s", save_to)
+        self._output_midi(output=output, input_audio=input_audio, midi=midi)
         if os.environ.get("LOG_LEVEL", "") == "debug":
             dump_pickle({"pred": pred}, "./debug_pred.pickle")
 

@@ -14,7 +14,7 @@ import tensorflow as tf
 from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
-from omnizart.utils import get_logger, ensure_path_exists
+from omnizart.utils import get_logger, ensure_path_exists, get_filename
 from omnizart.constants.midi import LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
 
 
@@ -35,7 +35,7 @@ class BaseTranscription(metaclass=ABCMeta):
     def get_model(self, settings):
         """Get the model from the python source file.
 
-        This is only for those customized models that can't export arch.yaml file,
+        This is only for those customized models that can't export *arch.yaml* file,
         and hence need to instanitiate the model from python class, which is not
         that desirable as the architecture is not recorded in a stand-alone file.
 
@@ -120,6 +120,19 @@ class BaseTranscription(metaclass=ABCMeta):
         ensure_path_exists(test_feat_out_path)
         return train_feat_out_path, test_feat_out_path
 
+    def _output_midi(self, output, input_audio, midi=None, verbose=True):
+        if output is None:
+            return None
+
+        if os.path.isdir(output):
+            output = jpath(output, get_filename(input_audio))
+        if midi is not None:
+            out_path = output if output.endswith(".mid") else f"{output}.mid"
+            midi.write(out_path)
+            if verbose:
+                logger.info("MIDI file has been written to %s.", out_path)
+        return output
+
     def _validate_and_get_settings(self, setting_instance):
         if setting_instance is not None:
             assert isinstance(setting_instance, self.setting_class)
@@ -130,7 +143,7 @@ class BaseTranscription(metaclass=ABCMeta):
 class Label:
     """Interface of different label format.
 
-    Plays role for generalize the label format, and subsequent dataset class should
+    Plays the role for generalize the label format, and subsequent dataset class should
     implement functions transforming labels (whether in .mid, .txt, or .csv format)
     and parse the necessary columns into attributes this class holds.
 
@@ -151,7 +164,7 @@ class Label:
     note_value: str
         Type of the note (e.g. quater, eighth, sixteenth).
     is_drum: bool
-        Whether the note represents the drum channel.
+        Whether the note represents the drum note.
     """
     def __init__(
         self,
@@ -213,6 +226,10 @@ class BaseDatasetLoader:
         must be specified.
     num_samples: int
         Total sample number to be yielded.
+    slice_hop: int
+        Hop size when initializing the start index.
+    feat_col_name: str
+        Name of the feature column stored in the *.hdf* feature files.
 
     Yields
     ------

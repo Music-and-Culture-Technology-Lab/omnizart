@@ -10,6 +10,7 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 
 # pylint: disable=C0103,W0612,E0611,W0613
 import os
+import csv
 from os.path import join as jpath
 from datetime import datetime
 
@@ -80,28 +81,21 @@ class VocalContourTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         f0 = inference(feature[:, :, 0], model, timestep=model_settings.training.timesteps)
+        agg_f0 = _aggregate_f0_info(f0, t_unit=model_settings.feature.hop_size)
 
         timestamp = np.arange(len(f0)) * model_settings.feature.hop_size
-        wav = sonify.pitch_contour(timestamp, f0, model_settings.feature.sampling_rate)
+        wav = sonify.pitch_contour(
+            timestamp, f0, model_settings.feature.sampling_rate, amplitudes=0.5 * np.ones(len(f0))
+        )
 
+        output = self._output_midi(output, input_audio, verbose=False)
         if output is not None:
-            if os.path.isdir(output):
-                base = os.path.basename(input_audio)
-                filename, _ = os.path.splitext(base)
-            filename = output
-            f0_out = f'{filename}_f0.txt'
-            wav_trans = f'{filename}_trans.wav'
-
-            if os.path.isdir(output):
-                f0_out = jpath(output, f0_out)
-                wav_trans = jpath(output, wav_trans)
-
-            np.savetxt(f0_out, f0)
-            wavwrite(wav_trans, model_settings.feature.sampling_rate, wav)
-            logger.info("Text and Wav files have been written to %s and %s", f0_out, wav_trans)
+            _write_f0_results(agg_f0, f"{output}_f0.csv")
+            wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
+            logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
         logger.info("Transcription finished")
-        return f0
+        return agg_f0
 
     def generate_feature(self, dataset_path, vocalcontour_settings=None, num_threads=4):
         """Extract the feature from the given dataset.
@@ -416,3 +410,44 @@ class VocalContourDatasetLoader(BaseDatasetLoader):
             label_len = len(label)
 
         return feature, label
+
+
+def _aggregate_f0_info(pred, t_unit):
+    results = []
+
+    cur_idx = 0
+    start_idx = 0
+    last_hz = pred[0]
+    eps = 1e-6
+    while cur_idx < len(pred):
+        cur_hz = pred[cur_idx]
+        if abs(cur_hz - last_hz) < eps:
+            # Skip to the next index with different frequency.
+            last_hz = cur_hz
+            cur_idx += 1
+            continue
+
+        if last_hz < eps:
+            # Almost equals to zero. Ignored.
+            last_hz = cur_hz
+            start_idx = cur_idx
+            cur_idx += 1
+            continue
+
+        results.append({
+            "start_time": round(start_idx * t_unit, 6),
+            "end_time": round(cur_idx * t_unit, 6),
+            "pitch": last_hz
+        })
+
+        start_idx = cur_idx
+        cur_idx += 1
+        last_hz = cur_hz
+    return results
+
+
+def _write_f0_results(agg_f0, output_path):
+    with open(output_path, "w") as out:
+        writer = csv.DictWriter(out, fieldnames=["start_time", "end_time", "pitch"])
+        writer.writeheader()
+        writer.writerows(agg_f0)

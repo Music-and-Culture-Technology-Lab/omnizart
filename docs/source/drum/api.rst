@@ -7,7 +7,14 @@ Drum Transcription
 
 App
 ###
-.. automodule:: omnizart.drum.app
+.. autoclass:: omnizart.drum.app.DrumTranscription
+    :members:
+    :show-inheritance:
+
+
+Dataset
+#######
+.. autoclass:: omnizart.drum.app.PopDatasetLoader
     :members:
     :show-inheritance:
 

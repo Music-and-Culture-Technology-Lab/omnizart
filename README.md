@@ -43,8 +43,8 @@ Comprehensive usage and API references can be found in the [official documentati
 |------------------|--------------------|--------------------|----------|-----------------------------------|
 | music            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes notes of instruments. |
 | drum             | :heavy_check_mark: | :interrobang:      |          | Transcribes drum tracks.          |
-| vocal            |                    |                    |          | Transcribes pitch of vocal.       |
-| vocal-contour    |                    |                    |          | Transcribes contour of vocal.     |
+| vocal            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes pitch of vocal.       |
+| vocal-contour    | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes contour of vocal.     |
 | chord            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes chord progression.    |
 | beat             |                    |                    |          | Transcribes beat position.        |
 

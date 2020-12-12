@@ -21,12 +21,13 @@ from omnizart.constants.midi import SOUNDFONT_PATH
 from omnizart.cli.music import music
 from omnizart.cli.drum import drum
 from omnizart.cli.chord import chord
+from omnizart.cli.vocal import vocal
 from omnizart.cli.vocal_contour import vocal_contour
 from omnizart.cli.transcribe import transcribe
 
 
 SUB_COMMAND_GROUP = [
-    {"Transcription": ["music", "chord", "drum", "transcribe"]},
+    {"Transcription": ["music", "chord", "drum", "vocal", "vocal-contour", "transcribe"]},
     {"Utilities": ["download-checkpoints", "download-dataset", "synth"]}
 ]
 
@@ -125,6 +126,12 @@ def download_checkpoints(output_path):
             "save_as": "checkpoints/music/music_note_stream/weights.h5",
             "file_length": 33816384
         },
+        "vocal_semi": {
+            "fid": "1F3_qns6jc7MjDYigNsKQLJeawsAWAq_x",
+            "save_as": "checkpoints/vocal/vocal_semi.zip",
+            "file_length": 213112805,
+            "unzip": True
+        },
         "vocal_contour": {
             "fid": "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
             "save_as": "checkpoints/vocal/contour/weights.h5",
@@ -196,6 +203,7 @@ def synth(input_midi, output_path, sf2_path):
 entry.add_command(music)
 entry.add_command(drum)
 entry.add_command(chord)
+entry.add_command(vocal)
 entry.add_command(vocal_contour)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)

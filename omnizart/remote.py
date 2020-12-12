@@ -108,6 +108,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
         sys.stdout.write('\033[2K\033[1G')
         print(f"Progress: 100%, {format_byte(total_size)}, {format_byte(avg_speed)}/s")
 
+    unzip_done = True
     if unzip:
         print("Extracting files...")
         try:
@@ -123,11 +124,12 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
                 # Assert the first item name is the root folder's name.
                 extracted_name = zip_ref.namelist()[0]
                 assert extracted_name.endswith("/") or extracted_name.endswith("\\")
-            return os.path.abspath(os.path.join(save_path, extracted_name))
+            return os.path.abspath(os.path.join(save_path, extracted_name)), unzip_done
         except zipfile.BadZipFile:
             print("File is not a zip file, do nothing...")
+            unzip_done = False
 
-    return os.path.abspath(out_path)
+    return os.path.abspath(out_path), unzip_done
 
 
 def download_large_file_from_google_drive(url, file_length=None, save_path="./", save_name=None, unzip=False):

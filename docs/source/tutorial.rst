@@ -47,8 +47,8 @@ The supported applications are as follows:
 * ``music`` - Transcribes polyphonic music, and outputs notes of pitched instruments in MIDI.
 * ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
 * ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
+* ``vocal`` - Transcribes polyphonic music, and outputs note-level vocal melody.
 * ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
-* ``vocal`` *(preparing)* - Transcribes polyphonic music, and outputs note-level vocal melody.
 * ``beat`` *(preparing)* - MIDI-domain beat tracking.
 
 Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
@@ -73,27 +73,29 @@ The processed features will be stored in *<path/to/dataset>/train_feature* and *
 
 The supported datasets for feature processing are application-dependent, summarized as follows:
 
-+-----------+-------+------+-------+------+---------------+
-| Module    | music | drum | chord | beat | vocal-contour |
-+===========+=======+======+=======+======+===============+
-| Maestro   |   O   |      |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| Maps      |   O   |      |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| MusicNet  |   O   |      |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| Pop       |   O   |  O   |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| Ext-Su    |   O   |      |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| BillBoard |       |      |   O   |      |               |
-+-----------+-------+------+-------+------+---------------+
-| BPS-FH    |       |      |       |      |               |
-+-----------+-------+------+-------+------+---------------+
-| MIR-1K    |       |      |       |      |       O       |
-+-----------+-------+------+-------+------+---------------+
-| MedleyDB  |       |      |       |      |       O       |
-+-----------+-------+------+-------+------+---------------+
++-------------+-------+------+-------+------+-------+---------------+
+| Module      | music | drum | chord | beat | vocal | vocal-contour |
++=============+=======+======+=======+======+=======+===============+
+| Maestro     |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Maps        |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| MusicNet    |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Pop         |   O   |  O   |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| Ext-Su      |   O   |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| BillBoard   |       |      |   O   |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| BPS-FH      |       |      |       |      |       |               |
++-------------+-------+------+-------+------+-------+---------------+
+| MIR-1K      |       |      |       |      |   O   |       O       |
++-------------+-------+------+-------+------+-------+---------------+
+| MedleyDB    |       |      |       |      |       |       O       |
++-------------+-------+------+-------+------+-------+---------------+
+| Tonas       |       |      |       |      |   O   |               |
++-------------+-------+------+-------+------+-------+---------------+
 
 Before running the commands below, make sure to download the corresponding datasets first.
 This can be easily done in :ref:`Download Datasets`.

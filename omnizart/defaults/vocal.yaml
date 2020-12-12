@@ -1,0 +1,150 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart vocal transcribe` command.
+        Type: String
+        Value: Semi
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            Super: checkpoints/vocal/vocal_super
+            Semi: checkpoints/vocal/vocal_semi
+    Feature:
+        Description: Default settings of feature extraction for drum transcription.
+        Settings:
+            HopSize:
+                Description: Hop size in seconds with respect to sampling rate.
+                Type: Float
+                Value: 0.02
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 16000
+            FrequencyResolution:
+                Type: Float
+                Value: 2.0
+            FrequencyCenter:
+                Description: Lowest frequency to extract.
+                Type: Float
+                Value: 80
+            TimeCenter:
+                Description: Highest frequency to extract (1/time_center).
+                Type: Float
+                Value: 0.001
+            Gamma:
+                Type: List
+                SubType: Float
+                Value: [0.24, 0.6, 1.0]
+            BinsPerOctave:
+                Description: Number of bins for each octave.
+                Type: Integer
+                Value: 48
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: vocal
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/vocal
+            MinKernelSize:
+                Description: Minimum kernel size of convolution layers in each pyramid block.
+                Type: Integer
+                Value: 16
+            Depth:
+                Description: Total number of pyramid blocks will be -> (Depth - 2) / 2 .
+                Type: Integer
+                Value: 110
+            Alpha:
+                Type: Integer
+                Value: 270
+            ShakeDrop:
+                Description: Whether to leverage Shake Drop normalization when back propagation.
+                Type: Bool
+                Value: True
+            SemiLossWeight:
+                Description: Weighting factor of the semi-supervise loss. Supervised loss will not be affected by this parameter.
+                Type: Float
+                Value: 1.0
+            SemiXi:
+                Description: A small constant value for weighting the adverarial perturbation.
+                Type: Float
+                Value: 0.000001
+            SemiEpsilon:
+                Description: Weighting factor of the output adversarial perturbation.
+                Type: Float
+                Value: 8.0
+            SemiIterations:
+                Description: Number of iterations when generating the adversarial perturbation.
+                Type: Integer
+                Value: 2
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            ContextLength:
+                Description: Length of context that will be used to find the peaks.
+                Type: Integer
+                Value: 2
+            Threshold:
+                Description: Threshold that will be applied to clip the predicted values to either 0 or 1.
+                Type: Float
+                Value: 0.5
+            MinDuration:
+                Description: Minimum required length of each note, in seconds.
+                Type: Float
+                Value: 0.1
+            PitchModel:
+                Description: The model for predicting the pitch contour. Default to use vocal-contour modeul. Could be path or mode name.
+                Type: String
+                Value: VocalContour
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 10
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 1000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 50
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 64
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 64
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 8
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.0001
+            ContextLength:
+                Description: Context to be considered before and after current timestamp.
+                Type: Integer
+                Value: 9

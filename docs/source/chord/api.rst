@@ -7,7 +7,7 @@ Chord Transcription
 
 App
 ###
-.. automodule:: omnizart.chord.app
+.. autoclass:: omnizart.chord.app.ChordTranscription
     :members:
     :show-inheritance:
 
@@ -17,6 +17,13 @@ Feature
 .. automodule:: omnizart.chord.features
     :members:
     :undoc-members:
+
+
+Dataset
+#######
+.. autoclass:: omnizart.chord.app.McGillDatasetLoader
+    :members:
+    :show-inheritance:
 
 
 Inference

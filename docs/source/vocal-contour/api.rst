@@ -31,7 +31,7 @@ It will be loaded by the class :class:`omnizart.setting_loaders.VocalContourSett
 The name of the attributes will be converted to snake-case (e.g. HopSize -> hop_size). 
 There is also a path transformation when applying the settings into the ``VocalContourSettings`` instance. 
 For example, the attribute ``BatchSize`` defined in the yaml path *General/Training/Settings/BatchSize* is transformed 
-to *MusicSettings.training.batch_size*. 
+to *VocalContourSettings.training.batch_size*. 
 The level of */Settings* is removed among all fields.
 
 .. literalinclude:: ../../../omnizart/defaults/vocal_contour.yaml
