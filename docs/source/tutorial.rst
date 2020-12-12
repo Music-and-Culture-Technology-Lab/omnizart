@@ -32,7 +32,7 @@ Detailed descriptions for the usage of each sub-command can be found in the dedi
 * :doc:`drum/cli` 
 * :doc:`chord/cli`
 * :doc:`vocal-contour/cli`
-* vocal *(preparing)*
+* :doc:`vocal/cli`
 * beat *(preparing)*
 
 All the applications share a same set of actions: **transcribe**, **generate-feature**, and **train-model**.
@@ -44,14 +44,14 @@ Transcribe
 As the name suggests, this action transcribes a given input.
 The supported applications are as follows:
 
-* ``music`` - Transcribes polyphonic music, and outputs notes of pitched instruments in MIDI.
-* ``drum`` - Transcribes polyphonic music, and outputs events of percussive instruments in MIDI.
-* ``chord`` - Transcribes polyphonic music, and outputs chord progression in MIDI and CSV.
-* ``vocal`` - Transcribes polyphonic music, and outputs note-level vocal melody.
-* ``vocal-contour`` - Transcribes polyphonic music, and outputs frame-level vocal melody (F0) in text.
-* ``beat`` *(preparing)* - MIDI-domain beat tracking.
+* ``music`` - Transcribe musical notes of pitched instruments in MIDI.
+* ``drum`` - Transcribe events of percussive instruments in MIDI.
+* ``chord`` - Transcribe chord progressions in MIDI and CSV.
+* ``vocal`` - Transcribe note-level vocal melody in MIDI.
+* ``vocal-contour`` - Transcribe frame-level vocal melody (F0) in text.
+* ``beat`` *(preparing)* - Transcribe beat position.
 
-Except ``beat`` which takes as input a MIDI file, all the applications receive audio files in WAV.
+Note that all the applications receive polyphonic music in WAV, except ``beat`` receives inputs in MIDI.
 
 Example usage:
 

@@ -1,4 +1,4 @@
-# omnizart
+# OMNIZART
 
 [![build](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/general-check/badge.svg)](https://github.com/Music-and-Culture-Technology-Lab/omnizart/actions?query=workflow%3Ageneral-check)
 [![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)](https://music-and-culture-technology-lab.github.io/omnizart-doc/)
@@ -7,63 +7,47 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/omnizart)](https://pypistats.org/packages/omnizart)
 [![Docker Pulls](https://img.shields.io/docker/pulls/mctlab/omnizart)](https://hub.docker.com/r/mctlab/omnizart)
 
-Omniscient Mozart, being able to transcribe everything in the music, including vocal, drum, chord, beat, instruments, and more.
-Combines all the hard works developed by everyone in MCTLab into a single command line tool. Python package and docker
-image are also available.
+Omnizart is a Python library that aims for democratizing automatic music transcription.
+Given polyphonic music, it is able to transcribe pitched instruments, vocal melody, chords, drum events, and beat.
+This is powered by the research outcomes from [Music and Culture Technology (MCT) Lab](https://sites.google.com/view/mctl/home).
 
-### Try omnizart now!! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/omnizart-colab)
+### Transcribe your favorite songs now in Colab! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/omnizart-colab)
 
-A quick-start example is as following:
+# Quick start
+
+Visit the [complete document](https://music-and-culture-technology-lab.github.io/omnizart-doc/) for detailed guidance.
+
+## Pip
 ``` bash
 # Install omnizart
 pip install omnizart
 
-# Download the checkpoints after installation
+# Download the checkpoints
 omnizart download-checkpoints
 
-# Now it's ready for the transcription~
+# Transcribe your songs
 omnizart drum transcribe <path/to/audio.wav>
 omnizart chord transcribe <path/to/audio.wav>
 omnizart music transcribe <path/to/audio.wav>
 ```
 
-Or use the docker image:
+## Docker
 ```
 docker pull mctlab/omnizart:latest
 docker run -it mctlab/omnizart:latest bash
 ```
 
-Comprehensive usage and API references can be found in the [official documentation site](https://music-and-culture-technology-lab.github.io/omnizart-doc/).
+# Supported applications
+| Application      | Transcription      | Training           | Evaluation | Description                                      |
+|------------------|--------------------|--------------------|------------|--------------------------------------------------|
+| music            | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe musical notes of pitched instruments. |
+| drum             | :heavy_check_mark: | :interrobang:      |            | Transcribe events of percussive instruments.     |
+| vocal            | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe note-level vocal melody.              |
+| vocal-contour    | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe frame-level vocal melody (F0).        |
+| chord            | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe chord progressions.                   |
+| beat             |                    |                    |            | Transcribe beat position.                        |
 
-# About
-[Music and Culture Technology Lab (MCTLab)](https://sites.google.com/view/mctl/home) aims to develop technology for music and relevant applications by leveraging cutting-edge AI techiniques.
+**NOTES**
+The current implementation for the drum model has unknown bugs, preventing loss convergence when training from scratch.
+Fortunately, you can still enjoy drum transcription with the provided checkpoints.
 
-# Plan to support
-| Commands         | transcribe         | train              | evaluate | Description                       |
-|------------------|--------------------|--------------------|----------|-----------------------------------|
-| music            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes notes of instruments. |
-| drum             | :heavy_check_mark: | :interrobang:      |          | Transcribes drum tracks.          |
-| vocal            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes pitch of vocal.       |
-| vocal-contour    | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes contour of vocal.     |
-| chord            | :heavy_check_mark: | :heavy_check_mark: |          | Transcribes chord progression.    |
-| beat             |                    |                    |          | Transcribes beat position.        |
-
-**NOTES** Though the implementation of training the drum model is 90% complete, but there still exists some
-invisible bugs that cause the training fails to converge compared to the author's original implementation.
-
-Example usage
-<pre>
-omnizart music transcribe <i>path/to/audio</i>
-omnizart chord transcribe <i>path/to/audio</i>
-omnizart drum transcribe <i>path/to/audio</i>
-</pre>
-
-For training a new model, download the dataset first and follow steps described below.
-<pre>
-# The following command will default saving the extracted feature under the same folder,
-# called <b>train_feature</b> and <b>test_feature</b>
-omnizart music generate-feature -d <i>path/to/dataset</i>
-
-# Train a new model
-omnizart music train-model -d <i>path/to/dataset</i>/train_feature --model-name My-Model
-</pre>

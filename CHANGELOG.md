@@ -2,23 +2,23 @@
 
 ## 0.2.0 - 2020-
 
-### Vocal transcription is available now!
-After a long development and experiments, we finally complete the vocal transcription module
-and integrate them into omnizart.
+### Vocal melody transcription in both frame- and note-level are live!
+We release the modules for vocal melody transcription after a decent amount of effort. 
+Now you can transcribe your favorite singing voice.
 
 ### Features
 - Release `vocal` and `vocal-contour` submodules.
 
 ### Enhancement
 - Improve chord transcription results by filtering out chord predictions with short duration.
-- Unify the way of resolving the transcirption results' output path.
+- Resolve the path for transcription output in a consistent way.
 
 ### Documentation
-- Re-organize the quick start and tutorial page to give a more clean and fluent reading experience.
-- Move the development section origially in README.md to CONTRIBUTING.md.
+- Re-organize Quick Start and Tutorial pages to improve accessibility.
+- Move the section for development from README.md to CONTRIBUTING.md.
 
 ### Bug Fix
-- Fix bug of passing the wrong parameter to vamp of chroma feature extraction.
+- Fix bugs of passing the wrong parameter to vamp for chroma feature extraction.
 
 ---
 

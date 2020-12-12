@@ -25,19 +25,24 @@ Omnizart provides the main functionalities that construct the life-cycle of deep
 covering from *dataset downloading*, *feature pre-processing*, *model training*, to *transcription* and *sonification*.
 Pre-trained checkpoints are also provided for the immediate usage of transcription.
 
+Demonstration
+#############
 
-Demo
-####
+Colab
+*****
 
 Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_ to transcribe your favorite song almost immediately!
 
-Below is a demonstration of chord and drum transcription.
+Sound samples
+*************
+
+Original song
 
 .. raw:: html
 
    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/hjJhweRlE-A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-The result of chord transcription
+Chord transcription
 
 .. raw:: html
 
@@ -47,7 +52,7 @@ The result of chord transcription
    </audio>
 
 
-The result of drum transcription
+Drum transcription
 
 .. raw:: html
 
@@ -57,7 +62,7 @@ The result of drum transcription
    </audio>
 
 
-The result of vocal transcription.
+Note-level vocal transcription
 
 .. raw:: html
 
@@ -67,7 +72,7 @@ The result of vocal transcription.
    </audio>
 
 
-The result of vocal pitch contour transcription.
+Frame-level vocal transcription*
 
 .. raw:: html
 
@@ -78,9 +83,7 @@ The result of vocal pitch contour transcription.
 
 
 Source files can be downloaded `here <https://drive.google.com/file/d/15VqHearznV9L83cyl61ccACsXXJ4vBHo/view?usp=sharing>`_.
-You can use *Audacity* to open it.
-
-All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`_.
+You can use *Audacity* to open the files.
 
 
 .. toctree::
