@@ -125,5 +125,4 @@ You can use *Audacity* to open the files.
 References
 ##########
 
-.. bibliography::
-   refs.bib
+.. bibliography:: refs.bib
