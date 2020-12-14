@@ -18,7 +18,7 @@ analyzing polyphonic music and transcribes
 **chord progression** :cite:`chord`,
 **drum events** :cite:`drum`,
 **frame-level vocal melody** :cite:`vocalcontour`,
-**note-level vocal melody**  :cite:`vocal`, and
+**note-level vocal melody** :cite:`vocal`, and
 **beat** :cite:`beat`.
 
 Omnizart provides the main functionalities that construct the life-cycle of deep learning-based music transcription,
@@ -31,7 +31,7 @@ Demonstration
 Colab
 *****
 
-Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_ to transcribe your favorite song almost immediately!
+Play with the `Colab notebook <https://bit.ly/OmnizartColab>`_ to transcribe your favorite song almost immediately!
 
 Sound samples
 *************
