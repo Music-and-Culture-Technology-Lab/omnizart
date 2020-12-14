@@ -2,10 +2,23 @@
 
 ## 0.2.0 - 2020-
 
-Vocal transcription is available now!
+### Vocal melody transcription in both frame- and note-level are live!
+We release the modules for vocal melody transcription after a decent amount of effort. 
+Now you can transcribe your favorite singing voice.
 
 ### Features
-- Release `vocal` and `vocal-contour` submodules. 
+- Release `vocal` and `vocal-contour` submodules.
+
+### Enhancement
+- Improve chord transcription results by filtering out chord predictions with short duration.
+- Resolve the path for transcription output in a consistent way.
+
+### Documentation
+- Re-organize Quick Start and Tutorial pages to improve accessibility.
+- Move the section for development from README.md to CONTRIBUTING.md.
+
+### Bug Fix
+- Fix bugs of passing the wrong parameter to vamp for chroma feature extraction.
 
 ---
 

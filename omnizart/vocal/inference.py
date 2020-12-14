@@ -231,7 +231,7 @@ def infer_midi(interval, agg_f0, t_unit=0.02):
     Parameters
     ----------
     interval: list[tuple[float, float]]
-        The return value of ``infer_interval`` function.
+        The return value of ``infer_interval`` function. List of onset/offset pairs in seconds.
     agg_f0: list[dict]
         Aggregated f0 information. Each elements in the list should contain three columns:
         *start_time*, *end_time*, and *pitch*. Time units should be in seonds, and pitch
@@ -268,6 +268,10 @@ def infer_midi(interval, agg_f0, t_unit=0.02):
             continue
 
         note_num = int(round(pretty_midi.hz_to_note_number(avg_hz)))
+        if not (0 <= note_num <= 127):
+            logger.warning("Caught invalid note number: %d (should be in range 0~127). Skipping.", note_num)
+            skip_num += 1
+            continue
         note = pretty_midi.Note(velocity=80, pitch=note_num, start=onset, end=offset)
         notes.append(note)
 

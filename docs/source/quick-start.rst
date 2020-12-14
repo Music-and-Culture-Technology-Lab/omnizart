@@ -1,121 +1,71 @@
 Quick Start
 ===========
 
-`Colab <https://bit.ly/omnizart-colab>`_ <- Try ``omnizart`` online now, without any local installation and efforts!!
+Colab
+#####
 
+Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_  to transcribe your favorite song without hassles.
+You can also follow the installation below to enjoy Omnizart locally.
 
 Installation
 ############
 
 Using pip
 *********
+Omnizart is under developement and will be updated regularly on PyPI.
+Use ``pip`` to install the latest stable version.
 
 .. code-block:: bash
 
+    # Install Omnizart
     pip install omnizart
 
-    # Download the checkpoints after pip install
+    # Then download the checkpoints
     omnizart download-checkpoints
 
 
-From source
-***********
-
-The most guaranteed way for installing the pacakge from source.
-This will create a virtual environment under the same folder,
-and thus not installed system-wide. For the system-wide installation
-approach, please refer to the following section.
+Development installation
+************************
+For the development installation, clone the git repo and the installation 
+creates a virtual environment under the directory *omnizart/* by default.
 
 .. code-block:: bash
 
     git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
+
+    # Install dependenies, with checkpoints automatically downloaded
     cd omnizart
     make install
 
-
-The second way is by using the provided shell script to install, which
-is almost identical to execute ``make install`` command, except you
-can specify more settings for the installtoin including to install
-system-wide this time.
-
-.. code-block:: bash
-
-    ### Under the `omnizart` folder
-    # System-wide installation
-    ./scripts/install.sh
-
-    # Install with virtual environment
-    ./scripts/install.sh venv
-
-    ## For conda user, the following approach is recommanded, since there
-    ## are some conflicts between poetry and conda.
-    # Use pip for installation. Takes longer time.
-    export DEFAULT_INSTALL_APPROACH=pip
-    ./scripts/install.sh
-
-    # Use poetry for installation. Install pacakges in parallel, and thus much faster.
-    export DEFAULT_INSTALL_APPROACH=poetry
-    ./scripts/install.sh
-
-
-A more manual way for installing this package is by using ``poetry``, which we use this
-tool for the dependency management.
-
-.. code-block:: bash
-
-    # Under the `omnizart` folder
-    pip install --upgrade pip
-    pip install --upgrade setuptools
-    pip install poetry
+    # Install Dev dependencies, since they will not be installed by default
     poetry install
 
-    # Activate the virtual environment and download the checkpoints
-    poetry shell
-    source $(dirname $(poetry run which python))/activate
-    omnizart download-checkpoints
 
+CLI
+###
 
+Below is an example usuage of pitched instrument transcription with the command-line interface, 
+first transcribing a piece of music and then synthesizing the results.
+For more details and other types of transcription, refer to :doc:`tutorial`.
 
-The last and the most unstable, conventional way for installation
-is by using the ``setup.py`` and ``requirements.txt`` files.
+Transcription
+*************
 
-.. code-block:: bash
-
-    # Under the `omnizart` folder
-    pip install --upgrade pip
-    pip install --upgrade setuptools
-
-    # May encounter problems when installing the dependency 'madmom'
-    pip install -r requirements.txt
-    python setup.py install
-
-    # Download the checkpoints
-    omnizart download-checkpoints
-
-
-Transcribe a song
-#################
-
-Transcribes a song into a MIDI file and a CSV file that contains more complete
-and representative information.
+The example transcribes a piece of music, being monophonic or polyphonic, 
+to a MIDI file of the transcribed pitched notes and a CSV file with more information.
 
 .. code-block:: bash
 
-    omnizart music transcribe <path/to/audio.wav>
+    omnizart music transcribe <path/to/example.wav>
 
 
-Synthesize
-##########
+Sonification
+************
 
-After transcribing, it is usually hard to directly listen to the MIDI, which needs
-additional soundfont to synthesize the symbolic representation into raw audio.
-
-We hear your voice! We provide a built-in command, with default soundfont already
-included, to transform the MIDI into wav file. Execute following:
+Omnizart renders the transcribed MIDI file with default soundfonts,
+synthesizing an audio in WAV by the command below.
+For the first-time execution, it is expected to take a bit for downloading the free-licensed soundfonts.
 
 .. code-block:: bash
 
     omnizart synth example.mid
-
-When you execute the first time, it takes a little while for downloading the
-free-licensed soundfont.

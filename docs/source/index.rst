@@ -3,36 +3,46 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Omniscient Mozart
-=================
 
-**Omnizart**, a command line tool for all kinds of transcription tasks, including vocal melody, drum percussion,
-chord progression, notes of instruments, and beat tracking.
-
-Provides a consistent way for managing the life-cycle of transcription tasks, from dataset
-downloading, feature pre-processing, model training, to the final MIDI inference and synthesizing
-the output MIDI to raw audio. Pre-trained models are also provided for immediate use.
-
-Everything are deliberately designed for the ease of use. We've put a large amount of energies
-and time for making ``omnizart`` comfortable to use.
-
+OMNIZART: MUSIC TRANSCRIPTION MADE EASY
+=======================================
 
 .. figure:: ../../figures/features2.png
    :align: center
 
-   Omnizart provides a complete solution for managing every stage in the life-cycle of transcription tasks.
 
+Omnizart is a Python library and a streamlined solution for automatic music transcription.
+This library gathers the research outcomes from `Music and Cultural Technology Lab <https://sites.google.com/view/mctl/home>`_, 
+analyzing polyphonic music and transcribes 
+**musical notes of instruments** :cite:`music`,
+**chord progression** :cite:`chord`,
+**drum events** :cite:`drum`,
+**frame-level vocal melody** :cite:`vocalcontour`,
+**note-level vocal melody**  :cite:`vocal`, and
+**beat** :cite:`beat`.
 
-Demo
-####
+Omnizart provides the main functionalities that construct the life-cycle of deep learning-based music transcription,
+covering from *dataset downloading*, *feature pre-processing*, *model training*, to *transcription* and *sonification*.
+Pre-trained checkpoints are also provided for the immediate usage of transcription.
 
-Here is an demonstration of the chord and drum transcription using our system.
+Demonstration
+#############
+
+Colab
+*****
+
+Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_ to transcribe your favorite song almost immediately!
+
+Sound samples
+*************
+
+Original song
 
 .. raw:: html
 
    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/hjJhweRlE-A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-Result of chord transcription.
+Chord transcription
 
 .. raw:: html
 
@@ -42,7 +52,7 @@ Result of chord transcription.
    </audio>
 
 
-Result of drum transcription.
+Drum transcription
 
 .. raw:: html
 
@@ -52,7 +62,7 @@ Result of drum transcription.
    </audio>
 
 
-Result of vocal transcription.
+Note-level vocal transcription
 
 .. raw:: html
 
@@ -62,7 +72,7 @@ Result of vocal transcription.
    </audio>
 
 
-Result of vocal pitch contour transcription.
+Frame-level vocal transcription*
 
 .. raw:: html
 
@@ -73,9 +83,7 @@ Result of vocal pitch contour transcription.
 
 
 Source files can be downloaded `here <https://drive.google.com/file/d/15VqHearznV9L83cyl61ccACsXXJ4vBHo/view?usp=sharing>`_.
-You can use *Audacity* to open it.
-
-All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`_.
+You can use *Audacity* to open the files.
 
 
 .. toctree::
@@ -88,6 +96,7 @@ All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`
    drum/cli.rst
    chord/cli.rst
    vocal/cli.rst
+   vocal-contour/cli.rst
 
 
 .. toctree::
@@ -98,6 +107,7 @@ All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`
    drum/api.rst
    chord/api.rst
    vocal/api.rst
+   vocal-contour/api.rst
    feature.rst
    models.rst
    training.rst
@@ -110,3 +120,10 @@ All works are developed under `MCTLab <https://sites.google.com/view/mctl/home>`
    * :ref:`genindex`
    * :ref:`modindex`
    * :ref:`search`
+
+
+References
+##########
+
+.. bibliography::
+   refs.bib

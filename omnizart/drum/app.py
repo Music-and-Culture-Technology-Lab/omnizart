@@ -81,13 +81,7 @@ class DrumTranscription(BaseTranscription):
             hihat_th=model_settings.inference.hihat_th
         )
 
-        if output is not None:
-            save_to = output
-            if os.path.isdir(save_to):
-                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(save_to)
-            logger.info("MIDI file have been written to %s", save_to)
-
+        self._output_midi(output=output, input_audio=input_audio, midi=midi)
         logger.info("Transcription finished")
         return midi
 

@@ -26,7 +26,7 @@ from omnizart.models.pyramid_net import PyramidNet
 
 
 logger = get_logger("Vocal Transcription")
-vcapp = LazyLoader("vacpp", globals(), "omnizart.vocal_contour")
+vcapp = LazyLoader("vcapp", globals(), "omnizart.vocal_contour")
 
 
 class VocalTranscription(BaseTranscription):
@@ -119,14 +119,9 @@ class VocalTranscription(BaseTranscription):
         logger.info("Inferencing MIDI...")
         midi = infer_midi(interval, agg_f0, t_unit=model_settings.feature.hop_size)
 
-        if output is not None:
-            if os.path.isdir(output):
-                output = jpath(output, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(output)
-            logger.info("MIDI file has been written to %s", output)
-
+        self._output_midi(output=output, input_audio=input_audio, midi=midi)
         logger.info("Transcription finished")
-        return agg_f0, interval, midi
+        return midi
 
     def generate_feature(self, dataset_path, vocal_settings=None, num_threads=4):
         """Extract the feature of the whole dataset.
@@ -363,7 +358,7 @@ def _vocal_separation(wav_list, out_folder):
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
         separator = Separator('spleeter:2stems')
-        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-acces
+        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
         for idx, wav_path in enumerate(wav_list, 1):
             logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
             separator.separate_to_file(wav_path, out_folder)

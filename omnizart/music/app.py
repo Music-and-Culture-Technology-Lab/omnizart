@@ -1,7 +1,7 @@
 """Application class of music.
 
-Inludes core functions and interfaces for transcribing the audio, train
-a model, generate feature of datasets, and evaluate on models.
+Inludes core functions and interfaces for music transcription:
+model training, feature pre-processing, and audio transcription.
 
 See Also
 --------
@@ -112,12 +112,7 @@ class MusicTranscription(BaseTranscription):
             channel_program_mapping=self.mode_inst_mapping[model_settings.transcription_mode],
         )
 
-        if output is not None:
-            save_to = output
-            if os.path.isdir(save_to):
-                save_to = jpath(save_to, os.path.basename(input_audio).replace(".wav", ".mid"))
-            midi.write(save_to)
-            logger.info("MIDI file has been written to %s", save_to)
+        self._output_midi(output=output, input_audio=input_audio, midi=midi)
         if os.environ.get("LOG_LEVEL", "") == "debug":
             dump_pickle({"pred": pred}, "./debug_pred.pickle")
 
@@ -125,16 +120,15 @@ class MusicTranscription(BaseTranscription):
         return midi
 
     def generate_feature(self, dataset_path, music_settings=None, num_threads=4):
-        """Extract the feature of the whole dataset.
+        """Extract the feature from the given dataset.
 
-        To train the model, the first thing is to pre-process the data into feature
+        To train the model, the first step is to pre-process the data into feature
         representations. After downloading the dataset, use this function to generate
-        the feature by giving the path to where the dataset stored, and the program
-        will do all the rest of things.
+        the feature by giving the path of the stored dataset.
 
         To specify the output path, modify the attribute
-        ``music_settings.dataset.feature_save_path`` to the value you want.
-        It will default to the folder under where the dataset stored, generating
+        ``music_settings.dataset.feature_save_path``.
+        It defaults to the folder under where the dataset stored, generating
         two folders: ``train_feature`` and ``test_feature``.
 
         Parameters
@@ -145,12 +139,12 @@ class MusicTranscription(BaseTranscription):
             The configuration instance that holds all relative settings for
             the life-cycle of building a model.
         num_threads:
-            Number of threads for parallel extracting the features.
+            Number of threads for parallel extraction the feature.
 
         See Also
         --------
         omnizart.constants.datasets:
-            Supported dataset that can be applied and the split of training/testing pieces.
+            The supported datasets and the corresponding training/testing splits.
         """
         settings = self._validate_and_get_settings(music_settings)
 
@@ -224,7 +218,7 @@ class MusicTranscription(BaseTranscription):
     def train(self, feature_folder, model_name=None, input_model_path=None, music_settings=None):
         """Model training.
 
-        Train a new music model or continue to train on a pre-trained model.
+        Train the model from scratch or continue training given a model checkpoint.
 
         Parameters
         ----------
@@ -234,11 +228,11 @@ class MusicTranscription(BaseTranscription):
             The name of the trained model. If not given, will default to the
             current timestamp.
         input_model_path: Path
-            Specify the path to the pre-trained model if you want to continue
-            to fine-tune on the model.
+            Specify the path to the model checkpoint in order to fine-tune
+            the model.
         music_settings: MusicSettings
-            The configuration instance that holds all relative settings for
-            the life-cycle of building a model.
+            The configuration that holds all relative settings for
+            the life-cycle of model building.
         """
         settings = self._validate_and_get_settings(music_settings)
 
@@ -378,7 +372,7 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
 
 
 class MusicDatasetLoader(BaseDatasetLoader):
-    """Feature loader for training ``music`` model.
+    """Data loader for training the mdoel of ``music``.
 
     Load feature and label for training. Also converts the custom format of
     label into piano roll representation.
@@ -401,15 +395,15 @@ class MusicDatasetLoader(BaseDatasetLoader):
     channels: list[int]
         Channels to be used for training. Allowed values are [1, 2, 3].
     feature_num: int
-        Target input size of feature dimension. Padding zeros to the bottom and top
-        if the input feature size and target size is inconsistent.
+        Target size of feature dimension.
+        Zero padding is done to resolve mismatched input and target size.
 
     Yields
     ------
     feature:
-        Input feature for training the model.
+        Input features for model training.
     label:
-        Coressponding label representation.
+        Coressponding labels.
     """
     def __init__(
         self,

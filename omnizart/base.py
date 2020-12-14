@@ -14,7 +14,7 @@ import tensorflow as tf
 from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
-from omnizart.utils import get_logger, ensure_path_exists
+from omnizart.utils import get_logger, ensure_path_exists, get_filename
 from omnizart.constants.midi import LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
 
 
@@ -119,6 +119,19 @@ class BaseTranscription(metaclass=ABCMeta):
         ensure_path_exists(train_feat_out_path)
         ensure_path_exists(test_feat_out_path)
         return train_feat_out_path, test_feat_out_path
+
+    def _output_midi(self, output, input_audio, midi=None, verbose=True):
+        if output is None:
+            return None
+
+        if os.path.isdir(output):
+            output = jpath(output, get_filename(input_audio))
+        if midi is not None:
+            out_path = output if output.endswith(".mid") else f"{output}.mid"
+            midi.write(out_path)
+            if verbose:
+                logger.info("MIDI file has been written to %s.", out_path)
+        return output
 
     def _validate_and_get_settings(self, setting_instance):
         if setting_instance is not None:
