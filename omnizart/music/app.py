@@ -52,6 +52,15 @@ class MusicTranscription(BaseTranscription):
             "Stream": MUSICNET_INSTRUMENT_PROGRAMS,
             "Pop": POP_INSTRUMENT_PROGRAMES
         }
+        self.label_trans_mode_mapping = {
+            "note": "Piano",
+            "frame": "Piano",
+            "true-frame": "Piano",
+            "note-stream": "Stream",
+            "frame-stream": "Stream",
+            "true-frame-stream": "Stream",
+            "pop-note-stream": "Pop"
+        }
         self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
     def transcribe(self, input_audio, model_path=None, output="./"):
@@ -243,9 +252,11 @@ class MusicTranscription(BaseTranscription):
             settings.training.label_type = prev_set.training.label_type
             settings.training.channels = prev_set.training.channels
             settings.model.save_path = prev_set.model.save_path
+            settings.transcription_mode = prev_set.transcription_mode
 
         logger.info("Using label type: %s", settings.training.label_type)
         l_type = LabelType(settings.training.label_type)
+        settings.transcription_mode = self.label_trans_mode_mapping[settings.training.label_type]
 
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
