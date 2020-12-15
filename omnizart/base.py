@@ -155,6 +155,8 @@ class Label:
         Offset time of the note in seconds.
     note: int
         Midi number of the number, should be within 21~108.
+    instrument: int
+        Instrument number in Midi.
     velocity: int
         Velocity of keypress, should be wihtin 0~127
     start_beat: float
