@@ -458,10 +458,10 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         causal=False,
         relative_position=False,
         max_dist=16,
-        self_mask=False
+        self_mask=False,
+        **kwargs
     ):
-
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.n_units = n_units
         self.n_heads = n_heads

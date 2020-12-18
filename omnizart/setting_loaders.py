@@ -336,6 +336,8 @@ class BeatSettings(Settings):
         self.checkpoint_path: dict = None
         self.feature = self.BeatFeature()
         self.dataset = self.BeatDataset()
+        self.model = self.BeatModel()
+        self.training = self.BeatTraining()
 
         super().__init__(conf_path=conf_path)
 
@@ -349,3 +351,26 @@ class BeatSettings(Settings):
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatModel:
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
+            self.model_type: str = None
+            self.timesteps: int = None
+            self.lstm_hidden_dim: int = None
+            self.num_lstm_layers: int = None
+            self.attn_hidden_dim: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatTraining:
+        def __init__(self):
+            self.epoch: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.early_stop: int = None
+            self.init_learning_rate: float = None
+            self.down_beat_weight: float = None
