@@ -1,60 +1,10 @@
 # pylint: disable=W0102,C0103
-import csv
 import math
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 from omnizart.constants.feature import CHORD_INT_MAPPING, ENHARMONIC_TABLE
-
-
-def get_train_test_split_ids(index_file_path, train_test_split_id=1000, ignore_ids=[353, 634, 1106]):
-    """Get train/test set split indexes.
-
-    Default will use the folder ID as the partition base.
-    The index number smaller than `train_test_split_id` will be taken as the
-    training set, and others for testing set.
-
-    Parameters
-    ----------
-    index_file_path: Path
-        Path to the meta index file which records basic information of each piece.
-    train_test_split_id: int
-        Split index of training and testing set.
-    ignore_ids: list[int]
-        IDs to be ignored.
-
-    Returns
-    -------
-    train_ids: list[str]
-        Folder ids of training set.
-    test_ids: list[str]
-        Folder ids of testing set
-    """
-
-    reader = csv.DictReader(open(index_file_path, "r"), delimiter=",")
-    name_id_mapping = {}
-    for data in reader:
-        pid = int(data["id"])
-        if data["title"] != "" and pid not in ignore_ids:
-            name = data["artist"] + ": " + data["title"]
-            if name not in name_id_mapping:
-                name_id_mapping[name] = []
-            name_id_mapping[name].append(pid)  # Repetition count: 1->613, 2->110, 3->19
-
-    train_ids, test_ids = [], []  # Folder ids
-    for pids in name_id_mapping.values():
-        if len(pids) <= 2:
-            pid = pids[0]
-        else:
-            pid = pids[2]
-
-        if pid <= train_test_split_id:
-            train_ids.append(str(pid).zfill(4))
-        else:
-            test_ids.append(str(pid).zfill(4))
-
-    return train_ids, test_ids
 
 
 def extract_feature_label(feat_path, lab_path, segment_width=21, segment_hop=5, num_steps=100):
