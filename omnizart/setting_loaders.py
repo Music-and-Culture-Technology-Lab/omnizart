@@ -327,6 +327,38 @@ class VocalSettings(Settings):
             self.context_length: int = None
 
 
+@json_serializable(key_path="./General", value_path="./Value")
+class PatchCNNSettings(Settings):
+    default_setting_file: str = "patch_cnn.yaml"
+
+    def __init__(self, conf_path=None):
+        self.transcription_mode: str = None
+        self.checkpoint_path: dict = None
+        self.feature = self.PatchCNNFeature()
+        self.dataset = self.PatchCNNDataset()
+
+        super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class PatchCNNFeature:
+        def __init__(self):
+            self.patch_size: int = None
+            self.peak_threshold: float = None
+            self.sampling_rate: int = None
+            self.hop_size: float = None
+            self.window_size: int = None
+            self.frequency_resolution: float = None
+            self.frequency_center: float = None
+            self.time_center: float = None
+            self.gamma: list = None
+            self.bins_per_octave: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class PatchCNNDataset:
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
+
 class BeatSettings(Settings):
     default_setting_file: str = "beat.yaml"
 

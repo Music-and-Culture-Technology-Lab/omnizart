@@ -1,0 +1,64 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart patch-cnn transcribe` command.
+        Type: String 
+        Value: Vocal
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            Vocal: checkpoints/patch_cnn/patch_cnn_vocal
+    Feature:
+        Description: Default settings of feature extraction
+        Settings:
+            PatchSize:
+                Description: Input size of feature dimension.
+                Type: Integer
+                Value: 25
+            PeakThreshold:
+                Description: Threshold used to filter out peaks with small value.
+                Type: Float
+                Value: 0.5
+            HopSize:
+                Description: Hop size in seconds with respect to sampling rate.
+                Type: Float
+                Value: 0.02
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 44100
+            WindowSize:
+                Type: Integer
+                Value: 7939
+            FrequencyResolution:
+                Type: Float
+                Value: 2.0
+            FrequencyCenter:
+                Description: Lowest frequency to extract.
+                Type: Float
+                Value: 27.5
+            TimeCenter:
+                Description: Highest frequency to extract (1/time_center).
+                Type: Float
+                Value: 0.00022287
+            Gamma:
+                Type: List
+                SubType: Float
+                Value: [0.24, 0.6, 1.0]
+            BinsPerOctave:
+                Description: Number of bins for each octave.
+                Type: Integer
+                Value: 48
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +

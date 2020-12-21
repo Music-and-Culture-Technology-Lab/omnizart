@@ -5,6 +5,8 @@ Author: Lisu
 Mantainer: BreezeWhite
 """
 # pylint: disable=C0103,W0102,R0914
+import math
+
 import numpy as np
 import scipy
 
@@ -186,6 +188,21 @@ def spectral_flux(spec, invert=False, norm=True):
     return flux
 
 
+def _find_peaks(data, threshold=0.5):
+    pre = data[1:-1] - data[:-2]
+    pre = np.where(pre < 0, 0, 1)
+    post = data[1:-1] - data[2:]
+    post = np.where(post < 0, 0, 1)
+    mask = pre * post
+    ext_mask = np.concatenate([[0], mask, [0]])
+    pdata = data * ext_mask
+    pdata = pdata - np.tile(threshold * np.amax(pdata), (len(data), 1))
+    
+    pks = np.where(pdata > 0)[0]
+    locs = np.where(ext_mask == 1)[0]
+    return pks, locs
+
+
 def _extract_cfp(
     x,
     fs,
@@ -332,3 +349,56 @@ def extract_vocal_cfp(filename, down_fs=16000, **kwargs):
     x, fs = load_audio(filename, sampling_rate=down_fs)
     logger.debug("Extracting vocal feature")
     return _extract_vocal_cfp(x, fs, **kwargs)
+
+
+def extract_patch_cfp(
+    filename,
+    patch_size=25,
+    threshold=0.5,
+    hop=0.02,  # in seconds
+    win_size=2049,
+    fr=2.0,
+    fc=80.0,
+    tc=1/1000.0,
+    g=[0.24, 0.6, 1],
+    bin_per_octave=48,
+    down_fs=16000,
+    max_sample=2000
+):
+    logger.debug("Extracting CFP feature")
+    Z, spec, gcos, ceps, cenf = extract_cfp(
+        filename,
+        down_fs=down_fs,
+        hop=hop,
+        win_size=win_size,
+        fr=fr,
+        fc=fc,
+        tc=tc,
+        g=g,
+        bin_per_octave=bin_per_octave,
+        max_sample=max_sample
+    )
+
+    half_ps = patch_size // 2
+    pad_z = np.pad(Z, ((0, half_ps), (half_ps, half_ps)), constant_values=0)  # feat x time
+    feat_dim, length = pad_z.shape
+
+    data = np.zeros([length, patch_size, patch_size])
+    mapping = np.zeros([length, 2])
+    counter = 0
+    for tidx in range(half_ps, pad_z.shape[1] - half_ps):
+        _, locs = _find_peaks(pad_z[:, tidx], threshold=threshold)
+        for idx in locs:
+            if (idx >= half_ps) and (idx < feat_dim - half_ps) and (counter < length):
+                prange = range(idx - half_ps, idx + half_ps + 1)
+                trange = range(tidx - half_ps, tidx + half_ps + 1)
+                data[counter] = pad_z[np.ix_(prange, trange)]
+                mapping[counter] = np.array([idx, tidx])
+                counter += 1
+            # elif (idx >= half_ps) and (idx < feat_dim - half_ps) and (counter >= length):
+            #     logger.error("Out of the biggest size. Please shorten the input audio.")
+
+    data = data[:counter - 1]
+    mapping = mapping[:counter - 1]
+    pad_z = pad_z[:-half_ps, half_ps:-half_ps]  # Remove padding
+    return data, mapping, pad_z
