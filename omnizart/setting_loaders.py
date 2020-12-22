@@ -336,6 +336,7 @@ class PatchCNNSettings(Settings):
         self.checkpoint_path: dict = None
         self.feature = self.PatchCNNFeature()
         self.dataset = self.PatchCNNDataset()
+        self.training = self.PatchCNNTraining()
 
         super().__init__(conf_path=conf_path)
 
@@ -358,6 +359,18 @@ class PatchCNNSettings(Settings):
         def __init__(self):
             self.save_path: str = None
             self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class PatchCNNTraining:
+        def __init__(self):
+            self.epoch: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.early_stop: int = None
+            self.init_learning_rate: float = None
+
 
 class BeatSettings(Settings):
     default_setting_file: str = "beat.yaml"

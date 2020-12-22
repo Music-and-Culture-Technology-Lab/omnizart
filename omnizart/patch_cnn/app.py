@@ -1,15 +1,17 @@
-import os
 from os.path import join as jpath
+from datetime import datetime
 
 import h5py
+import tensorflow as tf
 
 from omnizart.io import write_yaml
-from omnizart.utils import get_logger, parallel_generator, get_filename
-from omnizart.base import BaseTranscription
+from omnizart.utils import get_logger, parallel_generator, get_filename, ensure_path_exists
+from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.constants import datasets as d_struct
 from omnizart.feature.cfp import extract_patch_cfp
 from omnizart.setting_loaders import PatchCNNSettings
 from omnizart.models.patch_cnn import patch_cnn_model
+from omnizart.train import get_train_val_feat_file_list
 
 
 logger = get_logger("Patch CNN Transcription")
@@ -27,7 +29,7 @@ class PatchCNNTranscription(BaseTranscription):
 
         struct = d_struct.MIR1KStructure
 
-        ## Below are examples of dealing with multiple supported datasets.
+        ## Below are examples of dealing with multiple supported datasets.  # noqa: E266
         # dataset_type = resolve_dataset_type(
         #     dataset_path,
         #     keywords={"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
@@ -86,7 +88,67 @@ class PatchCNNTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, patch_cnn_settings=None):
-        pass
+        settings = self._validate_and_get_settings(patch_cnn_settings)
+
+        if input_model_path is not None:
+            logger.info("Continue to train on model: %s", input_model_path)
+            model, prev_set = self._load_model(input_model_path, custom_objects=self.custom_objects)
+            settings.feature.patch_size = prev_set.feature.patch_size
+
+        logger.info("Constructing dataset instance")
+        split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
+
+        output_types = (tf.float32, tf.float32)
+        train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
+        train_dataset = BaseDatasetLoader(
+                feature_files=train_feat_files,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+            ) \
+            .get_dataset(settings.training.batch_size, output_types=output_types)
+        val_dataset = BaseDatasetLoader(
+                feature_files=val_feat_files,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+            ) \
+            .get_dataset(settings.training.val_batch_size, output_types=output_types)
+
+        if input_model_path is None:
+            logger.info("Constructing new model")
+            model = patch_cnn_model(patch_size=settings.feature.patch_size)
+
+        logger.info("Compiling model")
+        optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
+        model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
+
+        logger.info("Resolving model output patch")
+        if model_name is None:
+            model_name = str(datetime.now()).replace(" ", "_")
+        if not model_name.startswith(settings.model.save_prefix):
+            model_name = settings.model.save_prefix + "_" + model_name
+        model_save_path = jpath(settings.model.save_path, model_name)
+        ensure_path_exists(model_save_path)
+        write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
+        write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
+        logger.info("Model output to: %s", model_save_path)
+
+        logger.info("Constrcuting callbacks")
+        callbacks = [
+            tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop),
+            tf.keras.callbacks.ModelCheckpoint(jpath(model_save_path, "weights.h5"), save_weights_only=True)
+        ]
+        logger.info("Callback list: %s", callbacks)
+
+        logger.info("Start training")
+        history = model.fit(
+            train_dataset,
+            validation_data=val_dataset,
+            epochs=settings.training.epoch,
+            steps_per_epoch=settings.training.steps,
+            validation_steps=settings.training.val_steps,
+            callbacks=callbacks,
+            use_multiprocessing=True,
+            workers=8
+        )
+        return model_save_path, history
 
 
 def _all_in_one_extract(data_pair, **feat_params):

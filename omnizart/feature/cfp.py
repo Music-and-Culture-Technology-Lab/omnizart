@@ -5,8 +5,6 @@ Author: Lisu
 Mantainer: BreezeWhite
 """
 # pylint: disable=C0103,W0102,R0914
-import math
-
 import numpy as np
 import scipy
 
@@ -197,7 +195,7 @@ def _find_peaks(data, threshold=0.5):
     ext_mask = np.concatenate([[0], mask, [0]])
     pdata = data * ext_mask
     pdata = pdata - np.tile(threshold * np.amax(pdata), (len(data), 1))
-    
+
     pks = np.where(pdata > 0)[0]
     locs = np.where(ext_mask == 1)[0]
     return pks, locs
@@ -366,7 +364,7 @@ def extract_patch_cfp(
     max_sample=2000
 ):
     logger.debug("Extracting CFP feature")
-    Z, spec, gcos, ceps, cenf = extract_cfp(
+    Z, _, _, _, _ = extract_cfp(
         filename,
         down_fs=down_fs,
         hop=hop,
@@ -389,7 +387,7 @@ def extract_patch_cfp(
     for tidx in range(half_ps, pad_z.shape[1] - half_ps):
         _, locs = _find_peaks(pad_z[:, tidx], threshold=threshold)
         for idx in locs:
-            if (idx >= half_ps) and (idx < feat_dim - half_ps) and (counter < length):
+            if (half_ps <= idx < feat_dim - half_ps) and (counter < length):
                 prange = range(idx - half_ps, idx + half_ps + 1)
                 trange = range(tidx - half_ps, tidx + half_ps + 1)
                 data[counter] = pad_z[np.ix_(prange, trange)]
