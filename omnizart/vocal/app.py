@@ -114,7 +114,7 @@ class VocalTranscription(BaseTranscription):
         )
 
         logger.info("Extracting pitch contour")
-        agg_f0 = vcapp.app.transcribe(input_audio, model_path=model_settings.inference.pitch_model)
+        agg_f0 = vcapp.app.transcribe(input_audio, model_path=model_settings.inference.pitch_model, output=output)
 
         logger.info("Inferencing MIDI...")
         midi = infer_midi(interval, agg_f0, t_unit=model_settings.feature.hop_size)
