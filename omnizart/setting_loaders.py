@@ -337,6 +337,7 @@ class PatchCNNSettings(Settings):
         self.feature = self.PatchCNNFeature()
         self.dataset = self.PatchCNNDataset()
         self.training = self.PatchCNNTraining()
+        self.inference = self.PatchCNNInference()
 
         super().__init__(conf_path=conf_path)
 
@@ -370,6 +371,12 @@ class PatchCNNSettings(Settings):
             self.val_batch_size: int = None
             self.early_stop: int = None
             self.init_learning_rate: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class PatchCNNInference:
+        def __init__(self):
+            self.threshold: float = None
+            self.max_method: str = None
 
 
 class BeatSettings(Settings):

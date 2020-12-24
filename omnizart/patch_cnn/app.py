@@ -1,8 +1,12 @@
+import os
 from os.path import join as jpath
 from datetime import datetime
 
 import h5py
+import numpy as np
 import tensorflow as tf
+from mir_eval import sonify
+from scipy.io.wavfile import write as wavwrite
 
 from omnizart.io import write_yaml
 from omnizart.utils import get_logger, parallel_generator, get_filename, ensure_path_exists
@@ -11,6 +15,7 @@ from omnizart.constants import datasets as d_struct
 from omnizart.feature.cfp import extract_patch_cfp
 from omnizart.setting_loaders import PatchCNNSettings
 from omnizart.models.patch_cnn import patch_cnn_model
+from omnizart.patch_cnn.inference import inference
 from omnizart.train import get_train_val_feat_file_list
 
 
@@ -21,8 +26,52 @@ class PatchCNNTranscription(BaseTranscription):
     def __init__(self, conf_path=None):
         super().__init__(PatchCNNSettings, conf_path=conf_path)
 
-    def transcribe(self, input_audio, model_path, output="./"):
-        pass
+    def transcribe(self, input_audio, model_path=None, output="./"):
+        if not os.path.isfile(input_audio):
+            raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
+
+        logger.info("Loading model...")
+        model, model_settings = self._load_model(model_path)
+
+        logger.info("Extracting patch CFP feature...")
+        feat, mapping, zzz, cenf = extract_patch_cfp(
+            input_audio,
+            patch_size=model_settings.feature.patch_size,
+            threshold=model_settings.feature.peak_threshold,
+            down_fs=model_settings.feature.sampling_rate,
+            hop=model_settings.feature.hop_size,
+            win_size=model_settings.feature.window_size,
+            fr=model_settings.feature.frequency_resolution,
+            fc=model_settings.feature.frequency_center,
+            tc=model_settings.feature.time_center,
+            g=model_settings.feature.gamma,
+            bin_per_octave=model_settings.feature.bins_per_octave,
+        )
+
+        logger.info("Predicting...")
+        feat = np.expand_dims(feat, axis=-1)
+        pred = model.predict(feat)
+
+        logger.info("Inferring contour...")
+        contour = inference(
+            pred,
+            mapping,
+            zzz,
+            cenf,
+            threshold=model_settings.inference.threshold,
+            max_method=model_settings.inference.max_method
+        )
+
+        output = self._output_midi(output, input_audio, verbose=False)
+        if output is not None:
+            timestamp = np.arange(len(contour)) * model_settings.feature.hop_size
+            wav = sonify.pitch_contour(
+                timestamp, contour, model_settings.feature.sampling_rate, amplitudes=0.5 * np.ones(len(contour))
+            )
+            wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
+            logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
+
+        return contour
 
     def generate_feature(self, dataset_path, patch_cnn_settings=None, num_threads=4):
         settings = self._validate_and_get_settings(patch_cnn_settings)
@@ -199,4 +248,4 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
 
 if __name__ == "__main__":
     app = PatchCNNTranscription()
-    app.generate_feature("/data/MIR-1K")
+    contour = app.transcribe("/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav")

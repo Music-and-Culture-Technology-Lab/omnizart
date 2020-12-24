@@ -3,13 +3,13 @@ General:
     TranscriptionMode:
         Description: Mode of transcription by executing the `omnizart patch-cnn transcribe` command.
         Type: String 
-        Value: Vocal
+        Value: Melody
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
         SubType: [String, String]
         Value:
-            Vocal: checkpoints/patch_cnn/patch_cnn_vocal
+            Melody: checkpoints/patch_cnn/patch_cnn_melody
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -28,21 +28,21 @@ General:
             SamplingRate:
                 Description: Adjust input sampling rate to this value.
                 Type: Integer
-                Value: 44100
+                Value: 16000
             WindowSize:
                 Type: Integer
-                Value: 7939
+                Value: 2049
             FrequencyResolution:
                 Type: Float
                 Value: 2.0
             FrequencyCenter:
                 Description: Lowest frequency to extract.
                 Type: Float
-                Value: 27.5
+                Value: 80
             TimeCenter:
                 Description: Highest frequency to extract (1/time_center).
                 Type: Float
-                Value: 0.00022287
+                Value: 0.001
             Gamma:
                 Type: List
                 SubType: Float
@@ -62,6 +62,18 @@ General:
                 Description: Path for storing the extracted feature. Default to the path under the dataset folder.
                 Type: String
                 Value: +
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            Threshold:
+                Description: Threshold of the prediction value.
+                Type: Float
+                Value: 0.5
+            MaxMethod:
+                Description: Method of determine the position of the max prediction value.
+                Type: String
+                Value: posterior
+                Choices: ["posterior", "prior"]
     Training:
         Description: Hyper parameters for training
         Settings:
