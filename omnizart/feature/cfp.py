@@ -188,13 +188,16 @@ def spectral_flux(spec, invert=False, norm=True):
 
 def _find_peaks(data, threshold=0.5):
     pre = data[1:-1] - data[:-2]
-    pre = np.where(pre < 0, 0, 1)
+    pre[pre < 0] = 0
+    pre[pre > 0] = 1
+
     post = data[1:-1] - data[2:]
-    post = np.where(post < 0, 0, 1)
+    post[post < 0] = 0
+    post[post > 0] = 1
     mask = pre * post
     ext_mask = np.concatenate([[0], mask, [0]])
     pdata = data * ext_mask
-    pdata = pdata - np.tile(threshold * np.amax(pdata), (len(data), 1))
+    pdata -= np.tile(threshold * np.amax(pdata, axis=0), (len(data)))
 
     pks = np.where(pdata > 0)[0]
     locs = np.where(ext_mask == 1)[0]
@@ -364,7 +367,7 @@ def extract_patch_cfp(
     max_sample=2000
 ):
     logger.debug("Extracting CFP feature")
-    Z, _, _, _, _ = extract_cfp(
+    Z, _, _, _, cenf = extract_cfp(
         filename,
         down_fs=down_fs,
         hop=hop,
@@ -381,22 +384,25 @@ def extract_patch_cfp(
     pad_z = np.pad(Z, ((0, half_ps), (half_ps, half_ps)), constant_values=0)  # feat x time
     feat_dim, length = pad_z.shape
 
-    data = np.zeros([length, patch_size, patch_size])
-    mapping = np.zeros([length, 2])
+    max_len = 300000
+    data = np.zeros([max_len, patch_size, patch_size])
+    mapping = np.zeros([max_len, 2])
     counter = 0
     for tidx in range(half_ps, pad_z.shape[1] - half_ps):
         _, locs = _find_peaks(pad_z[:, tidx], threshold=threshold)
         for idx in locs:
-            if (half_ps <= idx < feat_dim - half_ps) and (counter < length):
+            if (half_ps <= idx < feat_dim - half_ps) and (counter < max_len):
                 prange = range(idx - half_ps, idx + half_ps + 1)
                 trange = range(tidx - half_ps, tidx + half_ps + 1)
-                data[counter] = pad_z[np.ix_(prange, trange)]
-                mapping[counter] = np.array([idx, tidx])
+                patch = pad_z[np.ix_(prange, trange)]
+                data[counter, :, :] = patch.reshape(1, patch_size, patch_size)
+                mapping[counter] = np.array([idx, tidx - half_ps])
                 counter += 1
-            # elif (idx >= half_ps) and (idx < feat_dim - half_ps) and (counter >= length):
-            #     logger.error("Out of the biggest size. Please shorten the input audio.")
+            elif (half_ps <= idx < feat_dim - half_ps) and (counter >= max_len):
+                logger.error("The given audio is too long. Please clip the audio.")
 
-    data = data[:counter - 1]
-    mapping = mapping[:counter - 1]
-    pad_z = pad_z[:-half_ps, half_ps:-half_ps]  # Remove padding
-    return data, mapping, pad_z
+    # Remove padding
+    data = data[:counter - 1][half_ps:-half_ps]
+    mapping = mapping[:counter - 1][half_ps:-half_ps]
+    pad_z = pad_z[:-half_ps, half_ps:-half_ps]
+    return data, mapping, pad_z, cenf
