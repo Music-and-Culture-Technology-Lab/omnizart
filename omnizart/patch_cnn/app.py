@@ -8,8 +8,8 @@ import tensorflow as tf
 from mir_eval import sonify
 from scipy.io.wavfile import write as wavwrite
 
-from omnizart.io import write_yaml
-from omnizart.utils import get_logger, parallel_generator, get_filename, ensure_path_exists
+from omnizart.io import write_yaml, write_agg_f0_results
+from omnizart.utils import get_logger, parallel_generator, get_filename, ensure_path_exists, aggregate_f0_info
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.constants import datasets as d_struct
 from omnizart.feature.cfp import extract_patch_cfp
@@ -62,9 +62,14 @@ class PatchCNNTranscription(BaseTranscription):
             threshold=model_settings.inference.threshold,
             max_method=model_settings.inference.max_method
         )
+        agg_f0 = aggregate_f0_info(contour, t_unit=model_settings.feature.hop_size)
 
         output = self._output_midi(output, input_audio, verbose=False)
         if output is not None:
+            # Output contour information
+            write_agg_f0_results(agg_f0, output_path=f"{output}_f0.csv")
+
+            # Synthesize audio
             timestamp = np.arange(len(contour)) * model_settings.feature.hop_size
             wav = sonify.pitch_contour(
                 timestamp, contour, model_settings.feature.sampling_rate, amplitudes=0.5 * np.ones(len(contour))
@@ -72,7 +77,7 @@ class PatchCNNTranscription(BaseTranscription):
             wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
             logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
-        return contour
+        return agg_f0
 
     def generate_feature(self, dataset_path, patch_cnn_settings=None, num_threads=4):
         settings = self._validate_and_get_settings(patch_cnn_settings)
