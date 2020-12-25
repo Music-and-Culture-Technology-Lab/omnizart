@@ -16,6 +16,7 @@ from omnizart.feature.cfp import extract_patch_cfp
 from omnizart.setting_loaders import PatchCNNSettings
 from omnizart.models.patch_cnn import patch_cnn_model
 from omnizart.patch_cnn.inference import inference
+from omnizart.vocal.labels import MIR1KlabelExtraction
 from omnizart.train import get_train_val_feat_file_list
 
 
@@ -168,7 +169,7 @@ class PatchCNNTranscription(BaseTranscription):
         optimizer = tf.keras.optimizers.Adam(learning_rate=settings.training.init_learning_rate)
         model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
 
-        logger.info("Resolving model output patch")
+        logger.info("Resolving model output path")
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
@@ -200,11 +201,23 @@ class PatchCNNTranscription(BaseTranscription):
         return model_save_path, history
 
 
-def _all_in_one_extract(data_pair, **feat_params):
-    feat, mapping, zzz = extract_patch_cfp(data_pair[0], **feat_params)
+def extract_label(label_path, label_loader, t_unit):
+    labels = label_loader.load_label(label_path)
+    max_sec = max(label.end_time for label in labels)
+    frm_num = round(max_sec / t_unit)
+    gt_roll = np.zeros((frm_num, 2))
+    for label in labels:
+        start_idx = int(round(label.start_time / t_unit))
+        end_idx = int(round(label.end_time / t_unit))
+        gt_roll[start_idx:end_idx, 1] = 1
+    gt_roll[:, 0] = 1 - gt_roll[:, 1]
+    return gt_roll
 
-    # TODO: implement label extraction and execute here
-    return feat, mapping, zzz
+
+def _all_in_one_extract(data_pair, **feat_params):
+    feat, mapping, zzz, _ = extract_patch_cfp(data_pair[0], **feat_params)
+    label = extract_label(data_pair[1], MIR1KlabelExtraction, t_unit=feat_params["hop"])
+    return feat, mapping, zzz, label
 
 
 def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_threads=4):
@@ -231,7 +244,7 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
             **feat_params
         )
     )
-    for idx, ((feat, mapping, zzz), audio_idx) in iters:
+    for idx, ((feat, mapping, zzz, label), audio_idx) in iters:
         audio = data_pair_list[audio_idx][0]
 
         # logger.info("Progress: %s/%s - %s", idx+1, len(data_pair_list), audio)
@@ -243,9 +256,11 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
             out_f.create_dataset("feature", data=feat)
             out_f.create_dataset("mapping", data=mapping)
             out_f.create_dataset("Z", data=zzz)
+            out_f.create_dataset("label", data=label)
     print("")
 
 
 if __name__ == "__main__":
     app = PatchCNNTranscription()
-    contour = app.transcribe("/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav")
+    app.generate_feature("/data/MIR-1K")
+    # contour = app.transcribe("/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav")
