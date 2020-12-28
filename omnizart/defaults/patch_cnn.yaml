@@ -51,6 +51,17 @@ General:
                 Description: Number of bins for each octave.
                 Type: Integer
                 Value: 48
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: patch_cnn
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/patch_cnn
     Dataset:
         Description: Settings of datasets.
         Settings:
@@ -68,7 +79,7 @@ General:
             Threshold:
                 Description: Threshold of the prediction value.
                 Type: Float
-                Value: 0.5
+                Value: 0.05
             MaxMethod:
                 Description: Method of determine the position of the max prediction value.
                 Type: String
@@ -84,11 +95,11 @@ General:
             Steps:
                 Description: Number of training steps for each epoch.
                 Type: Integer
-                Value: 1000
+                Value: 2000
             ValSteps:
                 Description: Number of validation steps after each training epoch.
                 Type: Integer
-                Value: 500
+                Value: 300
             BatchSize:
                 Description: Batch size of each training step.
                 Type: Integer
@@ -104,4 +115,4 @@ General:
             InitLearningRate:
                 Descriptoin: Initial learning rate.
                 Type: Float
-                Value: 0.0001
+                Value: 0.00001

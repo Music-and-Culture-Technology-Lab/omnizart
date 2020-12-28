@@ -335,6 +335,7 @@ class PatchCNNSettings(Settings):
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
         self.feature = self.PatchCNNFeature()
+        self.model = self.PatchCNNModel()
         self.dataset = self.PatchCNNDataset()
         self.training = self.PatchCNNTraining()
         self.inference = self.PatchCNNInference()
@@ -354,6 +355,12 @@ class PatchCNNSettings(Settings):
             self.time_center: float = None
             self.gamma: list = None
             self.bins_per_octave: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class PatchCNNModel:
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
 
     @json_serializable(key_path="./Settings", value_path="./Value")
     class PatchCNNDataset:

@@ -15,7 +15,7 @@ def inference(pred, mapping, zzz, cenf, threshold=0.5, max_method="posterior"):
         candidate = maps[np.where(maps[:, 1] == tidx)[0]]
         if len(candidate) < 1:
             continue
-        elif len(candidate) == 1:
+        if len(candidate) == 1:
             contour[int(candidate[0, 1])] = candidate[0, 0]
         else:
             if max_method == "posterior":
@@ -25,8 +25,8 @@ def inference(pred, mapping, zzz, cenf, threshold=0.5, max_method="posterior"):
             freq_idx = int(freq_idx)
             contour[int(candidate[freq_idx, 1])] = candidate[freq_idx, 0]
 
-    for idx in range(len(contour)):
-        if contour[idx] > 1:
-            contour[idx] = cenf[int(contour[idx])]
+    for idx, cont in enumerate(contour):
+        if cont > 1:
+            contour[idx] = cenf[int(cont)]
 
     return contour

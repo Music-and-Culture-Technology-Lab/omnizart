@@ -6,6 +6,7 @@ import h5py
 import numpy as np
 import tensorflow as tf
 from mir_eval import sonify
+from mir_eval.util import midi_to_hz
 from scipy.io.wavfile import write as wavwrite
 
 from omnizart.io import write_yaml, write_agg_f0_results
@@ -77,7 +78,7 @@ class PatchCNNTranscription(BaseTranscription):
             wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
             logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
-        return agg_f0
+        return agg_f0, pred
 
     def generate_feature(self, dataset_path, patch_cnn_settings=None, num_threads=4):
         settings = self._validate_and_get_settings(patch_cnn_settings)
@@ -154,17 +155,18 @@ class PatchCNNTranscription(BaseTranscription):
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
 
         output_types = (tf.float32, tf.float32)
+        output_shapes = ((settings.feature.patch_size, settings.feature.patch_size, 1), (2))
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
-        train_dataset = BaseDatasetLoader(
+        train_dataset = PatchCNNDatasetLoader(
                 feature_files=train_feat_files,
                 num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
             ) \
-            .get_dataset(settings.training.batch_size, output_types=output_types)
-        val_dataset = BaseDatasetLoader(
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
+        val_dataset = PatchCNNDatasetLoader(
                 feature_files=val_feat_files,
                 num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
             ) \
-            .get_dataset(settings.training.val_batch_size, output_types=output_types)
+            .get_dataset(settings.training.val_batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Constructing new model")
@@ -206,22 +208,30 @@ class PatchCNNTranscription(BaseTranscription):
         return model_save_path, history
 
 
-def extract_label(label_path, label_loader, t_unit):
+def extract_label(label_path, label_loader, mapping, cenf, t_unit):
     labels = label_loader.load_label(label_path)
-    max_sec = max(label.end_time for label in labels)
-    frm_num = round(max_sec / t_unit)
-    gt_roll = np.zeros((frm_num, 2))
+    total_len = len(mapping)
+    cenf = np.array(cenf)
+    gt_roll = np.zeros((total_len, 2))
     for label in labels:
-        start_idx = int(round(label.start_time / t_unit))
-        end_idx = int(round(label.end_time / t_unit))
-        gt_roll[start_idx:end_idx, 1] = 1
+        start_tidx = int(round(label.start_time / t_unit))
+        end_tidx = int(round(label.end_time / t_unit))
+        frm_start = np.argmin(np.abs(mapping[:, 1] - start_tidx))
+        frm_end = total_len - np.argmin(np.abs(mapping[::-1, 1] - end_tidx))
+        cur_hz = midi_to_hz(label.note)
+        pitch_idx = np.argmin(np.abs(cenf - cur_hz))
+        for idx in range(frm_start, frm_end):
+            dist = abs(mapping[idx, 0] - pitch_idx)
+            prob = 1 / (1 + dist)
+            gt_roll[idx, 1] = prob
+
     gt_roll[:, 0] = 1 - gt_roll[:, 1]
     return gt_roll
 
 
 def _all_in_one_extract(data_pair, **feat_params):
-    feat, mapping, zzz, _ = extract_patch_cfp(data_pair[0], **feat_params)
-    label = extract_label(data_pair[1], MIR1KlabelExtraction, t_unit=feat_params["hop"])
+    feat, mapping, zzz, cenf = extract_patch_cfp(data_pair[0], **feat_params)
+    label = extract_label(data_pair[1], MIR1KlabelExtraction, mapping=mapping, cenf=cenf, t_unit=feat_params["hop"])
     return feat, mapping, zzz, label
 
 
@@ -265,7 +275,8 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
     print("")
 
 
-if __name__ == "__main__":
-    app = PatchCNNTranscription()
-    app.generate_feature("/data/MIR-1K")
-    # contour = app.transcribe("/data/omnizart/checkpoints/ytd_audio_00105_TRFSJUR12903CB23E7.mp3.wav")
+class PatchCNNDatasetLoader(BaseDatasetLoader):
+    def _get_feature(self, hdf_name, slice_start):
+        feat = self.hdf_refs[hdf_name][self.feat_col_name][slice_start:slice_start + self.slice_hop].squeeze()
+        return np.expand_dims(feat, axis=-1)
+

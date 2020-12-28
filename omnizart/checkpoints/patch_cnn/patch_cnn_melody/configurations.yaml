@@ -51,6 +51,17 @@ General:
                 Description: Number of bins for each octave.
                 Type: Integer
                 Value: 48
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: patch_cnn
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/patch_cnn
     Dataset:
         Description: Settings of datasets.
         Settings:

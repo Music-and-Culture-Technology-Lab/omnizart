@@ -382,7 +382,7 @@ def extract_patch_cfp(
 
     half_ps = patch_size // 2
     pad_z = np.pad(Z, ((0, half_ps), (half_ps, half_ps)), constant_values=0)  # feat x time
-    feat_dim, length = pad_z.shape
+    feat_dim, _ = pad_z.shape
 
     max_len = 300000
     data = np.zeros([max_len, patch_size, patch_size])
