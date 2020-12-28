@@ -25,10 +25,33 @@ logger = get_logger("Patch CNN Transcription")
 
 
 class PatchCNNTranscription(BaseTranscription):
+    """Application class of PatchCNN module."""
     def __init__(self, conf_path=None):
         super().__init__(PatchCNNSettings, conf_path=conf_path)
 
     def transcribe(self, input_audio, model_path=None, output="./"):
+        """Transcribe frame-level fundamental frequency of vocal from the given audio.
+
+        Parameters
+        ----------
+        input_audio: Path
+            Path to the wav audio file.
+        model_path: Path
+            Path to the trained model or the transcription mode. If given a path, should be
+            the folder that contains `arch.yaml`, `weights.h5`, and `configuration.yaml`.
+        output: Path (optional)
+            Path for writing out the extracted vocal f0. Default to current path.
+
+        Returns
+        -------
+        agg_f0: list[dict]
+            List of aggregated F0 information, with each entry containing the onset, offset,
+            and freqeuncy (Hz).
+
+        See Also
+        --------
+        omnizart.cli.patch_cnn.transcribe: The coressponding command line entry.
+        """
         if not os.path.isfile(input_audio):
             raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
 
@@ -56,10 +79,10 @@ class PatchCNNTranscription(BaseTranscription):
 
         logger.info("Inferring contour...")
         contour = inference(
-            pred,
-            mapping,
-            zzz,
-            cenf,
+            pred=pred,
+            mapping=mapping,
+            zzz=zzz,
+            cenf=cenf,
             threshold=model_settings.inference.threshold,
             max_method=model_settings.inference.max_method
         )
@@ -78,9 +101,35 @@ class PatchCNNTranscription(BaseTranscription):
             wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
             logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
-        return agg_f0, pred
+        return agg_f0
 
     def generate_feature(self, dataset_path, patch_cnn_settings=None, num_threads=4):
+        """Extract the feature from the given dataset.
+
+        To train the model, the first step is to pre-process the data into feature
+        representations. After downloading the dataset, use this function to generate
+        the feature by giving the path of the stored dataset.
+
+        To specify the output path, modify the attribute
+        ``patch_cnn_settings.dataset.feature_save_path``.
+        It defaults to the folder of the stored dataset, and creates
+        two folders: ``train_feature`` and ``test_feature``.
+
+        Parameters
+        ----------
+        dataset_path: Path
+            Path to the downloaded dataset.
+        patch_cnn_settings: PatchCNNSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        num_threads:
+            Number of threads for parallel extraction of the feature.
+
+        See Also
+        --------
+        omnizart.constants.datasets:
+            The supported datasets and the corresponding training/testing splits.
+        """
         settings = self._validate_and_get_settings(patch_cnn_settings)
 
         struct = d_struct.MIR1KStructure
@@ -144,6 +193,24 @@ class PatchCNNTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, patch_cnn_settings=None):
+        """Model training.
+
+        Train the model from scratch or continue training given a model checkpoint.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the generated feature.
+        model_name: str
+            The name of the trained model. If not given, will default to the
+            current timestamp.
+        input_model_path: Path
+            Specify the path to the model checkpoint in order to fine-tune
+            the model.
+        patch_cnn_settings: VocalContourSettings
+            The configuration that holds all relative settings for
+            the life-cycle of model building.
+        """
         settings = self._validate_and_get_settings(patch_cnn_settings)
 
         if input_model_path is not None:
@@ -209,6 +276,37 @@ class PatchCNNTranscription(BaseTranscription):
 
 
 def extract_label(label_path, label_loader, mapping, cenf, t_unit):
+    """Label extraction function of PatchCNN module.
+
+    Extracts the label representation required by PatchCNN module.
+    The output dimesions are: patch_length x 2. The second dimension indicates whether
+    there is an active vocal pitch or not of that patch.
+
+    Small probabilities are assigned to those patch with pitch slightly shifted
+    to augment the sparse label. The probabilities are computed according to the distance
+    of that pitch index to the ground-truth index: 1 / (dist + 1).
+
+    Parameters
+    ----------
+    label_path: Path
+        Path to the ground-truth file.
+    label_loader:
+        Label loader that contains ``load_label`` function for parsing the ground-truth
+        file into list :class:`Label` representation.
+    mapping: 2D numpy array
+        The original frequency and time index of patches.
+        See ``omnizart.feature.cfp.extract_patch_cfp`` for more details.
+    cenf: list[float]
+        Center frequencies in Hz of each frequency index.
+    t_unit: float
+        Time unit of each frame in seconds.
+
+    Returns
+    -------
+    gt_roll: 2D numpy array
+        A sequence of binary classes, represents whether the patch contains the pitch
+        of vocal.
+    """
     labels = label_loader.load_label(label_path)
     total_len = len(mapping)
     cenf = np.array(cenf)
@@ -276,7 +374,7 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
 
 
 class PatchCNNDatasetLoader(BaseDatasetLoader):
+    """Dataset loader for PatchCNN module."""
     def _get_feature(self, hdf_name, slice_start):
         feat = self.hdf_refs[hdf_name][self.feat_col_name][slice_start:slice_start + self.slice_hop].squeeze()
         return np.expand_dims(feat, axis=-1)
-

@@ -2,6 +2,31 @@ import numpy as np
 
 
 def inference(pred, mapping, zzz, cenf, threshold=0.5, max_method="posterior"):
+    """Infers pitch contour from the model prediction.
+
+    Parameters
+    ----------
+    pred:
+        The predicted results of the model.
+    mapping: 2D numpy array
+        The original frequency and time index of patches.
+        See ``omnizart.feature.cfp.extract_patch_cfp`` for more details.
+    zzz: 2D numpy array
+        The original CFP feature.
+    cenf: list[float]
+        Center frequencies in Hz of each frequency index.
+    threshold: float
+        Threshold for filtering value of predictions.
+    max_method: {'posterior', 'prior'}
+        The approach for determine the frequency. Method of *posterior* assigns the
+        frequency value according to the given ``mapping`` parameter, and *prior*
+        uses the given ``zzz`` feature for the determination.
+
+    Returns
+    -------
+    contour: 1D numpy array
+        Sequence of freqeuncies in Hz, representing the inferred pitch contour.
+    """
     pred = pred[:, 1]
 
     pred_idx = np.where(pred > threshold)
@@ -22,6 +47,8 @@ def inference(pred, mapping, zzz, cenf, threshold=0.5, max_method="posterior"):
                 freq_idx = np.where(candidate[:, 2] == np.max(candidate[:, 2]))[0]
             elif max_method == "prior":
                 freq_idx = zzz[candidate[:, 0].astype('int'), tidx].argmax(axis=0)
+            else:
+                raise ValueError(f"Invalid maximum method: {max_method}")
             freq_idx = int(freq_idx)
             contour[int(candidate[freq_idx, 1])] = candidate[freq_idx, 0]
 

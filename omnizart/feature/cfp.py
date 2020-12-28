@@ -366,6 +366,49 @@ def extract_patch_cfp(
     down_fs=16000,
     max_sample=2000
 ):
+    """Extract patch CFP feature for PatchCNN module.
+
+    Parameters
+    ----------
+    filename: Path
+        Path to the audio
+    patch_size: int
+        Height and width of each feature patch.
+    threshold: float
+        Threshold for determine peaks.
+    hop: float
+        Hop size in seconds, with regard to the sampling rate.
+    win_size: int
+        Window size.
+    fr: float
+        Frequency resolution.
+    fc: float
+        Lowest start frequency.
+    tc: float
+        Inverse number of the highest frequency bound.
+    g: list[float]
+        Power factor of the output STFT results.
+    bin_per_octave: int
+        Number of bins in each octave.
+    down_fs: int
+        Resample to this sampling rate, if the loaded audio has a different value.
+    max_sample: int
+        Maximum number of frames to be processed for each computation. Adjust to
+        a smaller number if your RAM is not enough.
+
+    Returns
+    -------
+    patch: 3D numpy array
+        Sequence of patch CFP features. The position of the patches are inferred
+        according to the amplitude of the spectrogram.
+    mapping: 2D numpy array
+        Records the original frequency and time index of each patch, having dimension
+        of len(patch) x 2.
+    Z: 2D numpy array
+        The original CFP feature. Dim: freq x time
+    cenf: list[float]
+        Records the corresponding center frequencies of the frequency dimension.
+    """
     logger.debug("Extracting CFP feature")
     Z, _, _, _, cenf = extract_cfp(
         filename,
