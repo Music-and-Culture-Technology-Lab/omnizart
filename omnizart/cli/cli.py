@@ -141,6 +141,11 @@ def download_checkpoints(output_path):
             "fid": "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
             "save_as": "checkpoints/vocal/contour/weights.h5",
             "file_length": 50732192
+        },
+        "patch_cnn_melody": {
+            "fid": "17vl7t3pQwzYqPgRN1HPOCVQjvUF8Jtbu",
+            "save_as": "checkpoints/patch_cnn/patch_cnn_melody/weights.h5",
+            "file_length": 729904
         }
     }
 
