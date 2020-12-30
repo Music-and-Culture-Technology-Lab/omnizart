@@ -4,7 +4,7 @@
 ignore=bootstrap_data
 
 [MESSAGES CONTROL]
-disable=C0114,C0116,C0330
+disable=C0114,C0116,C0330,R0801
 
 [BASIC]
 good-names=i,j,k,it,_,e,t,r,c,db,h,ii,z,fs

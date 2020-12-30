@@ -335,3 +335,56 @@ class LazyLoader(types.ModuleType):
 def get_filename(path):
     abspath = os.path.abspath(path)
     return os.path.splitext(os.path.basename(abspath))[0]
+
+
+def aggregate_f0_info(pred, t_unit):
+    """Aggregation function of F0 contour.
+
+    Aggregate the repeated frequencies in continuous frames into higher-level
+    representation, with information of start time, end time, and frequency.
+
+    Parameters
+    ----------
+    pred: 1D numpy array
+        Array that contains F0 information (Hz) in frame-level.
+    t_unit: float
+        Time unit of each frame.
+
+    Returns
+    -------
+    agg_f0: list[dict]
+        Aggregated F0 information. Each element in the list represents
+        a single freqeuncy with start time, end time, and frequency
+        recorded in *dict*.
+    """
+    results = []
+
+    cur_idx = 0
+    start_idx = 0
+    last_hz = pred[0]
+    eps = 1e-6
+    while cur_idx < len(pred):
+        cur_hz = pred[cur_idx]
+        if abs(cur_hz - last_hz) < eps:
+            # Skip to the next index with different frequency.
+            last_hz = cur_hz
+            cur_idx += 1
+            continue
+
+        if last_hz < eps:
+            # Almost equals to zero. Ignored.
+            last_hz = cur_hz
+            start_idx = cur_idx
+            cur_idx += 1
+            continue
+
+        results.append({
+            "start_time": round(start_idx * t_unit, 6),
+            "end_time": round(cur_idx * t_unit, 6),
+            "frequency": last_hz
+        })
+
+        start_idx = cur_idx
+        cur_idx += 1
+        last_hz = cur_hz
+    return results

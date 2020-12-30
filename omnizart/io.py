@@ -1,4 +1,5 @@
 import os
+import csv
 import pickle
 
 import yaml
@@ -118,3 +119,24 @@ def write_yaml(json_obj, output_path, dump=True):
     # If dump is false, then the json_obj should be yaml string already.
     out_str = yaml.dump(json_obj) if dump else json_obj
     open(output_path, "w").write(out_str)
+
+
+def write_agg_f0_results(agg_f0, output_path):
+    """Write out aggregated F0 information as a CSV file.
+
+    Parameters
+    ----------
+    agg_f0: list[dict]
+        List of aggregated F0 information.
+    output_path: Path
+        Path for output the CSV file. Should contain the file name.
+
+    See Also
+    --------
+    omnizart.utils.aggregate_f0_info:
+        The function for generating the aggregated F0 information.
+    """
+    with open(output_path, "w") as out:
+        writer = csv.DictWriter(out, fieldnames=["start_time", "end_time", "frequency"])
+        writer.writeheader()
+        writer.writerows(agg_f0)
