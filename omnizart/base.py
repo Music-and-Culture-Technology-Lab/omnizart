@@ -253,7 +253,14 @@ class BaseDatasetLoader:
         self.slice_hop = slice_hop
         self.feat_col_name = feat_col_name
 
-        self.hdf_refs = {hdf: h5py.File(hdf, "r") for hdf in self.hdf_files}
+        self.hdf_refs = {}
+        for hdf in self.hdf_files:
+            try:
+                self.hdf_refs[hdf] = h5py.File(hdf, "r")
+            except OSError:
+                msg = f"Resource temporarily unavailable due to file being opened without closing. Resource: {hdf}"
+                logger.error(msg)
+                raise OSError(msg)
         self.num_samples = num_samples
 
         # Initialize indices of index-to-file mapping to ensure all samples

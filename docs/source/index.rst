@@ -92,6 +92,13 @@ You can use *Audacity* to open the files.
 
    quick-start.rst
    tutorial.rst
+   add-new-modules.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Commnad Line Interface
+
    music/cli.rst
    drum/cli.rst
    chord/cli.rst
