@@ -220,10 +220,10 @@ class PatchCNNTranscription(BaseTranscription):
 
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
+        train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
         output_types = (tf.float32, tf.float32)
         output_shapes = ((settings.feature.patch_size, settings.feature.patch_size, 1), (2))
-        train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
         train_dataset = PatchCNNDatasetLoader(
                 feature_files=train_feat_files,
                 num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
