@@ -10,7 +10,6 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 
 # pylint: disable=C0103,W0612,E0611,W0613
 import os
-import csv
 from os.path import join as jpath
 from datetime import datetime
 
@@ -24,8 +23,8 @@ from mir_eval import sonify
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.setting_loaders import VocalContourSettings
 from omnizart.feature.wrapper_func import extract_cfp_feature
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, resolve_dataset_type
-from omnizart.io import write_yaml
+from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, resolve_dataset_type, aggregate_f0_info
+from omnizart.io import write_yaml, write_agg_f0_results
 from omnizart.train import train_epochs, get_train_val_feat_file_list
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
 from omnizart.vocal_contour.inference import inference
@@ -81,7 +80,7 @@ class VocalContourTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         f0 = inference(feature[:, :, 0], model, timestep=model_settings.training.timesteps)
-        agg_f0 = _aggregate_f0_info(f0, t_unit=model_settings.feature.hop_size)
+        agg_f0 = aggregate_f0_info(f0, t_unit=model_settings.feature.hop_size)
 
         timestamp = np.arange(len(f0)) * model_settings.feature.hop_size
         wav = sonify.pitch_contour(
@@ -90,7 +89,7 @@ class VocalContourTranscription(BaseTranscription):
 
         output = self._output_midi(output, input_audio, verbose=False)
         if output is not None:
-            _write_f0_results(agg_f0, f"{output}_f0.csv")
+            write_agg_f0_results(agg_f0, f"{output}_f0.csv")
             wavwrite(f"{output}_trans.wav", model_settings.feature.sampling_rate, wav)
             logger.info("Text and Wav files have been written to %s", os.path.abspath(os.path.dirname(output)))
 
@@ -410,44 +409,3 @@ class VocalContourDatasetLoader(BaseDatasetLoader):
             label_len = len(label)
 
         return feature, label
-
-
-def _aggregate_f0_info(pred, t_unit):
-    results = []
-
-    cur_idx = 0
-    start_idx = 0
-    last_hz = pred[0]
-    eps = 1e-6
-    while cur_idx < len(pred):
-        cur_hz = pred[cur_idx]
-        if abs(cur_hz - last_hz) < eps:
-            # Skip to the next index with different frequency.
-            last_hz = cur_hz
-            cur_idx += 1
-            continue
-
-        if last_hz < eps:
-            # Almost equals to zero. Ignored.
-            last_hz = cur_hz
-            start_idx = cur_idx
-            cur_idx += 1
-            continue
-
-        results.append({
-            "start_time": round(start_idx * t_unit, 6),
-            "end_time": round(cur_idx * t_unit, 6),
-            "pitch": last_hz
-        })
-
-        start_idx = cur_idx
-        cur_idx += 1
-        last_hz = cur_hz
-    return results
-
-
-def _write_f0_results(agg_f0, output_path):
-    with open(output_path, "w") as out:
-        writer = csv.DictWriter(out, fieldnames=["start_time", "end_time", "pitch"])
-        writer.writeheader()
-        writer.writerows(agg_f0)

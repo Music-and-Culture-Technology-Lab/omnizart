@@ -186,6 +186,24 @@ def spectral_flux(spec, invert=False, norm=True):
     return flux
 
 
+def _find_peaks(data, threshold=0.5):
+    pre = data[1:-1] - data[:-2]
+    pre[pre < 0] = 0
+    pre[pre > 0] = 1
+
+    post = data[1:-1] - data[2:]
+    post[post < 0] = 0
+    post[post > 0] = 1
+    mask = pre * post
+    ext_mask = np.concatenate([[0], mask, [0]])
+    pdata = data * ext_mask
+    pdata -= np.tile(threshold * np.amax(pdata, axis=0), (len(data)))
+
+    pks = np.where(pdata > 0)[0]
+    locs = np.where(ext_mask == 1)[0]
+    return pks, locs
+
+
 def _extract_cfp(
     x,
     fs,
@@ -332,3 +350,102 @@ def extract_vocal_cfp(filename, down_fs=16000, **kwargs):
     x, fs = load_audio(filename, sampling_rate=down_fs)
     logger.debug("Extracting vocal feature")
     return _extract_vocal_cfp(x, fs, **kwargs)
+
+
+def extract_patch_cfp(
+    filename,
+    patch_size=25,
+    threshold=0.5,
+    hop=0.02,  # in seconds
+    win_size=2049,
+    fr=2.0,
+    fc=80.0,
+    tc=1/1000.0,
+    g=[0.24, 0.6, 1],
+    bin_per_octave=48,
+    down_fs=16000,
+    max_sample=2000
+):
+    """Extract patch CFP feature for PatchCNN module.
+
+    Parameters
+    ----------
+    filename: Path
+        Path to the audio
+    patch_size: int
+        Height and width of each feature patch.
+    threshold: float
+        Threshold for determine peaks.
+    hop: float
+        Hop size in seconds, with regard to the sampling rate.
+    win_size: int
+        Window size.
+    fr: float
+        Frequency resolution.
+    fc: float
+        Lowest start frequency.
+    tc: float
+        Inverse number of the highest frequency bound.
+    g: list[float]
+        Power factor of the output STFT results.
+    bin_per_octave: int
+        Number of bins in each octave.
+    down_fs: int
+        Resample to this sampling rate, if the loaded audio has a different value.
+    max_sample: int
+        Maximum number of frames to be processed for each computation. Adjust to
+        a smaller number if your RAM is not enough.
+
+    Returns
+    -------
+    patch: 3D numpy array
+        Sequence of patch CFP features. The position of the patches are inferred
+        according to the amplitude of the spectrogram.
+    mapping: 2D numpy array
+        Records the original frequency and time index of each patch, having dimension
+        of len(patch) x 2.
+    Z: 2D numpy array
+        The original CFP feature. Dim: freq x time
+    cenf: list[float]
+        Records the corresponding center frequencies of the frequency dimension.
+    """
+    logger.debug("Extracting CFP feature")
+    Z, _, _, _, cenf = extract_cfp(
+        filename,
+        down_fs=down_fs,
+        hop=hop,
+        win_size=win_size,
+        fr=fr,
+        fc=fc,
+        tc=tc,
+        g=g,
+        bin_per_octave=bin_per_octave,
+        max_sample=max_sample
+    )
+
+    half_ps = patch_size // 2
+    pad_z = np.pad(Z, ((0, half_ps), (half_ps, half_ps)), constant_values=0)  # feat x time
+    feat_dim, _ = pad_z.shape
+
+    max_len = 300000
+    data = np.zeros([max_len, patch_size, patch_size])
+    mapping = np.zeros([max_len, 2])
+    counter = 0
+    for tidx in range(half_ps, pad_z.shape[1] - half_ps):
+        _, locs = _find_peaks(pad_z[:, tidx], threshold=threshold)
+        for idx in locs:
+            if (half_ps <= idx < feat_dim - half_ps) and (counter < max_len):
+                prange = range(idx - half_ps, idx + half_ps + 1)
+                trange = range(tidx - half_ps, tidx + half_ps + 1)
+                patch = pad_z[np.ix_(prange, trange)]
+                data[counter, :, :] = patch.reshape(1, patch_size, patch_size)
+                mapping[counter] = np.array([idx, tidx - half_ps])
+                counter += 1
+            elif (half_ps <= idx < feat_dim - half_ps) and (counter >= max_len):
+                logger.error("The given audio is too long. Please clip the audio.")
+
+    # Remove padding
+    data = data[:counter - 1][half_ps:-half_ps]
+    mapping = mapping[:counter - 1][half_ps:-half_ps]
+    pad_z = pad_z[:-half_ps, half_ps:-half_ps]
+    return data, mapping, pad_z, cenf

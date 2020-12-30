@@ -97,6 +97,7 @@ You can use *Audacity* to open the files.
    chord/cli.rst
    vocal/cli.rst
    vocal-contour/cli.rst
+   patch-cnn/cli.rst
 
 
 .. toctree::
@@ -108,6 +109,7 @@ You can use *Audacity* to open the files.
    chord/api.rst
    vocal/api.rst
    vocal-contour/api.rst
+   patch-cnn/api.rst
    feature.rst
    models.rst
    training.rst
