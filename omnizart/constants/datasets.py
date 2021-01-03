@@ -25,7 +25,9 @@ Complete information of supported datasets are as following:
 """
 # pylint: disable=C0112
 import os
+import csv
 import glob
+from os.path import join as jpath
 from shutil import copy
 
 from omnizart.io import load_yaml
@@ -324,11 +326,102 @@ class McGillBillBoard(BaseStructure):
     #: Path to the index file relative the dataset
     index_file_path = "./billboard-2.0-index.csv"
 
-    #: Split ID of train/val set.
+    #: Split ID of train/test set.
     train_test_split_id = 1000
 
     #: Dataset URL
     url = "https://drive.google.com/uc?export=download&id=1_K_Fof4zt1IQvs1aDmf-5wY0wHqgcPlC"
+
+    #: File IDs to be ignored
+    ignore_ids = [353, 634, 1106]
+
+    @classmethod
+    def _get_train_test_split_ids(cls, dataset_path):
+        """Get train/test set split indexes.
+
+        Default will use the folder ID as the partition base.
+        The index number smaller than `train_test_split_id` will be taken as the
+        training set, and others for testing set.
+
+        Returns
+        -------
+        train_ids: list[str]
+            Folder ids of training set.
+        test_ids: list[str]
+            Folder ids of testing set
+        """
+        index_file_path = jpath(dataset_path, cls.index_file_path)
+        reader = csv.DictReader(open(index_file_path, "r"), delimiter=",")
+        name_id_mapping = {}
+        for data in reader:
+            pid = int(data["id"])
+            if data["title"] != "" and pid not in cls.ignore_ids:
+                name = data["artist"] + ": " + data["title"]
+                if name not in name_id_mapping:
+                    name_id_mapping[name] = []
+                name_id_mapping[name].append(pid)  # Repetition count: 1->613, 2->110, 3->19
+
+        train_ids, test_ids = [], []  # Folder ids
+        for pids in name_id_mapping.values():
+            if len(pids) <= 2:
+                pid = pids[0]
+            else:
+                pid = pids[2]
+
+            if pid <= cls.train_test_split_id:
+                train_ids.append(str(pid).zfill(4))
+            else:
+                test_ids.append(str(pid).zfill(4))
+
+        return train_ids, test_ids
+
+    @classmethod
+    def _get_paths_in_ids(cls, target_folder, target_file, ids):
+        output = []
+        for f_name in os.listdir(target_folder):
+            if f_name in ids:
+                output.append(jpath(target_folder, f_name, target_file))
+        return output
+
+    @classmethod
+    def get_train_wavs(cls, dataset_path):
+        train_ids, _ = cls._get_train_test_split_ids(dataset_path)
+        feat_path = jpath(dataset_path, cls.feature_folder)
+        return cls._get_paths_in_ids(feat_path, cls.feature_file_name, train_ids)
+
+    @classmethod
+    def get_train_labels(cls, dataset_path):
+        train_ids, _ = cls._get_train_test_split_ids(dataset_path)
+        label_path = jpath(dataset_path, cls.label_folder)
+        return cls._get_paths_in_ids(label_path, cls.label_file_name, train_ids)
+
+    @classmethod
+    def get_test_wavs(cls, dataset_path):
+        _, test_ids = cls._get_train_test_split_ids(dataset_path)
+        feat_path = jpath(dataset_path, cls.feature_folder)
+        return cls._get_paths_in_ids(feat_path, cls.feature_file_name, test_ids)
+
+    @classmethod
+    def get_test_labels(cls, dataset_path):
+        _, test_ids = cls._get_train_test_split_ids(dataset_path)
+        label_path = jpath(dataset_path, cls.label_folder)
+        return cls._get_paths_in_ids(label_path, cls.label_file_name, test_ids)
+
+    @classmethod
+    def _get_data_pair(cls, wavs, labels):
+        wavs = [os.path.abspath(wav) for wav in wavs]
+        labels = [os.path.abspath(label) for label in labels]
+        get_id = lambda path: os.path.basename(os.path.dirname(path))
+        label_path_mapping = {get_id(label): label for label in labels}
+
+        pair = []
+        for wav in wavs:
+            wav_id = get_id(wav)
+            label_path = label_path_mapping[wav_id]
+            assert os.path.exists(wav)
+            assert os.path.exists(label_path)
+            pair.append((wav, label_path))
+        return pair
 
 
 class BeethovenSonatasStructure(BaseStructure):

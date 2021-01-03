@@ -52,6 +52,15 @@ class MusicTranscription(BaseTranscription):
             "Stream": MUSICNET_INSTRUMENT_PROGRAMS,
             "Pop": POP_INSTRUMENT_PROGRAMES
         }
+        self.label_trans_mode_mapping = {
+            "note": "Piano",
+            "frame": "Piano",
+            "true-frame": "Piano",
+            "note-stream": "Stream",
+            "frame-stream": "Stream",
+            "true-frame-stream": "Stream",
+            "pop-note-stream": "Pop"
+        }
         self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
     def transcribe(self, input_audio, model_path=None, output="./"):
@@ -86,10 +95,19 @@ class MusicTranscription(BaseTranscription):
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
-        # TODO: The feature parameters are not passed as in `generate_feature`;
-        # this might cause problem due to the mismatch between the generated feature (for training)
-        # and the extracted feature (for transcription)
-        feature = extract_cfp_feature(input_audio, harmonic=model_settings.feature.harmonic)
+        feature = extract_cfp_feature(
+            input_audio,
+            down_fs=model_settings.feature.sampling_rate,
+            hop=model_settings.feature.hop_size,
+            win_size=model_settings.feature.window_size,
+            fr=model_settings.feature.frequency_resolution,
+            fc=model_settings.feature.frequency_center,
+            tc=model_settings.feature.time_center,
+            g=model_settings.feature.gamma,
+            bin_per_octave=model_settings.feature.bins_per_octave,
+            harmonic_num=model_settings.feature.harmonic_number,
+            harmonic=model_settings.feature.harmonic
+        )
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
@@ -243,9 +261,11 @@ class MusicTranscription(BaseTranscription):
             settings.training.label_type = prev_set.training.label_type
             settings.training.channels = prev_set.training.channels
             settings.model.save_path = prev_set.model.save_path
+            settings.transcription_mode = prev_set.transcription_mode
 
         logger.info("Using label type: %s", settings.training.label_type)
         l_type = LabelType(settings.training.label_type)
+        settings.transcription_mode = self.label_trans_mode_mapping[settings.training.label_type]
 
         logger.info("Constructing dataset instance")
         split = settings.training.steps / (settings.training.steps + settings.training.val_steps)
@@ -403,7 +423,7 @@ class MusicDatasetLoader(BaseDatasetLoader):
     feature:
         Input features for model training.
     label:
-        Coressponding labels.
+        Corresponding labels.
     """
     def __init__(
         self,

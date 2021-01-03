@@ -12,7 +12,7 @@ from omnizart.io import write_yaml
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
-from omnizart.chord.features import get_train_test_split_ids, extract_feature_label
+from omnizart.chord.features import extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
 from omnizart.models.chord_model import ChordModel, ReduceSlope
@@ -105,46 +105,22 @@ class ChordTranscription(BaseTranscription):
         """
         settings = self._validate_and_get_settings(chord_settings)
 
-        index_file_path = jpath(dataset_path, McGillBillBoard.index_file_path)
-        train_ids, test_ids = get_train_test_split_ids(
-            index_file_path, train_test_split_id=McGillBillBoard.train_test_split_id
-        )
-
         # Resolve feature output path
         train_feat_out_path, test_feat_out_path = self._resolve_feature_output_path(dataset_path, settings)
         logger.info("Output training feature to %s", train_feat_out_path)
         logger.info("Output testing feature to %s", test_feat_out_path)
 
-        feat_path = jpath(dataset_path, McGillBillBoard.feature_folder)
-        label_path = jpath(dataset_path, McGillBillBoard.label_folder)
-        input_list = []
-        for f_name in os.listdir(feat_path):
-            if not (f_name in train_ids or f_name in test_ids):
-                continue
-            input_list.append((
-                jpath(feat_path, f_name, McGillBillBoard.feature_file_name),
-                jpath(label_path, f_name, McGillBillBoard.label_file_name)
-            ))
+        train_data_pair = McGillBillBoard.get_train_data_pair(dataset_path)
+        test_data_pair = McGillBillBoard.get_test_data_pair(dataset_path)
+        logger.info("Total number of training data: %d", len(train_data_pair))
+        logger.info("Total number of testing data: %d", len(test_data_pair))
 
-        iters = enumerate(
-            parallel_generator(
-                _extract_feature_arg_wrapper,
-                input_list,
-                segment_width=settings.feature.segment_width,
-                segment_hop=settings.feature.segment_hop,
-                num_steps=settings.feature.num_steps,
-                max_workers=num_threads,
-                chunk_size=num_threads
-            )
-        )
-        for idx, ((feature), feat_idx) in iters:
-            feat_path = input_list[feat_idx][0]
-            f_name = os.path.basename(os.path.dirname(feat_path))
-            logger.info("Progress: %s/%s - %s", idx + 1, len(input_list), f_name)
+        # Start feature extraction
+        logger.info("Start to extract training feature")
+        _parallel_feature_extraction(train_data_pair, train_feat_out_path, num_threads=num_threads)
 
-            feat_out_path = train_feat_out_path if f_name in train_ids else test_feat_out_path
-            out_path = jpath(feat_out_path, f_name + ".hdf")
-            _write_feature(feature, out_path=out_path)
+        logger.info("Start to extract testing feature")
+        _parallel_feature_extraction(test_data_pair, test_feat_out_path, num_threads=num_threads)
 
         # Writing out the settings
         write_yaml(settings.to_json(), jpath(train_feat_out_path, ".success.yaml"))
@@ -180,7 +156,10 @@ class ChordTranscription(BaseTranscription):
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
         output_types = (tf.float32, (tf.int32, tf.int32))
-        output_shapes = ([100, 504], ([100], [100]))
+        output_shapes = (
+            [settings.feature.num_steps, settings.feature.segment_width * 24],
+            ([settings.feature.num_steps], [settings.feature.num_steps])
+        )
         train_dataset = McGillDatasetLoader(
                 feature_files=train_feat_files,
                 num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
@@ -255,6 +234,24 @@ class ChordTranscription(BaseTranscription):
 
 def _extract_feature_arg_wrapper(input_tup, **kwargs):
     return extract_feature_label(input_tup[0], input_tup[1], **kwargs)
+
+
+def _parallel_feature_extraction(data_pair, out_path, num_threads=4):
+    iters = enumerate(
+        parallel_generator(
+            _extract_feature_arg_wrapper,
+            data_pair,
+            max_workers=num_threads,
+            chunk_size=num_threads
+        )
+    )
+    for idx, ((feature), feat_idx) in iters:
+        f_name = os.path.dirname(data_pair[feat_idx][0])
+
+        # logger.info("Progress: %d/%d - %s", idx + 1, len(data_pair), f_name)
+        print(f"Progress: {idx+1}/{len(data_pair)} - {f_name}", end="\r")
+        out_hdf = jpath(out_path, os.path.basename(f_name) + ".hdf")
+        _write_feature(feature, out_path=out_hdf)
 
 
 def _write_feature(feature, out_path):

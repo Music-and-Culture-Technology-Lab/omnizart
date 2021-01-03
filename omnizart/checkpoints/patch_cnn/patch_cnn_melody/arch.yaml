@@ -1,0 +1,135 @@
+backend: tensorflow
+class_name: Sequential
+config:
+  layers:
+  - class_name: Conv2D
+    config:
+      activation: relu
+      activity_regularizer: null
+      batch_input_shape: !!python/tuple [null, 25, 25, 1]
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: !!python/tuple [1, 1]
+      dtype: float32
+      filters: 8
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: RandomNormal
+        config: {mean: 0.0, seed: null, stddev: 0.01}
+      kernel_regularizer: null
+      kernel_size: !!python/tuple [5, 5]
+      name: conv2d_1
+      padding: valid
+      strides: !!python/tuple [1, 1]
+      trainable: true
+      use_bias: true
+  - class_name: Dropout
+    config: {dtype: float32, name: dropout_1, noise_shape: null, rate: 0.25, seed: null,
+      trainable: true}
+  - class_name: Conv2D
+    config:
+      activation: relu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      data_format: channels_last
+      dilation_rate: !!python/tuple [1, 1]
+      dtype: float32
+      filters: 16
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: RandomNormal
+        config: {mean: 0.0, seed: null, stddev: 0.01}
+      kernel_regularizer: null
+      kernel_size: !!python/tuple [3, 3]
+      name: conv2d_2
+      padding: valid
+      strides: !!python/tuple [1, 1]
+      trainable: true
+      use_bias: true
+  - class_name: Dropout
+    config: {dtype: float32, name: dropout_2, noise_shape: null, rate: 0.25, seed: null,
+      trainable: true}
+  - class_name: MaxPooling2D
+    config:
+      data_format: channels_last
+      dtype: float32
+      name: max_pooling2d_1
+      padding: valid
+      pool_size: !!python/tuple [2, 2]
+      strides: !!python/tuple [2, 2]
+      trainable: true
+  - class_name: Flatten
+    config: {data_format: channels_last, dtype: float32, name: flatten_1, trainable: true}
+  - class_name: Dense
+    config:
+      activation: relu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer: null
+      name: dense_1
+      trainable: true
+      units: 128
+      use_bias: true
+  - class_name: Dropout
+    config: {dtype: float32, name: dropout_3, noise_shape: null, rate: 0.25, seed: null,
+      trainable: true}
+  - class_name: Dense
+    config:
+      activation: relu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer: null
+      name: dense_2
+      trainable: true
+      units: 64
+      use_bias: true
+  - class_name: Dropout
+    config: {dtype: float32, name: dropout_4, noise_shape: null, rate: 0.25, seed: null,
+      trainable: true}
+  - class_name: Dense
+    config:
+      activation: softmax
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      dtype: float32
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer: null
+      name: dense_3
+      trainable: true
+      units: 2
+      use_bias: true
+  name: sequential_1
+keras_version: 2.3.0

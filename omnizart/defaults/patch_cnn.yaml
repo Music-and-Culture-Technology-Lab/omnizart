@@ -1,0 +1,118 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart patch-cnn transcribe` command.
+        Type: String 
+        Value: Melody
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            Melody: checkpoints/patch_cnn/patch_cnn_melody
+    Feature:
+        Description: Default settings of feature extraction
+        Settings:
+            PatchSize:
+                Description: Input size of feature dimension.
+                Type: Integer
+                Value: 25
+            PeakThreshold:
+                Description: Threshold used to filter out peaks with small value.
+                Type: Float
+                Value: 0.5
+            HopSize:
+                Description: Hop size in seconds with respect to sampling rate.
+                Type: Float
+                Value: 0.02
+            SamplingRate:
+                Description: Adjust input sampling rate to this value.
+                Type: Integer
+                Value: 16000
+            WindowSize:
+                Type: Integer
+                Value: 2049
+            FrequencyResolution:
+                Type: Float
+                Value: 2.0
+            FrequencyCenter:
+                Description: Lowest frequency to extract.
+                Type: Float
+                Value: 80
+            TimeCenter:
+                Description: Highest frequency to extract (1/time_center).
+                Type: Float
+                Value: 0.001
+            Gamma:
+                Type: List
+                SubType: Float
+                Value: [0.24, 0.6, 1.0]
+            BinsPerOctave:
+                Description: Number of bins for each octave.
+                Type: Integer
+                Value: 48
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: patch_cnn
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/patch_cnn
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            Threshold:
+                Description: Threshold of the prediction value.
+                Type: Float
+                Value: 0.05
+            MaxMethod:
+                Description: Method of determine the position of the max prediction value.
+                Type: String
+                Value: posterior
+                Choices: ["posterior", "prior"]
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 10
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 2000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 300
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 32
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 32
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 4
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.00001
