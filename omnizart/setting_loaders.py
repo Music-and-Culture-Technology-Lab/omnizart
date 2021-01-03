@@ -397,6 +397,7 @@ class BeatSettings(Settings):
         self.dataset = self.BeatDataset()
         self.model = self.BeatModel()
         self.training = self.BeatTraining()
+        self.inference = self.BeatInference()
 
         super().__init__(conf_path=conf_path)
 

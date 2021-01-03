@@ -100,7 +100,7 @@ General:
             EarlyStop:
                 Description: Terminate the training if the validation performance doesn't imrove after n epochs.
                 Type: Integer
-                Value: 8
+                Value: 4
             InitLearningRate:
                 Descriptoin: Initial learning rate.
                 Type: Float

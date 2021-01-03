@@ -31,7 +31,7 @@ class BeatTranscription(BaseTranscription):
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         if not os.path.isfile(input_audio):
-            raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audo}")
+            raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
 
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
@@ -43,7 +43,14 @@ class BeatTranscription(BaseTranscription):
         pred = predict(feature, model, timesteps=model_settings.model.timesteps, batch_size=16)
 
         logger.info("Inferring beats and down beats...")
-        midi = inference(pred, t_unit=model_settings.feature.time_unit)
+        midi = inference(
+            pred,
+            beat_th=model_settings.inference.beat_threshold,
+            down_beat_th=model_settings.inference.down_beat_threshold,
+            min_dist=model_settings.inference.min_distance,
+            t_unit=model_settings.feature.time_unit
+        )
+
         output = self._output_midi(output=output, input_audio=input_audio, midi=midi)
         if output is not None:
             _write_csv(midi, output=output.replace(".mid", ""))
@@ -132,7 +139,9 @@ class BeatTranscription(BaseTranscription):
 
         logger.info("Constructing callbacks")
         callbacks = [
-            tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
+            tf.keras.callbacks.EarlyStopping(
+                patience=settings.training.early_stop, monitor="val_loss", restore_best_weights=True
+            ),
             tf.keras.callbacks.ModelCheckpoint(
                 jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor="val_loss"
             )
