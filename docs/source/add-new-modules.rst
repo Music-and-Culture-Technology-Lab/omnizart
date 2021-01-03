@@ -18,6 +18,13 @@ Principles
   new modules. Most of them are very similar of their overall architecture, but vary in detail.
   Most the time, you could just copy and paste the small pieces to your module, and modify just a
   small part of them to adapt to your task.
+* **Process unit should be as small as possible** - For example, if you want to extract spectral feature of an audio,
+  then the process unit of your function should be an audio, rather than a list of audios. If you want to process
+  a batch of audios, than you should write another function wrap around the first function and iterate through
+  the audios.
+* **Do only one thing in one single function** - Similar to the above principle, do as less things as possible in
+  a single function. Most of time, we just mess everything together, making an *'almighty'* function, and it may work but
+  in a dangerous balance. That's the last thing you would like to see when you are developing a big project.
 * **Try not to make your own wheels** - There have been many useful and validated functions that are
   developed to deal with the daily works. They are already there to cover 90% of every details of a
   module, thus new logics are in very small chances being needed. 
@@ -136,7 +143,7 @@ Critical Files/Functions
   - The dataset loader for feeding data to models. Dealing with listing files, iterating through all feature/label pairs,
   indexing, and additionally augmenting, cliping, or transforming the feature/label on the fly.
 
-* `omnizart.setting_loaders.PatchCNNSettings <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/setting_loaders.py#L366-L386>`_
+* `omnizart.setting_loaders.PatchCNNSettings <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/setting_loaders.py#L359-L380>`_
   - The data class that holds the necessary hyper parameters that will be used by different functions of this module. For model training,
   related hyper parameters are registered under ``PatchCNNSettings.dataset``, ``PatchCNNSettings.model``, and
   ``PatchCNNSettings.training`` attributes.
@@ -171,6 +178,58 @@ Overall Process Flow
 
 Implement Transcription
 #######################
+
+This is the most important function that you should put it at the first place to accomplish.
+There are lots of open projects that provide their pre-process and training code, but seldom do they proride an easy
+way for user to play around a single piece. Often you have to hack in various way to make it work using
+the provided checkpoint and code, and the barrier would be to tough for non-technical end users.
+
+This project is aimed for being a friendly and easy using tool. We always put user experience in the front, and
+take care all the details that should not bother users.
+
+Commits
+*******
+
+* `c5431d9 <https://github.com/Music-and-Culture-Technology-Lab/omnizart/pull/11/commits/c5431d90643629a3403ac98ecb407073cd2c80b0>`_
+
+Critical Files/Functions
+************************
+
+* `omnizart.patch_cnn.app.PatchCNNTranscription.transcribe <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L32-L104>`_
+  - The main function for providing an interface of end-to-end transcription. Given the audio path, it should yield the
+  results the task is about. Steps including feature extraction, model prediction, and inference.
+
+* `(vocal) omnizart.vocal.prediction <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/vocal/prediction.py>`_
+  - Predict on the extracted feature by using the model. This is for those module who needs to feed data in a more complex way. In PatchCNN
+  module, the model just recieve the extracted feature without further slicing or other extension, thus no need for this function.
+
+* `omnizart.patch_cnn.inference <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/patch_cnn/inference.py>`_
+  - Infer the final results from the raw prediction value.  See also :class:`omnizart.vocal.inference` for a more complicated case.
+
+* `omnizart.setting_loaders.PatchCNNSettings <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/setting_loaders.py#L382-L386>`_
+  - The data class that holds the necessary hyper parameters that will be used by different functions of this module. For model training,
+  related hyper parameters are registered under ``PatchCNNSettings.inference`` attributes.
+
+* `omnizart/defatuls/patch_cnn.yaml <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/checkpoints/patch_cnn/patch_cnn_melody/configurations.yaml#L76-L87>`_
+  - The configuration file of the module, records the values of hyper parameters and will be consumed by the data class (i.e. PatchCNNSettings).
+
+Overall Process Flow
+********************
+
+1. Load the checkpoint and coressponding settings.
+    * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L58-L59>`_
+
+2. Extract the feature. Remember brining all the parameters the funtion has.
+    * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L58-L59>`_
+
+3. Model prediction
+    * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L58-L59>`_
+
+4. Inference on the prediction
+    * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L80-L89>`_
+
+5. Output the transcription results
+    * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L91-L102>`_
 
 Add Unit Tests
 ##############
