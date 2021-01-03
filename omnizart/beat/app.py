@@ -13,7 +13,8 @@ from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import MusicNetStructure
 from omnizart.setting_loaders import BeatSettings
 from omnizart.beat.features import extract_musicnet_feature, extract_musicnet_label, extract_feature_from_midi
-from omnizart.music.losses import focal_loss
+from omnizart.beat.prediction import predict
+from omnizart.beat.inference import inference
 from omnizart.models.rnn import blstm, blstm_attn
 from omnizart.models.t2t import MultiHeadAttention
 
@@ -28,15 +29,26 @@ class BeatTranscription(BaseTranscription):
 
         self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
-    def transcribe(self, input_midi, model_path=None, output="./"):
-        if not os.path.isfile(input_midi):
-            raise FileNotFoundError(f"The given audio path does not exist. Path: {input_midi}")
+    def transcribe(self, input_audio, model_path=None, output="./"):
+        if not os.path.isfile(input_audio):
+            raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audo}")
 
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Extracting feature...")
-        feature = extract_feature_from_midi(input_midi, t_unit=model_settings.feature.time_unit)
+        feature = extract_feature_from_midi(input_audio, t_unit=model_settings.feature.time_unit)
+
+        logger.info("Predicting...")
+        pred = predict(feature, model, timesteps=model_settings.model.timesteps, batch_size=16)
+
+        logger.info("Inferring beats and down beats...")
+        midi = inference(pred, t_unit=model_settings.feature.time_unit)
+        output = self._output_midi(output=output, input_audio=input_audio, midi=midi)
+        if output is not None:
+            _write_csv(midi, output=output.replace(".mid", ""))
+            logger.info("MIDI and CSV file have been written to %s", output)
+        return pred, midi
 
     def generate_feature(self, dataset_path, beat_settings=None, num_threads=8):
         settings = self._validate_and_get_settings(beat_settings)
@@ -67,7 +79,7 @@ class BeatTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, beat_settings=None):
-        settings= self._validate_and_get_settings(beat_settings)
+        settings = self._validate_and_get_settings(beat_settings)
 
         if input_model_path is not None:
             logger.info("Continue to train on model: %s", input_model_path)
@@ -140,7 +152,7 @@ class BeatTranscription(BaseTranscription):
         )
         return model_save_path, history
 
-    def _construct_blstm_model(self, settings):
+    def _construct_blstm_model(self, settings):  # pylint:disable=no-self-use
         return blstm(
             timesteps=settings.model.timesteps,
             input_dim=178,
@@ -148,7 +160,7 @@ class BeatTranscription(BaseTranscription):
             num_lstm_layers=settings.model.num_lstm_layers
         )
 
-    def _construct_blstm_attn_model(self, settings):
+    def _construct_blstm_attn_model(self, settings):  # pylint:disable=no-self-use
         return blstm_attn(
             timesteps=settings.model.timesteps,
             input_dim=178,
@@ -278,10 +290,26 @@ def weighted_binary_crossentropy(target, pred, down_beat_weight=5):
     return tf.reduce_mean(-bce)
 
 
+def _write_csv(midi, output):
+    for inst in midi.instruments:
+        if inst.name == "Beat":
+            out_name = f"{output}_beat.csv"
+        else:
+            out_name = f"{output}_down_beat.csv"
+        with open(out_name, "w") as out:
+            onsets = [f"{nn.start:.6f}\n" for nn in inst.notes]
+            out.writelines(onsets)
+
+
 if __name__ == "__main__":
     settings = BeatSettings()
-    settings.training.steps = 1000
-    settings.training.val_steps = 100
-    settings.training.epoch = 3
+    settings.training.steps = 2000
+    settings.training.val_steps = 200
+    settings.training.epoch = 10
     app = BeatTranscription()
-    app.train("/media/whitebreeze/本機磁碟/MusicNet/train_feature", model_name="test_beat", beat_settings=settings)
+    # app.train("/media/MusicNet/train_feature", model_name="test_beat", beat_settings=settings)
+    out = app.transcribe(
+        "/media/whitebreeze/本機磁碟/MusicNet/test_labels/midi/2382.mid",
+        model_path="/data/omnizart/checkpoints/beat/beat_test_beat",
+        output="test.mid"
+    )

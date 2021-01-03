@@ -37,9 +37,9 @@ def extract_feature(labels, t_unit=0.01):
     # Extract piano roll feature (onset, duration)
     onset_idx_set = set()
     for label in labels:
-        on_idx = round(label.start_time / t_unit)
-        off_idx = round(label.end_time / t_unit)
-        pitch = label.note - LOWEST_MIDI_NOTE
+        on_idx = int(round(label.start_time / t_unit))
+        off_idx = int(round(label.end_time / t_unit))
+        pitch = int(label.note) - LOWEST_MIDI_NOTE
         onset[on_idx, pitch] = 1
         dura[on_idx:off_idx, pitch] = 1
         onset_idx_set.add(on_idx)

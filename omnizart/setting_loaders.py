@@ -374,3 +374,10 @@ class BeatSettings(Settings):
             self.early_stop: int = None
             self.init_learning_rate: float = None
             self.down_beat_weight: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatInference:
+        def __init__(self):
+            self.beat_threshold: float = None
+            self.down_beat_threshold: float = None
+            self.min_distance: float = None
