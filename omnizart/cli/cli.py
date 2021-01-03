@@ -23,6 +23,7 @@ from omnizart.cli.drum import drum
 from omnizart.cli.chord import chord
 from omnizart.cli.vocal import vocal
 from omnizart.cli.vocal_contour import vocal_contour
+from omnizart.cli.beat import beat
 from omnizart.cli.patch_cnn import patch_cnn
 from omnizart.cli.transcribe import transcribe
 
@@ -30,7 +31,7 @@ from omnizart.cli.transcribe import transcribe
 SUB_COMMAND_GROUP = [
     {
         "Transcription": [
-            "music", "chord", "drum", "vocal", "vocal-contour", "patch-cnn", "transcribe"
+            "music", "chord", "drum", "vocal", "vocal-contour", "beat", "patch-cnn", "transcribe"
         ]
     },
     {"Utilities": ["download-checkpoints", "download-dataset", "synth"]}
@@ -142,6 +143,11 @@ def download_checkpoints(output_path):
             "save_as": "checkpoints/vocal/contour/weights.h5",
             "file_length": 50732192
         },
+        "beat": {
+            "fid": "1YigN_eR1s_iZzam13JrkDVAb0ysTX84q",
+            "save_as": "checkpoints/beat/beat_blstm/weights.h5",
+            "file_length": 400267656
+        },
         "patch_cnn_melody": {
             "fid": "17vl7t3pQwzYqPgRN1HPOCVQjvUF8Jtbu",
             "save_as": "checkpoints/patch_cnn/patch_cnn_melody/weights.h5",
@@ -215,6 +221,7 @@ entry.add_command(drum)
 entry.add_command(chord)
 entry.add_command(vocal)
 entry.add_command(vocal_contour)
+entry.add_command(beat)
 entry.add_command(patch_cnn)
 entry.add_command(transcribe)
 entry.add_command(download_dataset)
