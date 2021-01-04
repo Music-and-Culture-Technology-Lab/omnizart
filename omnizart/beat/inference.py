@@ -7,6 +7,27 @@ DOWN_BEAT_NOTE_NUM = 36  # Bass drum
 
 
 def inference(pred, beat_th=0.5, down_beat_th=0.5, min_dist=0.3, t_unit=0.1):
+    """Infers the beat and down beat positions from the raw prediction values.
+
+    Parameters
+    ----------
+    pred: 2D numpy array
+        The prediction of the model.
+    beat_th: float
+        Threshold for beat channel.
+    down_beat_th: float
+        Threshold for down beat channel.
+    min_dist: float
+        Minimum distance between two beat positions in seconds.
+    t_unit: float
+        Time unit of each frame in seconds.
+
+    Returns
+    -------
+    midi: pretty_midi.PrettyMIDI
+        Inferred beat positions recorded as MIDI notes. Information of beat
+        and down beat are recorded in two different instrument tracks.
+    """
     mdist = max(1, round(min_dist / t_unit))
     beat_pos, _ = find_peaks(pred[:, 0], height=beat_th, distance=mdist)
     db_pos, _ = find_peaks(pred[:, 1], height=down_beat_th, distance=mdist)

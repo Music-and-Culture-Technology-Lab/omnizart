@@ -14,6 +14,13 @@ logger = get_logger("Beat features")
 
 
 def extract_feature_from_midi(midi_path, t_unit=0.01):
+    """Extract feature for beat module from MIDI file.
+
+    See Also
+    --------
+    omnizart.beat.feature.extract_feature:
+        The main feature extraction function of beat module.
+    """
     midi = pretty_midi.PrettyMIDI(midi_path)
     labels = []
     for inst in midi.instruments:
@@ -23,11 +30,33 @@ def extract_feature_from_midi(midi_path, t_unit=0.01):
 
 
 def extract_musicnet_feature(csv_path, t_unit=0.01):
+    """Extract feature for beat module from MusicNet label file.
+
+    See Also
+    --------
+    omnizart.beat.feature.extract_feature:
+        The main feature extraction function of beat module.
+    """
     labels = MusicNetLabelExtraction.load_label(csv_path)
     return extract_feature(labels, t_unit=t_unit)
 
 
 def extract_feature(labels, t_unit=0.01):
+    """Extract feature representation required by beat module.
+    
+    Parameters
+    ----------
+    labels: list[:class:`omnizart.base.Label`]
+        List of :class:`omnizart.base.Label` instances.
+    t_unit: float
+        Time unit of each frame of the output representation.
+
+    Returns
+    -------
+    feature: 2D numpy array
+        A piano roll like representation. Please refer to the original paper
+        for more details.
+    """
     max_sec = max(label.end_time for label in labels)
     frm_num = math.ceil(max_sec / t_unit)
     onset = np.zeros((frm_num, 88))
@@ -150,7 +179,3 @@ def extract_musicnet_label(csv_path, meter=4, t_unit=0.01, rounding=1, fade_out=
             down_beat_arr[itp_beat_idx:itp_beat_idx + fade_out] = act_value
 
     return beat_arr, down_beat_arr
-
-
-if __name__ == "__main__":
-    out = extract_musicnet_label('/data/omnizart/bootstrap_data/symbolic-beat-tracking/feature/2406.csv')

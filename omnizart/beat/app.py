@@ -30,6 +30,32 @@ class BeatTranscription(BaseTranscription):
         self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
     def transcribe(self, input_audio, model_path=None, output="./"):
+        """Transcribe beat positions in the given MIDI.
+
+        Tracks the beat in symbolic domain. Outputs three files if the output path is given:
+        *<filename>.mid*, <filename>_beat.csv, and <filename>_down_beat.csv, where *filename*
+        is the name of the input MIDI without extension. The *.csv files records the beat
+        positions in seconds.
+
+        Parameters
+        ----------
+        input_audio: Path
+            Path to the MIDI file (.mid).
+        model_path: Path
+            Path to the trained model or the supported transcription mode.
+        output: Path (optional)
+            Path for writing out the transcribed MIDI file. Default to the current path.
+
+        Returns
+        -------
+        midi: pretty_midi.PrettyMIDI
+            The transcribed beat positions. There are two types of beat: beat and down beat.
+            Each are recorded in independent instrument track.
+
+        See Also
+        --------
+        omnizart.cli.beat.transcribe: CLI entry point of this function.
+        """
         if not os.path.isfile(input_audio):
             raise FileNotFoundError(f"The given audio path does not exist. Path: {input_audio}")
 
@@ -55,9 +81,30 @@ class BeatTranscription(BaseTranscription):
         if output is not None:
             _write_csv(midi, output=output.replace(".mid", ""))
             logger.info("MIDI and CSV file have been written to %s", output)
-        return pred, midi
+        return midi
 
     def generate_feature(self, dataset_path, beat_settings=None, num_threads=8):
+        """Extract the feature from the given dataset.
+
+        To train the model, the first step is to pre-process the data into feature
+        representations. After downloading the dataset, use this function to generate
+        the feature by giving the path of the stored dataset.
+
+        To specify the output path, modify the attribute
+        ``beat_settings.dataset.feature_save_path``.
+        It defaults to the folder under where the dataset stored, generating
+        two folders: ``train_feature`` and ``test_feature``.
+
+        Parameters
+        ----------
+        dataset_path: Path
+            Path to the downloaded dataset.
+        beat_settings: BeatSettings
+            The configuration instance that holds all relative settings for
+            the life-cycle of building a model.
+        num_threads:
+            Number of threads for parallel extraction the feature.
+        """
         settings = self._validate_and_get_settings(beat_settings)
 
         # Resolve feature output path
@@ -86,6 +133,24 @@ class BeatTranscription(BaseTranscription):
         logger.info("All done")
 
     def train(self, feature_folder, model_name=None, input_model_path=None, beat_settings=None):
+        """Model training.
+
+        Train the model from scratch or continue training given a model checkpoint.
+
+        Parameters
+        ----------
+        feature_folder: Path
+            Path to the generated feature.
+        model_name: str
+            The name of the trained model. If not given, will default to the
+            current timestamp.
+        input_model_path: Path
+            Specify the path to the model checkpoint in order to fine-tune
+            the model.
+        beat_settings: BeatSettings
+            The configuration that holds all relative settings for
+            the life-cycle of model building.
+        """
         settings = self._validate_and_get_settings(beat_settings)
 
         if input_model_path is not None:
@@ -140,7 +205,7 @@ class BeatTranscription(BaseTranscription):
         logger.info("Constructing callbacks")
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
-                patience=settings.training.early_stop, monitor="val_loss", restore_best_weights=True
+                patience=settings.training.early_stop, monitor="val_loss", restore_best_weights=False
             ),
             tf.keras.callbacks.ModelCheckpoint(
                 jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor="val_loss"
@@ -283,6 +348,7 @@ class BeatDatasetLoader(BaseDatasetLoader):
 
 
 def weighted_binary_crossentropy(target, pred, down_beat_weight=5):
+    """Wrap around binary crossentropy loss with weighting to different channels."""
     # Compute binary crossentropy loss
     epsilon = 1e-6
     bce = target * tf.math.log(pred + epsilon)
@@ -300,6 +366,7 @@ def weighted_binary_crossentropy(target, pred, down_beat_weight=5):
 
 
 def _write_csv(midi, output):
+    """Write out the beat and down beat information to files."""
     for inst in midi.instruments:
         if inst.name == "Beat":
             out_name = f"{output}_beat.csv"
@@ -311,14 +378,5 @@ def _write_csv(midi, output):
 
 
 if __name__ == "__main__":
-    settings = BeatSettings()
-    settings.training.steps = 2000
-    settings.training.val_steps = 200
-    settings.training.epoch = 10
     app = BeatTranscription()
-    # app.train("/media/MusicNet/train_feature", model_name="test_beat", beat_settings=settings)
-    out = app.transcribe(
-        "/media/whitebreeze/本機磁碟/MusicNet/test_labels/midi/2382.mid",
-        model_path="/data/omnizart/checkpoints/beat/beat_test_beat",
-        output="test.mid"
-    )
+    out = app.transcribe("/media/whitebreeze/本機磁碟/MusicNet/test_labels/midi/2303.mid")
