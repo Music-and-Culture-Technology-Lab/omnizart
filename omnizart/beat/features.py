@@ -43,7 +43,7 @@ def extract_musicnet_feature(csv_path, t_unit=0.01):
 
 def extract_feature(labels, t_unit=0.01):
     """Extract feature representation required by beat module.
-    
+
     Parameters
     ----------
     labels: list[Label]
