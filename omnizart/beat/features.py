@@ -18,7 +18,7 @@ def extract_feature_from_midi(midi_path, t_unit=0.01):
 
     See Also
     --------
-    omnizart.beat.feature.extract_feature:
+    omnizart.beat.features.extract_feature:
         The main feature extraction function of beat module.
     """
     midi = pretty_midi.PrettyMIDI(midi_path)
@@ -34,7 +34,7 @@ def extract_musicnet_feature(csv_path, t_unit=0.01):
 
     See Also
     --------
-    omnizart.beat.feature.extract_feature:
+    omnizart.beat.features.extract_feature:
         The main feature extraction function of beat module.
     """
     labels = MusicNetLabelExtraction.load_label(csv_path)
@@ -46,7 +46,7 @@ def extract_feature(labels, t_unit=0.01):
     
     Parameters
     ----------
-    labels: list[:class:`omnizart.base.Label`]
+    labels: list[Label]
         List of :class:`omnizart.base.Label` instances.
     t_unit: float
         Time unit of each frame of the output representation.

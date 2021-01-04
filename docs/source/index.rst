@@ -97,6 +97,7 @@ You can use *Audacity* to open the files.
    chord/cli.rst
    vocal/cli.rst
    vocal-contour/cli.rst
+   beat/cli.rst
    patch-cnn/cli.rst
 
 
@@ -110,6 +111,7 @@ You can use *Audacity* to open the files.
    vocal/api.rst
    vocal-contour/api.rst
    patch-cnn/api.rst
+   beat/api.rst
    feature.rst
    models.rst
    training.rst

@@ -11,7 +11,7 @@ STEP_SIZE_RATIO = 0.5
 
 
 def create_batches(feature, timesteps, batch_size=8):
-    """Create a 3D output from the 2D feature for model prediciton.
+    """Create a 4D output from the 2D feature for model prediciton.
 
     Create overlapped input features, and collect feature slices into batches.
     The overlap size is 1/4 length to the timesteps.
@@ -73,6 +73,11 @@ def predict(feature, model, timesteps=1000, batch_size=64):
         Size of the input feature dimension.
     batch_size: int
         Batch size for the model input.
+
+    Returns
+    -------
+    pred: 2D numpy array
+        The predicted probabilities of beat and down beat positions.
     """
     logger.debug("Creating batches")
     ori_len = len(feature)
