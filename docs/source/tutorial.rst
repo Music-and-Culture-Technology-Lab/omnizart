@@ -33,7 +33,7 @@ Detailed descriptions for the usage of each sub-command can be found in the dedi
 * :doc:`chord/cli`
 * :doc:`vocal-contour/cli`
 * :doc:`vocal/cli`
-* beat *(preparing)*
+* :doc:`beat/cli`
 
 All the applications share a same set of actions: **transcribe**, **generate-feature**, and **train-model**.
 Let's have a walkthrough of each ``action``.
@@ -49,7 +49,7 @@ The supported applications are as follows:
 * ``chord`` - Transcribe chord progressions in MIDI and CSV.
 * ``vocal`` - Transcribe note-level vocal melody in MIDI.
 * ``vocal-contour`` - Transcribe frame-level vocal melody (F0) in text.
-* ``beat`` *(preparing)* - Transcribe beat position.
+* ``beat`` - Transcribe beat position.
 
 Note that all the applications receive polyphonic music in WAV, except ``beat`` receives inputs in MIDI.
 
@@ -73,29 +73,29 @@ The processed features will be stored in *<path/to/dataset>/train_feature* and *
 
 The supported datasets for feature processing are application-dependent, summarized as follows:
 
-+-------------+-------+------+-------+------+-------+---------------+
-| Module      | music | drum | chord | beat | vocal | vocal-contour |
-+=============+=======+======+=======+======+=======+===============+
-| Maestro     |   O   |      |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| Maps        |   O   |      |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| MusicNet    |   O   |      |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| Pop         |   O   |  O   |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| Ext-Su      |   O   |      |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| BillBoard   |       |      |   O   |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| BPS-FH      |       |      |       |      |       |               |
-+-------------+-------+------+-------+------+-------+---------------+
-| MIR-1K      |       |      |       |      |   O   |       O       |
-+-------------+-------+------+-------+------+-------+---------------+
-| MedleyDB    |       |      |       |      |       |       O       |
-+-------------+-------+------+-------+------+-------+---------------+
-| Tonas       |       |      |       |      |   O   |               |
-+-------------+-------+------+-------+------+-------+---------------+
++-------------+-------+------+-------+------+-------+---------------+------+
+| Module      | music | drum | chord | beat | vocal | vocal-contour | beat |
++=============+=======+======+=======+======+=======+===============+------+
+| Maestro     |   O   |      |       |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| Maps        |   O   |      |       |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| MusicNet    |   O   |      |       |      |       |               |  O   |
++-------------+-------+------+-------+------+-------+---------------+------+
+| Pop         |   O   |  O   |       |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| Ext-Su      |   O   |      |       |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| BillBoard   |       |      |   O   |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| BPS-FH      |       |      |       |      |       |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| MIR-1K      |       |      |       |      |   O   |       O       |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| MedleyDB    |       |      |       |      |       |       O       |      |
++-------------+-------+------+-------+------+-------+---------------+------+
+| Tonas       |       |      |       |      |   O   |               |      |
++-------------+-------+------+-------+------+-------+---------------+------+
 
 Before running the commands below, make sure to download the corresponding datasets first.
 This can be easily done in :ref:`Download Datasets`.

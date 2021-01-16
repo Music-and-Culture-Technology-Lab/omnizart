@@ -11,6 +11,7 @@ packages = \
  'omnizart.cli.patch_cnn',
  'omnizart.cli.vocal',
  'omnizart.cli.vocal_contour',
+ 'omnizart.cli.beat',
  'omnizart.constants',
  'omnizart.constants.schema',
  'omnizart.drum',
@@ -31,6 +32,7 @@ package_data = \
               'checkpoints/patch_cnn/patch_cnn_melody/*',
               'checkpoints/vocal/contour/*',
               'checkpoints/vocal/vocal_semi/*',
+              'checkpoints/beat/beat_blstm/*',
               'defaults/*',
               'resource/vamp/*']}
 

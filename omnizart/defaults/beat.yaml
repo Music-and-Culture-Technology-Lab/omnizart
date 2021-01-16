@@ -1,0 +1,111 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart beat transcribe` command.
+        Type: String
+        Value: BLSTM
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            BLSTM: checkpoints/beat/beat_blstm
+    Feature:
+        Description: Default settings of feature extraction for drum transcription.
+        Settings:
+            TimeUnit:
+                Description: Time unit of each frame in seconds.
+                Type: Float
+                Value: 0.01
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: beat
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/beat
+            ModelType:
+                Description: One of 'blstm' or 'blstm_attn'.
+                Type: String
+                Value: blstm
+            Timesteps:
+                Description: Input length of the model.
+                Type: Integer
+                Value: 1000
+            LstmHiddenDim:
+                Description: Dimension of LSTM hidden layers.
+                Type: Integer
+                Value: 25
+            NumLstmLayers:
+                Description: Number of LSTM layers.
+                Type: Integer
+                Value: 2
+            AttnHiddenDim:
+                Description: Dimension of multi-head attention layers.
+                Type: Integer
+                Value: 256
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            BeatThreshold:
+                Description: Threshold that will be applied to clip the predicted beat values to either 0 or 1.
+                Type: Float
+                Value: 0.5
+            DownBeatThreshold:
+                Description: Same as above, but for down beat.
+                Type: Float
+                Value: 0.3
+            MinDistance:
+                Description: Minimum required distance between each note in seconds.
+                Type: Float
+                Value: 0.3
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 10
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 1000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 50
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 64
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 64
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 7
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.001
+            DownBeatWeight:
+                Description: Weighting of down beat loss. Beat loss is always set to one.
+                Type: Float
+                Value: 5

@@ -386,11 +386,58 @@ class PatchCNNSettings(Settings):
             self.max_method: str = None
 
 
+@json_serializable(key_path="./General", value_path="./Value")
 class BeatSettings(Settings):
     default_setting_file: str = "beat.yaml"
 
     def __init__(self, conf_path=None):
         self.transcription_mode: str = None
         self.checkpoint_path: dict = None
+        self.feature = self.BeatFeature()
+        self.dataset = self.BeatDataset()
+        self.model = self.BeatModel()
+        self.training = self.BeatTraining()
+        self.inference = self.BeatInference()
 
         super().__init__(conf_path=conf_path)
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatFeature:
+        def __init__(self):
+            self.time_unit: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatDataset:
+        def __init__(self):
+            self.save_path: str = None
+            self.feature_save_path: str = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatModel:
+        def __init__(self):
+            self.save_prefix: str = None
+            self.save_path: str = None
+            self.model_type: str = None
+            self.timesteps: int = None
+            self.lstm_hidden_dim: int = None
+            self.num_lstm_layers: int = None
+            self.attn_hidden_dim: int = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatTraining:
+        def __init__(self):
+            self.epoch: int = None
+            self.steps: int = None
+            self.val_steps: int = None
+            self.batch_size: int = None
+            self.val_batch_size: int = None
+            self.early_stop: int = None
+            self.init_learning_rate: float = None
+            self.down_beat_weight: float = None
+
+    @json_serializable(key_path="./Settings", value_path="./Value")
+    class BeatInference:
+        def __init__(self):
+            self.beat_threshold: float = None
+            self.down_beat_threshold: float = None
+            self.min_distance: float = None

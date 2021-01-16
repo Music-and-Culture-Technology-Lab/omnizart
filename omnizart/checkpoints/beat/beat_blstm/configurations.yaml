@@ -1,0 +1,58 @@
+General:
+  CheckpointPath:
+    Value:
+      BLSTM: checkpoints/beat/beat_blstm
+  Dataset:
+    Settings:
+      FeatureSavePath:
+        Value: +
+      SavePath:
+        Value: ./
+  Feature:
+    Settings:
+      TimeUnit:
+        Value: 0.01
+  Inference:
+    Settings:
+      BeatThreshold:
+        Value: 0.5
+      DownBeatThreshold:
+        Value: 0.3
+      MinDistance:
+        Value: 0.3
+  Model:
+    Settings:
+      AttnHiddenDim:
+        Value: 256
+      LstmHiddenDim:
+        Value: 25
+      ModelType:
+        Value: blstm
+      NumLstmLayers:
+        Value: 2
+      SavePath:
+        Value: ./checkpoints/beat
+      SavePrefix:
+        Value: beat
+      Timesteps:
+        Value: 1000
+  Training:
+    Settings:
+      BatchSize:
+        Value: 64
+      DownBeatWeight:
+        Value: 5
+      EarlyStop:
+        Value: 4
+      Epoch:
+        Value: 10
+      InitLearningRate:
+        Value: 0.001
+      Steps:
+        Value: 2000
+      ValBatchSize:
+        Value: 64
+      ValSteps:
+        Value: 200
+  TranscriptionMode:
+    Value: BLSTM
