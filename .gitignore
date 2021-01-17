@@ -17,6 +17,7 @@ bootstrap_data/
 tf_dataset_experiment/
 htmlcov/
 .vscode/
+.python-version
 *.code-workspace
 .coverage
 .cookie
