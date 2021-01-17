@@ -1,6 +1,25 @@
 # Changelog
 
-## 0.2.0 - 2020-
+## 0.3.0 - 2020-01-17
+
+Release the `beat` module for symbolic domain beat transcription.
+
+### Features
+- Release `beat` module.
+- Add an example `patch-cnn` module for demonstrating the implementation progress.
+
+### Enhancement
+- Refactor the flow of chord module for parsing the feature and label files.
+- Modularize F0 information aggragation functions to *utils.py* and *io.py*.
+- Improve verbosity on fail to open hdf files.
+
+### Documentation
+- Re-arrange the side bar with an additional group of CLI.
+- Add custom CSS style for adjusting the width of audio and video elements.
+
+---
+
+## 0.2.0 - 2020-12-13
 
 ### Vocal melody transcription in both frame- and note-level are live!
 We release the modules for vocal melody transcription after a decent amount of effort. 

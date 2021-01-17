@@ -45,7 +45,7 @@ docker run -it mctlab/omnizart:latest bash
 | vocal            | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe note-level vocal melody.              |
 | vocal-contour    | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe frame-level vocal melody (F0).        |
 | chord            | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe chord progressions.                   |
-| beat             |                    |                    |            | Transcribe beat position.                        |
+| beat             | :heavy_check_mark: | :heavy_check_mark: |            | Transcribe beat position.                        |
 
 **NOTES**
 The current implementation for the drum model has unknown bugs, preventing loss convergence when training from scratch.
