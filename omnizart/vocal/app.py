@@ -10,7 +10,7 @@ import librosa
 import numpy as np
 import tensorflow as tf
 from spleeter.separator import Separator
-from spleeter.utils.logging import get_logger as sp_get_logger
+from spleeter.utils.logging import logger as sp_logger
 
 from omnizart.io import load_audio, write_yaml
 from omnizart.utils import get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader
@@ -38,7 +38,6 @@ class VocalTranscription(BaseTranscription):
         super().__init__(VocalSettings, conf_path=conf_path)
 
         # Disable logging information of Spleeter
-        sp_logger = sp_get_logger()
         sp_logger.setLevel(40)  # logging.ERROR
 
     def transcribe(self, input_audio, model_path=None, output="./"):

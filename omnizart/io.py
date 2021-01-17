@@ -73,7 +73,7 @@ def load_audio(audio_path, sampling_rate=44100, mono=True):
         Sampling rate of the audio. Will be the same as the given ``sampling_rate``.
     """
     try:
-        audio_loader = adapter.get_default_audio_adapter()
+        audio_loader = adapter.AudioAdapter.default()
         audio, fs = audio_loader.load(audio_path, sample_rate=sampling_rate)
         if mono:
             audio = librosa.to_mono(audio.squeeze().T)
