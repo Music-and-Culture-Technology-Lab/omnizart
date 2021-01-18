@@ -1,19 +1,21 @@
 import os
 import glob
 import shutil
+import subprocess
 from os.path import join as jpath
 from collections import OrderedDict
 from datetime import datetime
 
 import h5py
-import librosa
 import numpy as np
 import tensorflow as tf
 from spleeter.separator import Separator
 from spleeter.utils.logging import logger as sp_logger
 
 from omnizart.io import load_audio, write_yaml
-from omnizart.utils import get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader
+from omnizart.utils import (
+    get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader, get_filename
+)
 from omnizart.constants import datasets as d_struct
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.feature.cfp import extract_vocal_cfp, _extract_vocal_cfp
@@ -27,6 +29,11 @@ from omnizart.models.pyramid_net import PyramidNet
 
 logger = get_logger("Vocal Transcription")
 vcapp = LazyLoader("vcapp", globals(), "omnizart.vocal_contour")
+
+
+class SpleeterError(Exception):
+    """Wrapper exception class around Spleeter errors"""
+    pass
 
 
 class VocalTranscription(BaseTranscription):
@@ -75,19 +82,24 @@ class VocalTranscription(BaseTranscription):
         omnizart.vocal_contour.transcribe: Pitch estimation function.
         """
         logger.info("Separating vocal track from the audio...")
-        separator = Separator('spleeter:2stems')
+        command = ["spleeter", "separate", input_audio, "-o", "./"]
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        _, error = process.communicate()
+        if process.returncode != 0:
+            raise SpleeterError(error.decode("utf-8"))
 
-        # Tricky way to avoid the annoying tensorflow graph being finalized issue.
-        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
+        # Resolve the path of separated output files
+        folder_path = jpath("./", get_filename(input_audio))
+        vocal_wav_path = jpath(folder_path, "vocals.wav")
+        wav, fs = load_audio(vocal_wav_path)
 
-        wav, fs = load_audio(input_audio, mono=False)
-        pred = separator.separate(wav)
+        # Clean out the output files
+        shutil.rmtree(folder_path)
 
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path)
 
         logger.info("Extracting feature...")
-        wav = librosa.to_mono(pred["vocals"].squeeze().T)
         feature = _extract_vocal_cfp(
             wav,
             fs,
