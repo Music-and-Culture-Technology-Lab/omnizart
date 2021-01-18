@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 - 2020-01-18
+
+### Bugs
+- Call Spleeter in CLI mode instead of using python class.
+
 ## 0.3.0 - 2020-01-17
 
 Release the `beat` module for symbolic domain beat transcription.
@@ -16,6 +21,9 @@ Release the `beat` module for symbolic domain beat transcription.
 ### Documentation
 - Re-arrange the side bar with an additional group of CLI.
 - Add custom CSS style for adjusting the width of audio and video elements.
+
+### Bugs
+- Fix Spleeter import errors after upgrading to v2.1.2.
 
 ---
 
