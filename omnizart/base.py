@@ -190,6 +190,40 @@ class Label:
         self.note_value = note_value
         self.is_drum = is_drum
 
+    def __eq__(self, val):
+        if not isinstance(val, Label):
+            return False
+
+        epsilon = 1e-4  # Tolerance of time difference
+        if abs(self.start_time - val.start_time) < epsilon \
+                and abs(self.end_time - val.end_time) < epsilon \
+                and self.note == val.note \
+                and self.velocity == val.velocity \
+                and self.instrument == val.instrument \
+                and abs(self.start_beat - val.start_beat) < epsilon \
+                and abs(self.end_beat - val.end_beat) < epsilon \
+                and self.note_value == val.note_value \
+                and self.is_drum == val.is_drum:
+            return True
+        return False
+
+    def __str__(self):
+        msg = [
+            f"Start time: {self.start_time}",
+            f"End time: {self.end_time}",
+            f"Note number: {self.note}",
+            f"Velocity: {self.velocity}",
+            f"Instrument number: {self.instrument}",
+            f"Start beat: {self.start_beat}",
+            f"End beat: {self.end_beat}",
+            f"Note value: {self.note_value}",
+            f"Is drum: {self.is_drum}"
+        ]
+        return ", ".join(msg)
+
+    def __repr__(self):
+        return self.__str__()
+
     @property
     def note(self):
         return self._note
