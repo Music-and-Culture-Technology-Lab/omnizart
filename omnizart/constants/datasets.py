@@ -30,7 +30,11 @@ import glob
 from os.path import join as jpath
 from shutil import copy
 
+import pretty_midi
+import numpy as np
+
 from omnizart.io import load_yaml
+from omnizart.base import Label
 from omnizart.utils import ensure_path_exists, get_logger
 from omnizart.remote import download_large_file_from_google_drive
 
@@ -173,6 +177,32 @@ class BaseStructure:
     def _post_download(cls, dataset_path):
         pass
 
+    @classmethod
+    def load_label(cls, label_path):
+        """Load and parse labels for the given label file path.
+
+        Parses different format of label information to shared intermediate format,
+        encapslated with :class:`Label` instances. The default is parsing MIDI
+        file format.
+        """
+        midi = pretty_midi.PrettyMIDI(label_path)
+        labels = []
+        for inst in midi.instruments:
+            if inst.is_drum:
+                continue
+            for note in inst.notes:
+                label = Label(
+                    start_time=note.start,
+                    end_time=note.end,
+                    note=note.pitch,
+                    velocity=note.velocity,
+                    instrument=inst.program
+                )
+                if label.note == -1:
+                    continue
+                labels.append(label)
+        return labels
+
 
 class MapsStructure(BaseStructure):
     """Structure of MAPS dataset"""
@@ -199,6 +229,18 @@ class MapsStructure(BaseStructure):
     #: Folder to test labels
     test_labels = test_wavs
 
+    @classmethod
+    def load_label(cls, label_path):
+        lines = open(label_path, "r").readlines()[1:]  # Discard the first line which contains column names
+        labels = []
+        for line in lines:
+            if line.strip() == "":
+                continue
+            values = line.split("\t")
+            onset, offset, note = float(values[0]), float(values[1]), int(values[2].strip())
+            labels.append(Label(start_time=onset, end_time=offset, note=note))
+        return labels
+
 
 class MusicNetStructure(BaseStructure):
     """Structure of MusicNet dataset"""
@@ -220,6 +262,38 @@ class MusicNetStructure(BaseStructure):
 
     #: Folder to test labels
     test_labels = ["test_labels"]
+
+    @classmethod
+    def load_label(cls, label_path):
+        labels = []
+        sample_rate = 44100
+        with open(label_path, "r") as label_file:
+            reader = csv.DictReader(label_file, delimiter=",")
+            for row in reader:
+                onset = float(row["start_time"]) / sample_rate
+                offset = float(row["end_time"]) / sample_rate
+                inst = int(row["instrument"]) - 1
+                note = int(row["note"])
+
+                # The statement used in the paper is 'measure', which is kind of ambiguous. 
+                start_beat = float(row["start_beat"])
+
+                # It's actually beat length of 'end_beat' column, thus adding start beat position here to
+                # make it a 'real end_beat'.
+                end_beat = float(row["end_beat"]) + start_beat
+                note_value = row["note_value"]
+
+                label = Label(
+                    start_time=onset,
+                    end_time=offset,
+                    note=note,
+                    instrument=inst,
+                    start_beat=start_beat,
+                    end_beat=end_beat,
+                    note_value=note_value
+                )
+                labels.append(label)
+        return labels
 
 
 class MaestroStructure(BaseStructure):
@@ -473,6 +547,34 @@ class MIR1KStructure(BaseStructure):
             copy(wav, test_folder)
         return wavs
 
+    @classmethod
+    def load_label(cls, label_path):
+        with open(label_path, "r") as lin:
+            lines = lin.readlines()
+
+        notes = np.array([round(float(note)) for note in lines])
+        note_diff = notes[1:] - notes[:-1]
+        change_idx = np.where(note_diff != 0)[0] + 1
+        change_idx = np.insert(change_idx, 0, 0)  # Padding a single zero to the beginning.
+        labels = []
+        for idx, chi in enumerate(change_idx[:-1]):
+            note = notes[chi]
+            if note == 0:
+                continue
+
+            start_t = 0.01 * chi + 0.02  # The first frame starts from 20ms.
+            end_t = 0.01 * change_idx[idx+1] + 0.02  # noqa: E226
+            if end_t - start_t < 0.05:
+                # Minimum duration should over 50ms.
+                continue
+
+            labels.append(Label(
+                start_time=float(start_t),
+                end_time=float(end_t),
+                note=note
+            ))
+        return labels
+
 
 class CMediaStructure(BaseStructure):
     """Constant settings of CMedia dataset."""
@@ -494,6 +596,19 @@ class CMediaStructure(BaseStructure):
 
     #: Folder to test labels
     test_labels = []
+
+    @classmethod
+    def load_label(cls, label_path):
+        labels = []
+        with open(label_path, "r") as label_file:
+            reader = csv.DictReader(label_file, delimiter=",")
+            for row in reader:
+                labels.append(Label(
+                    start_time=float(row["onset"]),
+                    end_time=float(row["offset"]),
+                    note=int(row["note"])
+                ))
+        return labels
 
 
 class TonasStructure(BaseStructure):
@@ -520,6 +635,21 @@ class TonasStructure(BaseStructure):
 
     #: Folder to test labels
     test_labels = []
+
+    @classmethod
+    def load_label(cls, label_path):
+        with open(label_path, "r") as lin:
+            lines = lin.readlines()
+
+        labels = []
+        for line in lines[1:]:
+            onset, dura, note, _ = line.split(", ")
+            labels.append(Label(
+                start_time=float(onset),
+                end_time=float(onset) + float(dura),
+                note=round(float(note))
+            ))
+        return labels
 
 
 class MedleyDBStructure(BaseStructure):
@@ -677,3 +807,21 @@ class MedleyDBStructure(BaseStructure):
     @classmethod
     def _name_transform(cls, basename):
         return basename.replace(cls.wav_postfix, "")
+
+    @classmethod
+    def load_label(cls, label_path):
+        with open(label_path, "r") as fin:
+            lines = fin.readlines()
+
+        labels = []
+        t_unit = 256 / 44100  # ~= 0.0058 secs
+        for line in lines:
+            elems = line.strip().split(",")
+            sec, hz = float(elems[0]), float(elems[1])  # pylint: disable=invalid-name
+            if hz < 1e-10:
+                continue
+            note = float(pretty_midi.hz_to_note_number(hz))  # Convert return type of np.float64 to float
+            end_t = sec + t_unit
+            labels.append(Label(start_time=sec, end_time=end_t, note=note))
+
+        return labels

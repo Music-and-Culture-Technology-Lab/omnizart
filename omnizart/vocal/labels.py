@@ -4,6 +4,7 @@ import abc
 import numpy as np
 
 from omnizart.base import Label
+from omnizart.constants import datasets as dset
 
 
 class BaseLabelExtraction(metaclass=abc.ABCMeta):
@@ -91,62 +92,18 @@ class CMediaLabelExtraction(BaseLabelExtraction):
     """Label extraction for CMedia dataset."""
     @classmethod
     def load_label(cls, label_path):
-        labels = []
-        with open(label_path, "r") as label_file:
-            reader = csv.DictReader(label_file, delimiter=",")
-            for row in reader:
-                labels.append(Label(
-                    start_time=float(row["onset"]),
-                    end_time=float(row["offset"]),
-                    note=int(row["note"])
-                ))
-        return labels
+        return dset.CMediaStructure.load_label(label_path)
 
 
 class MIR1KlabelExtraction(BaseLabelExtraction):
     """Label extraction for MIR-1K dataset."""
     @classmethod
     def load_label(cls, label_path):
-        with open(label_path, "r") as lin:
-            lines = lin.readlines()
-
-        notes = np.array([round(float(note)) for note in lines])
-        note_diff = notes[1:] - notes[:-1]
-        change_idx = np.where(note_diff != 0)[0] + 1
-        change_idx = np.insert(change_idx, 0, 0)  # Padding a single zero to the beginning.
-        labels = []
-        for idx, chi in enumerate(change_idx[:-1]):
-            note = notes[chi]
-            if note == 0:
-                continue
-
-            start_t = 0.01 * chi + 0.02  # The first frame starts from 20ms.
-            end_t = 0.01 * change_idx[idx+1] + 0.02  # noqa: E226
-            if end_t - start_t < 0.05:
-                # Minimum duration should over 50ms.
-                continue
-
-            labels.append(Label(
-                start_time=float(start_t),
-                end_time=float(end_t),
-                note=note
-            ))
-        return labels
+        return dset.MIR1KStructure.load_label(label_path)
 
 
 class TonasLabelExtraction(BaseLabelExtraction):
     """Label extraction for TONAS dataset."""
     @classmethod
     def load_label(cls, label_path):
-        with open(label_path, "r") as lin:
-            lines = lin.readlines()
-
-        labels = []
-        for line in lines[1:]:
-            onset, dura, note, _ = line.split(", ")
-            labels.append(Label(
-                start_time=float(onset),
-                end_time=float(onset) + float(dura),
-                note=round(float(note))
-            ))
-        return labels
+        return dset.TonasStructure.load_label(label_path)

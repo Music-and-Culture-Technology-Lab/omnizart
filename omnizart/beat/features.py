@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 from omnizart.utils import get_logger
 from omnizart.base import Label
 from omnizart.constants.midi import LOWEST_MIDI_NOTE
-from omnizart.music.labels import MusicNetLabelExtraction
+from omnizart.constants.datasets import MusicNetStructure
 
 
 logger = get_logger("Beat features")
@@ -37,7 +37,7 @@ def extract_musicnet_feature(csv_path, t_unit=0.01):
     omnizart.beat.features.extract_feature:
         The main feature extraction function of beat module.
     """
-    labels = MusicNetLabelExtraction.load_label(csv_path)
+    labels = MusicNetStructure.load_label(csv_path)
     return extract_feature(labels, t_unit=t_unit)
 
 
@@ -124,7 +124,7 @@ def extract_musicnet_label(csv_path, meter=4, t_unit=0.01, rounding=1, fade_out=
         Used to augment the sparse positive label in a fade-out manner, reducing
         the value from 1 to 1/fade_out, totaling in length of <fade_out>.
     """
-    labels = MusicNetLabelExtraction.load_label(csv_path)
+    labels = MusicNetStructure.load_label(csv_path)
 
     # We found that some of the annotations in MusicNet may have a global beat offset,
     # making the whole piece lack of integer beats, and thus cause errors.
