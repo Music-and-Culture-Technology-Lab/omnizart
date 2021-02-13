@@ -197,7 +197,7 @@ class Label:
         epsilon = 1e-4  # Tolerance of time difference
         if abs(self.start_time - val.start_time) < epsilon \
                 and abs(self.end_time - val.end_time) < epsilon \
-                and self.note == val.note \
+                and abs(self.note - val.note) < epsilon \
                 and self.velocity == val.velocity \
                 and self.instrument == val.instrument \
                 and abs(self.start_beat - val.start_beat) < epsilon \
