@@ -19,6 +19,15 @@ from omnizart.utils import ensure_path_exists
 SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "TB")]
 
 
+class GDFileAccessLimited(Exception):
+    """Custom exception on failing to download GD file.
+
+    This exception is raised when the GD file is overly accessed during a certain
+    period.
+    """
+    pass
+
+
 def format_byte(size, digit=2):
     """Format the given byte size into human-readable string."""
     rounding = f".{digit}f"
@@ -200,17 +209,14 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
                 break
 
     cols = cookie.split("; ")
-    warn_col = [col for col in cols if "download_warning" in col][0]
+
+    try:
+        warn_col = [col for col in cols if "download_warning" in col][0]
+    except IndexError:
+        raise GDFileAccessLimited("The resource is temporarily unavailable due to file being overly accessed")
+
     confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
     return download(
         url, file_length=file_length, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip
     )
-
-
-if __name__ == "__main__":
-    # URL = "https://drive.google.com/uc?export=download&id=1GVqlEq6we0xS9DoPK3vxCqpF1ZymxuGb"
-    URL = "https://drive.google.com/uc?export=download&id=1sjv9mpLFSjFeJsr8vhtqp80DRnOO5ZYJ"
-    URL = "https://drive.google.com/uc?export=download&id=1nYq2FB5LQfYJoXyYZl3XcklpJkCOnwhV"
-    # download(URL)
-    download_large_file_from_google_drive(URL)

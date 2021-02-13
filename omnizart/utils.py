@@ -381,7 +381,8 @@ def aggregate_f0_info(pred, t_unit):
         results.append({
             "start_time": round(start_idx * t_unit, 6),
             "end_time": round(cur_idx * t_unit, 6),
-            "frequency": last_hz
+            "frequency": last_hz,
+            "pitch": pretty_midi.hz_to_note_number(last_hz)
         })
 
         start_idx = cur_idx

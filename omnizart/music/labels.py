@@ -1,14 +1,12 @@
 import os
 import abc
-import csv
 
-import pretty_midi
 import numpy as np
 
+from omnizart.constants import datasets as dset
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE
 from omnizart.io import dump_pickle
 from omnizart.utils import get_logger
-from omnizart.base import Label
 
 
 logger = get_logger("Music Labels")
@@ -321,68 +319,21 @@ class MaestroLabelExtraction(BaseLabelExtraction):
     """Label extraction class for Maestro dataset"""
     @classmethod
     def load_label(cls, label_path):
-        midi = pretty_midi.PrettyMIDI(label_path)
-        labels = []
-        for inst in midi.instruments:
-            if inst.id_drum:
-                continue
-            for note in inst.notes:
-                label = Label(
-                    start_time=note.start,
-                    end_time=note.end,
-                    note=note.pitch,
-                    velocity=note.velocity,
-                    instrument=inst.program
-                )
-                if label.note == -1:
-                    continue
-                labels.append(label)
-        return labels
+        return dset.MaestroStructure.load_label(label_path)
 
 
 class MapsLabelExtraction(BaseLabelExtraction):
     """Label extraction class for Maps dataset"""
     @classmethod
     def load_label(cls, label_path):
-        lines = open(label_path, "r").readlines()[1:]  # Discard the first line which contains column names
-        labels = []
-        for line in lines:
-            if line.strip() == "":
-                continue
-            values = line.split("\t")
-            onset, offset, note = float(values[0]), float(values[1]), int(values[2].strip())
-            labels.append(Label(start_time=onset, end_time=offset, note=note))
-        return labels
+        return dset.MapsStructure.load_label(label_path)
 
 
 class MusicNetLabelExtraction(BaseLabelExtraction):
     """Label extraction class for MusicNet dataset"""
     @classmethod
     def load_label(cls, label_path):
-        labels = []
-        sample_rate = 44100
-        with open(label_path, "r") as label_file:
-            reader = csv.DictReader(label_file, delimiter=",")
-            for row in reader:
-                onset = float(row["start_time"]) / sample_rate
-                offset = float(row["end_time"]) / sample_rate
-                inst = int(row["instrument"]) - 1
-                note = int(row["note"])
-                start_beat = float(row["start_beat"])
-                end_beat = float(row["end_beat"])
-                note_value = row["note_value"]
-
-                label = Label(
-                    start_time=onset,
-                    end_time=offset,
-                    note=note,
-                    instrument=inst,
-                    start_beat=start_beat,
-                    end_beat=end_beat,
-                    note_value=note_value
-                )
-                labels.append(label)
-        return labels
+        return dset.MusicNetStructure.load_label(label_path)
 
 
 class SuLabelExtraction(MaestroLabelExtraction):

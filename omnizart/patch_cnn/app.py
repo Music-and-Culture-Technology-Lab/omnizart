@@ -17,7 +17,6 @@ from omnizart.feature.cfp import extract_patch_cfp
 from omnizart.setting_loaders import PatchCNNSettings
 from omnizart.models.patch_cnn import patch_cnn_model
 from omnizart.patch_cnn.inference import inference
-from omnizart.vocal.labels import MIR1KlabelExtraction
 from omnizart.train import get_train_val_feat_file_list
 
 
@@ -329,7 +328,7 @@ def extract_label(label_path, label_loader, mapping, cenf, t_unit):
 
 def _all_in_one_extract(data_pair, **feat_params):
     feat, mapping, zzz, cenf = extract_patch_cfp(data_pair[0], **feat_params)
-    label = extract_label(data_pair[1], MIR1KlabelExtraction, mapping=mapping, cenf=cenf, t_unit=feat_params["hop"])
+    label = extract_label(data_pair[1], d_struct.MIR1KStructure, mapping=mapping, cenf=cenf, t_unit=feat_params["hop"])
     return feat, mapping, zzz, label
 
 
