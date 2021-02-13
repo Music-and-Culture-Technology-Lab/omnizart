@@ -87,3 +87,17 @@ def test_cmedia_load_label():
     gt_file_path = "./tests/resource/gt_files/cmedia_gt_file.csv"
     labels = dset.CMediaStructure.load_label(gt_file_path)
     _assert_all_equal(expected, labels)
+
+
+def test_medleydb_load_label():
+    t_unit = 256 / 44100
+    expected = [
+        Label(2.461315, 2.46712, 74.312369),
+        Label(2.46712, 2.472925, 74.283337),
+        Label(2.472925, 2.47873, 74.256145),
+        Label(2.47873, 2.484535, 74.235337),
+        Label(2.484535, 2.4903, 74.209788)
+    ]
+    gt_file_path = "./tests/resource/gt_files/medleydb_gt_file.csv"
+    labels = dset.MedleyDBStructure.load_label(gt_file_path)
+    _assert_all_equal(expected, labels)
