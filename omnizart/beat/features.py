@@ -159,8 +159,8 @@ def extract_musicnet_label(csv_path, meter=4, t_unit=0.01, rounding=1, fade_out=
         logger.error("No integer beat found in the piece: %s", csv_path)
 
     # Recover missing beat position without time stamp by interpolation.
-    max_beat = math.ceil(max(label.start_beat - offset + label.end_beat for label in labels))
-    min_beat = math.ceil(min(label.start_time - offset for label in labels))
+    max_beat = math.ceil(max(label.end_beat - offset for label in labels))
+    min_beat = math.ceil(min(label.start_beat - offset for label in labels))
     beats = set(range(min_beat, max_beat + 1))
     missing_beats = beats - set(added_beats)
     interp_beat_idx = interp1d(
