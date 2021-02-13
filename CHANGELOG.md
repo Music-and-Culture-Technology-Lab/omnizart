@@ -1,11 +1,24 @@
 # Changelog
 
-## 0.3.1 - 2020-01-18
+## 0.3.2 - 2021-02-
+
+### Enhancement
+- Move `load_label` functions of different datasets into dataset structure classes.
+- Add custom exception on fail downloading GD file due to access limit.
+- Add unit tests on parsing label files into shared intermediate format.
+
+### Bugs
+- Fix wrong access name of the dict in vocal midi inference function.
+- Fix bug of generating beat module training labels.
+
+## 0.3.1 - 2021-01-18
+
+Hotfix release of spleeter error.
 
 ### Bugs
 - Call Spleeter in CLI mode instead of using python class.
 
-## 0.3.0 - 2020-01-17
+## 0.3.0 - 2021-01-17
 
 Release the `beat` module for symbolic domain beat transcription.
 
