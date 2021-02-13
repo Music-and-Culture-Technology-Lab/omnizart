@@ -1,9 +1,7 @@
 import abc
 
 import numpy as np
-from librosa.core import hz_to_midi
 
-from omnizart.base import Label
 from omnizart.constants import datasets as dset
 from omnizart.constants.midi import LOWEST_MIDI_NOTE
 

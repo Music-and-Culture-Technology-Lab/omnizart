@@ -1,9 +1,7 @@
-import csv
 import abc
 
 import numpy as np
 
-from omnizart.base import Label
 from omnizart.constants import datasets as dset
 
 

@@ -275,7 +275,7 @@ class MusicNetStructure(BaseStructure):
                 inst = int(row["instrument"]) - 1
                 note = int(row["note"])
 
-                # The statement used in the paper is 'measure', which is kind of ambiguous. 
+                # The statement used in the paper is 'measure', which is kind of ambiguous.
                 start_beat = float(row["start_beat"])
 
                 # It's actually beat length of 'end_beat' column, thus adding start beat position here to
