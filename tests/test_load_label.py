@@ -74,3 +74,16 @@ def test_tonas_load_label():
     gt_file_path = "./tests/resource/gt_files/tonas_gt_file.notes.Corrected"
     labels = dset.TonasStructure.load_label(gt_file_path)
     _assert_all_equal(expected, labels)
+
+
+def test_cmedia_load_label():
+    expected = [
+        Label(0.12345, 0.3333, 50),
+        Label(1.112, 1.5, 66),
+        Label(1.6666, 1.78, 70),
+        Label(1.6666, 1.8, 73),
+        Label(1.94333, 2.3, 65)
+    ]
+    gt_file_path = "./tests/resource/gt_files/cmedia_gt_file.csv"
+    labels = dset.CMediaStructure.load_label(gt_file_path)
+    _assert_all_equal(expected, labels)
