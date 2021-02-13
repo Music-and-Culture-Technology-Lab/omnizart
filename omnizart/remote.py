@@ -20,6 +20,11 @@ SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "
 
 
 class GDFileAccessLimited(Exception):
+    """Custom exception on failing to download GD file.
+
+    This exception is raised when the GD file is overly accessed during a certain
+    period.
+    """
     pass
 
 
