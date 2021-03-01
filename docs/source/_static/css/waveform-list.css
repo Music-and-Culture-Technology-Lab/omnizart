@@ -1,0 +1,275 @@
+.playlist {
+    margin: 2em 0;
+}
+
+.playlist .playlist-time-scale {
+    height: 30px;
+}
+
+.playlist .playlist-tracks {
+    background: #E0EFF1;
+}
+
+.playlist .channel {
+    background: grey;
+}
+
+.playlist .channel-progress {
+    background: orange;
+}
+
+.playlist .cursor {
+    background: black;
+}
+
+.playlist .wp-fade {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.playlist .state-cursor,
+.playlist .state-select {
+    cursor: text;
+}
+
+.playlist .state-fadein {
+    cursor: w-resize;
+}
+
+.playlist .state-fadeout {
+    cursor: e-resize;
+}
+
+.playlist .state-shift {
+    cursor: ew-resize;
+}
+
+.playlist .selection.point {
+    background: red;
+}
+
+.playlist .selection.segment {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.playlist .channel-wrapper.silent .channel {
+    opacity: 0.3;
+}
+
+.playlist .controls {
+    background: white;
+    text-align: center;
+}
+
+.playlist .controls header {
+    overflow: hidden;
+    color: rgb(0, 0, 0);
+    background-color: rgba(43, 226, 52, 0.418);
+    margin-bottom: 1em;
+    height: 20px;
+}
+
+.playlist .controls label {
+    margin: 1em auto;
+    width: 100%;
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, 0);
+}
+
+.playlist .controls label:before {
+    content: "\f027";
+    color: black;
+    font-size: 18px;
+    padding-right: 5px;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.playlist .controls label:after {
+    content: "\f028";
+    color: black;
+    font-size: 18px;
+    padding-left: 5px;
+}
+
+.playlist .controls input[type=range] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: inline-block;
+    width: 75%;
+}
+
+.playlist .controls input[type=range]::-webkit-slider-runnable-track {
+    height: 8px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+    padding: 1px;
+}
+
+.playlist .controls input[type=range]::-moz-range-track {
+    height: 8px;
+    background: #ddd;
+    border: none;
+    border-radius: 3px;
+    padding: 1px;
+}
+
+.playlist .controls input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+    margin-top: -5px;
+    cursor: ew-resize;
+}
+
+.playlist .controls input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+    margin-top: -5px;
+    cursor: ew-resize;
+}
+
+.playlist .controls input[type=range]:focus {
+    outline: none;
+}
+
+.playlist .controls input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+
+.playlist .controls input[type=range]:focus::-moz-range-track {
+    background: #ccc;
+}
+
+.playlist .annotations .annotations-boxes {
+    text-align: center;
+}
+
+.playlist .annotations .annotation-box {
+    border: 2px dashed grey;
+    padding: 0 10px;
+}
+
+.playlist .annotations .annotation-box .resize-handle {
+    background: grey;
+    opacity: 0.3;
+    cursor: ew-resize;
+}
+
+.playlist .annotations .annotation-box .id {
+    cursor: pointer;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.playlist .annotations .annotations-text {
+    font-size: 19px;
+    font-weight: 300;
+    margin-top: 1em;
+    height: 160px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.playlist .annotations .annotations-text .annotation {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.playlist .annotations .annotations-text .annotation span {
+    margin: 0.3rem 0.6rem;
+}
+
+.playlist .annotations .annotations-text .annotation span:last-of-type {
+    margin-right: 1.2rem;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-id {
+    font-size: 16px;
+    line-height: 27px;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-start {
+    font-size: 16px;
+    line-height: 27px;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-end {
+    font-size: 16px;
+    line-height: 27px;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-lines {
+    flex-grow: 10;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-actions {
+    flex-basis: auto;
+    width: 80px;
+    text-align: right;
+    font-size: 16px;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-actions i {
+    margin-right: 0.6rem;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-actions i:last-of-type {
+    margin-right: 0;
+}
+
+.playlist .annotations .annotations-text .annotation .annotation-actions i:hover {
+    color: orange;
+    cursor: pointer;
+}
+
+.playlist .annotations .current {
+    background-color: #EBF4F6;
+}
+
+.playlist .vocals {
+    background-color: #c0dce0;
+}
+
+.playlist .vocals header {
+    background-color: green;
+}
+
+.track-drop {
+    border: 2px dashed blue;
+    height: 100px;
+    width: 200px;
+    margin: 1em 0;
+}
+
+.track-drop::before {
+    content: "Drop audio file(s) here!";
+}
+
+.track-drop.drag-enter {
+    border: 2px solid orange;
+}
+
+footer {
+    margin-top: 2em;
+}
+
+
+/*# sourceMappingURL=main.css.map */

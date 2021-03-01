@@ -92,8 +92,7 @@ You can use *Audacity* to open the files.
 
    quick-start.rst
    tutorial.rst
-   add-new-modules.rst
-
+   demo.rst
 
 .. toctree::
    :maxdepth: 2
