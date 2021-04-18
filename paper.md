@@ -46,7 +46,7 @@ In summary, Omnizart incorporates:
 - Main functionalities in the life-cycle of AMT research, covering from dataset downloading, feature pre-processing, model training, to sonification of the transcription result.
 
 Omnizart is based on Tensorflow @[abadi2016tensorflow]. 
-The complete code base, command-line interface, documentation, as well as demo examples can all be accessed from the project repository \texttt{\url{https://github.com/Music-and-Culture-Technology-Lab/omnizart}}.
+The complete code base, command-line interface, documentation, as well as demo examples can all be accessed from the [project website](https://github.com/Music-and-Culture-Technology-Lab/omnizart).
 
 
 # Purpose
