@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "omnizart"
-version = "0.3.2"
+version = "0.3.3"
 description = "Omniscient Mozart, being able to transcribe everything in the music."
 readme = "README.md"
 authors = ["BreezeWhite <freedombluewater@gmail.com>", "yjlolo <yjlolo125@gmail.com>"]
@@ -36,7 +36,7 @@ numba = "0.48"
 tqdm = "^4.49.0"
 pyfluidsynth = "^1.2.5"
 vamp = "^1.1.0"
-urllib3 = "^1.25.11"
+urllib3 = "1.26.4"
 spleeter = "^2.0.1"
 mir_eval = "^0.6"
 
