@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.3.2 - 2021-02-
+## 0.3.3 - 2021-05-07
+Hotfix version according to issue #19.
+
+## Bugs
+- Fix column inconsistency of `aggregate_f0_info` and `write_agg_f0_results`.
+- Update version of dependencies according to the security alert.
+
+
+## 0.3.2 - 2021-02-13
 
 ### Enhancement
 - Move `load_label` functions of different datasets into dataset structure classes.
