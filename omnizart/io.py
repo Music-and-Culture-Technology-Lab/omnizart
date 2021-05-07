@@ -136,7 +136,13 @@ def write_agg_f0_results(agg_f0, output_path):
     omnizart.utils.aggregate_f0_info:
         The function for generating the aggregated F0 information.
     """
+    fieldnames = ["start_time", "end_time", "frequency", "pitch"]
+
+    # Check the format is correct
+    if any(list(row.keys()) != fieldnames for row in agg_f0):
+        raise ValueError(f"Fields inconsistent! Expected: {fieldnames}")
+
     with open(output_path, "w") as out:
-        writer = csv.DictWriter(out, fieldnames=["start_time", "end_time", "frequency"])
+        writer = csv.DictWriter(out, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(agg_f0)

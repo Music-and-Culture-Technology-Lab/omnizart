@@ -363,6 +363,7 @@ def aggregate_f0_info(pred, t_unit):
     start_idx = 0
     last_hz = pred[0]
     eps = 1e-6
+    pred.append(0)  # Append an additional zero to the end temporarily.
     while cur_idx < len(pred):
         cur_hz = pred[cur_idx]
         if abs(cur_hz - last_hz) < eps:
@@ -388,4 +389,6 @@ def aggregate_f0_info(pred, t_unit):
         start_idx = cur_idx
         cur_idx += 1
         last_hz = cur_hz
+
+    del pred[-1]  # Remove the additional ending zero.
     return results

@@ -183,3 +183,29 @@ def test_serializable_recursive_value_path():
         "C": {"Level1": {"Level2": "HelloWorld"}}
     }
     assert data_a.to_json() == data
+
+
+def test_aggregate_f0_info():
+    t_unit = 0.01
+    data = [0, 0, 0, 440, 440, 440, 440, 0, 0, 0, 220, 220]
+    expected = [
+        {"start_time": 0.03, "end_time": 0.07, "frequency": 440, "pitch": 69},
+        {"start_time": 0.1, "end_time": 0.12, "frequency": 220, "pitch": 57}
+    ]
+    results = utils.aggregate_f0_info(data, t_unit)
+    assert results == expected
+
+    output_path = "result.tmp"
+    io.write_agg_f0_results(results, output_path)
+
+    # Invalid column
+    with pytest.raises(ValueError):
+        results[0]["invalid"] = ""
+        io.write_agg_f0_results(results, output_path)
+
+    with pytest.raises(ValueError):
+        del results[0]["invalid"]
+        del results[0]["pitch"]
+        io.write_agg_f0_results(results, output_path)
+
+    os.remove(output_path)
