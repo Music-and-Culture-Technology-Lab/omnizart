@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.4 - 2021-05-10
+Hotifx version according to issue #19.
+
+## Bugs
+- Fix bug of treating numpy array as list while appending elements.
+
+
 ## 0.3.3 - 2021-05-07
 Hotfix version according to issue #19.
 
