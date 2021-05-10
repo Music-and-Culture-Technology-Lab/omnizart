@@ -2,6 +2,7 @@ import os
 import shutil
 
 import pytest
+import numpy as np
 from jsonschema import ValidationError
 
 from omnizart import utils
@@ -187,7 +188,7 @@ def test_serializable_recursive_value_path():
 
 def test_aggregate_f0_info():
     t_unit = 0.01
-    data = [0, 0, 0, 440, 440, 440, 440, 0, 0, 0, 220, 220]
+    data = np.array([0, 0, 0, 440, 440, 440, 440, 0, 0, 0, 220, 220])
     expected = [
         {"start_time": 0.03, "end_time": 0.07, "frequency": 440, "pitch": 69},
         {"start_time": 0.1, "end_time": 0.12, "frequency": 220, "pitch": 57}
