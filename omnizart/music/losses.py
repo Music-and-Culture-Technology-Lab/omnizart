@@ -56,10 +56,10 @@ def q_func(y_true, gamma=0.1, total_chs=22):
     return (1-gamma) * y_true + gamma/total_chs  # noqa: E226
 
 
-def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22):
+def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22, weight=None):
     """Function to compute loss after applying **label-smoothing**."""
 
-    total_chs = min(25, max(total_chs, 5))
+    total_chs = min(25, max(total_chs, 10))
     clip_value = lambda v_in: tf.clip_by_value(v_in, 1e-8, 1.0)
     target = clip_value(q_func(y_true, gamma=gamma, total_chs=total_chs))
     neg_target = clip_value(q_func(1 - y_true, gamma=gamma, total_chs=total_chs))
@@ -67,4 +67,11 @@ def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22):
     neg_sigmoid_p = clip_value(tf.nn.sigmoid(1 - y_pred))
 
     cross_entropy = -target * tf.math.log(sigmoid_p) - neg_target * tf.math.log(neg_sigmoid_p)
-    return tf.reduce_mean(cross_entropy)
+    entropy = -sigmoid_p * tf.math.log(sigmoid_p)
+    mix_ent = 0.85 * cross_entropy + 0.15 * entropy
+
+    if weight is not None:
+        # 'weight' should be an 1D list with length the same as channel numbers (last axis).
+        mix_ent *= weight
+
+    return tf.reduce_mean(mix_ent)
