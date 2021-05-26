@@ -111,12 +111,7 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
-        pred = predict(
-            feature[:, :, channels],
-            model,
-            timesteps=model_settings.training.timesteps,
-            feature_num=model_settings.training.feature_num
-        )
+        pred = predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
 
         logger.info("Infering notes....")
         midi = multi_inst_note_inference(
@@ -132,7 +127,7 @@ class MusicTranscription(BaseTranscription):
 
         self._output_midi(output=output, input_audio=input_audio, midi=midi)
         if os.environ.get("LOG_LEVEL", "") == "debug":
-            dump_pickle({"pred": pred}, "./debug_pred.pickle")
+            dump_pickle({"pred": pred, "feature": feature}, "./debug_pred.pickle")
 
         logger.info("Transcription finished")
         return midi
@@ -272,24 +267,28 @@ class MusicTranscription(BaseTranscription):
         train_feat_files, val_feat_files = get_train_val_feat_file_list(feature_folder, split=split)
 
         output_types = (tf.float32, tf.float32)
+        output_shapes = (
+            (settings.training.timesteps, settings.training.feature_num, len(settings.training.channels)),
+            (settings.training.timesteps, settings.training.feature_num, l_type.get_out_classes())
+        )
         train_dataset = MusicDatasetLoader(
                 l_type.get_conversion_func(),
                 feature_files=train_feat_files,
-                num_samples=settings.training.batch_size * settings.training.steps,
+                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps,
                 timesteps=settings.training.timesteps,
                 channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
                 feature_num=settings.training.feature_num
             ) \
-            .get_dataset(settings.training.batch_size, output_types=output_types)
+            .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
         val_dataset = MusicDatasetLoader(
                 l_type.get_conversion_func(),
                 feature_files=val_feat_files,
-                num_samples=settings.training.val_batch_size * settings.training.val_steps,
+                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps,
                 timesteps=settings.training.timesteps,
                 channels=[FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in settings.training.channels],
                 feature_num=settings.training.feature_num
             ) \
-            .get_dataset(settings.training.val_batch_size, output_types=output_types)
+            .get_dataset(settings.training.val_batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
             logger.info("Creating new model with type: %s", settings.model.model_type)
@@ -305,11 +304,12 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Compiling model with loss function type: %s", settings.training.loss_function)
         loss_func = {
-            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes()),
+            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes(), weight=[1, 0.5, 1.5]),
             "focal": focal_loss,
             "bce": tf.keras.losses.BinaryCrossentropy()
         }[settings.training.loss_function]
-        model.compile(optimizer="adam", loss=loss_func, metrics=['accuracy'])
+        optim = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
         if model_name is None:
@@ -324,19 +324,20 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Constructing callbacks")
         callbacks = [
-            EarlyStopping(patience=settings.training.early_stop),
-            ModelCheckpoint(model_save_path, save_weights_only=True)
+            tf.keras.callbacks.EarlyStopping(
+                patience=settings.training.early_stop, restore_best_weights=True, monitor='val_acc'),
+            tf.keras.callbacks.ModelCheckpoint(
+                jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor='val_acc')
         ]
         logger.info("Callback list: %s", callbacks)
 
         logger.info("Start training")
-        history = train_epochs(
-            model,
+        history = model.fit(
             train_dataset,
-            validate_dataset=val_dataset,
+            validation_data=val_dataset,
             epochs=settings.training.epoch,
-            steps=settings.training.steps,
-            val_steps=settings.training.val_steps,
+            steps_per_epoch=settings.training.steps,
+            validation_steps=settings.training.val_steps,
             callbacks=callbacks
         )
         return model_save_path, history
@@ -462,7 +463,11 @@ class MusicDatasetLoader(BaseDatasetLoader):
 
     def _get_feature(self, hdf_name, slice_start):
         feat = self.hdf_refs[hdf_name]["feature"]
-        feat = feat[slice_start:slice_start + self.slice_hop, :, self.channels].squeeze()
+        container = []
+        for ch in self.channels:
+            container.append(feat[slice_start:slice_start + self.slice_hop, :, ch].squeeze())
+        feat = np.dstack(container)
+        # feat = feat[slice_start:slice_start + self.slice_hop, :, self.channels].squeeze()
         if self.pad:
             feat = np.pad(feat, self.pad_shape, constant_values=0)
         return feat
@@ -501,6 +506,20 @@ class MusicDatasetLoader(BaseDatasetLoader):
             label = np.pad(label, ((0, diff), (0, 0), (0, 0)))
 
         return feature, label
+
+
+class Entropy(tf.keras.metrics.Metric):
+    def __init__(self, name='entropy', **kwargs):
+        super(Entropy, self).__init__(name=name, **kwargs)
+        self.ent = self.add_weight(name='entropy', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        prob = tf.math.sigmoid(y_pred)
+        ent = -prob * tf.math.log(prob)
+        self.ent.assign_add(tf.reduce_mean(ent))
+
+    def result(self):
+        return self.ent
 
 
 if __name__ == "__main__":
