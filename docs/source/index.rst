@@ -92,6 +92,7 @@ You can use *Audacity* to open the files.
 
    quick-start.rst
    tutorial.rst
+   demo.rst
 
 .. toctree::
    :maxdepth: 2
@@ -136,3 +137,11 @@ References
 
 .. bibliography::
    refs.bib
+
+[1]_ Tsung-Ping Chen and Lis Su, "Harmony Transformer: Incorporating Chord Segmentation Into Harmony Recognition,"
+International Society of Music Information Retrieval Conference (ISMIR), 2019.
+
+[2]_ 
+
+[3]_ Wei-Tsung Lu and Li Su, "Vocal Melody Extraction With Semantic Segmentation and Audio-Symbolic Domain
+Transfer Learning," International Society of Music Information Retrieval Conference (ISMIR), 2018.
