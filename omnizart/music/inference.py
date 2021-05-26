@@ -80,29 +80,28 @@ def down_sample(pred, occur_num=3):
     return d_sample
 
 
-def infer_pitch(pitch, shortest=5, offset_interval=6):
+def infer_pitch(pitch, shortest=7, offset_interval=6):
     w_on = pitch[:, 2]
     w_dura = pitch[:, 1]
 
-    peaks, _ = find_peaks(w_on, distance=shortest, width=5)
+    peaks, _ = find_peaks(w_on, distance=shortest, width=3)
     if len(peaks) == 0:
         return []
 
     notes = []
-    adjust = 5 if shortest == 10 else 2
     for i in range(len(peaks) - 1):
-        notes.append({"start": peaks[i] - adjust, "end": peaks[i + 1] - adjust, "stren": pitch[peaks[i], 2]})
-    notes.append({"start": peaks[-1] - adjust, "end": len(w_on) - adjust, "stren": pitch[peaks[-1], 2]})
+        notes.append({"start": peaks[i], "end": peaks[i + 1], "stren": pitch[peaks[i], 2]})
+    notes.append({"start": peaks[-1], "end": len(w_on), "stren": pitch[peaks[-1], 2]})
 
     del_idx = []
     for idx, peak in enumerate(peaks):
         upper = int(peaks[idx + 1]) if idx < len(peaks) - 1 else len(w_dura)
         for i in range(peak, upper):
             if np.sum(w_dura[i:i + offset_interval]) == 0:
-                if i - notes[idx]["start"] - adjust < shortest - 1:
+                if i - notes[idx]["start"] < shortest - 1:
                     del_idx.append(idx)
                 else:
-                    notes[idx]["end"] = i - adjust
+                    notes[idx]["end"] = i
                 break
 
     for ii, i in enumerate(del_idx):
@@ -111,7 +110,7 @@ def infer_pitch(pitch, shortest=5, offset_interval=6):
     return notes
 
 
-def infer_piece(piece, shortest_sec=0.1, offset_sec=0.12, t_unit=0.02):
+def infer_piece(piece, shortest_sec=0.05, offset_sec=0.12, t_unit=0.02):
     """
         Dim: time x 88 x 4 (off, dura, onset, offset)
     """
@@ -329,7 +328,7 @@ def note_inference(
     mode="note",
     onset_th=7.5,
     lower_onset_th=None,
-    split_bound=36,
+    split_bound=25,
     dura_th=2,
     frm_th=1,
     normalize=True,
