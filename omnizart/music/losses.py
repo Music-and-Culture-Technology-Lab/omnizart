@@ -63,15 +63,12 @@ def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22, weight=None):
     clip_value = lambda v_in: tf.clip_by_value(v_in, 1e-8, 1.0)
     target = clip_value(q_func(y_true, gamma=gamma, total_chs=total_chs))
     neg_target = clip_value(q_func(1 - y_true, gamma=gamma, total_chs=total_chs))
-    sigmoid_p = clip_value(tf.nn.sigmoid(y_pred))
-    neg_sigmoid_p = clip_value(tf.nn.sigmoid(1 - y_pred))
+    sigmoid_p = clip_value(tf.math.sigmoid(y_pred))
+    neg_sigmoid_p = clip_value(1 - sigmoid_p)
 
-    cross_entropy = -target * tf.math.log(sigmoid_p) - neg_target * tf.math.log(neg_sigmoid_p)
-    entropy = -sigmoid_p * tf.math.log(sigmoid_p)
-    mix_ent = 0.85 * cross_entropy + 0.15 * entropy
-
+    loss = -target * tf.math.log(sigmoid_p) - neg_target * tf.math.log(neg_sigmoid_p)
     if weight is not None:
         # 'weight' should be an 1D list with length the same as channel numbers (last axis).
-        mix_ent *= weight
+        loss *= weight
 
-    return tf.reduce_mean(mix_ent)
+    return tf.reduce_mean(loss)
