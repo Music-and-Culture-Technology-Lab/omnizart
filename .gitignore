@@ -18,9 +18,10 @@ tf_dataset_experiment/
 htmlcov/
 .vscode/
 .python-version
-*.code-workspace
 .coverage
 .cookie
+*.code-workspace
+*.pickle
 
 # Transcription results
 *.mid
