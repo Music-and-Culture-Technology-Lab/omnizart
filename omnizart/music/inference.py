@@ -50,8 +50,7 @@ def roll_down_sample(data, occur_num=3, base=88):
 
     for i in range(0, data.shape[1], scale):
         total = np.sum(data[:, i:i + scale], axis=1)
-        return_v[:, int(i / scale)] = np.where(total >= occur_num, total / occur_num, 0)
-    return_v = np.where(return_v >= 1, 1, return_v)
+        return_v[:, int(i / scale)] = np.where(total >= occur_num, total / scale, 0)
 
     return return_v
 
@@ -80,11 +79,11 @@ def down_sample(pred, occur_num=3):
     return d_sample
 
 
-def infer_pitch(pitch, shortest=7, offset_interval=6):
+def infer_pitch(pitch, shortest=10, offset_interval=6):
     w_on = pitch[:, 2]
     w_dura = pitch[:, 1]
 
-    peaks, _ = find_peaks(w_on, distance=shortest, width=3)
+    peaks, _ = find_peaks(w_on, distance=shortest, width=7)
     if len(peaks) == 0:
         return []
 
