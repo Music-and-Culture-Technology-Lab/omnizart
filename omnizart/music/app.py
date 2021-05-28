@@ -304,11 +304,11 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Compiling model with loss function type: %s", settings.training.loss_function)
         loss_func = {
-            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes(), weight=[1, 0.5, 1.5]),
+            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes()),
             "focal": focal_loss,
             "bce": tf.keras.losses.BinaryCrossentropy()
         }[settings.training.loss_function]
-        optim = tf.keras.optimizers.Adam(learning_rate=1e-4)
+        optim = tf.keras.optimizers.Adam(learning_rate=1e-6)
         model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
@@ -327,7 +327,8 @@ class MusicTranscription(BaseTranscription):
             tf.keras.callbacks.EarlyStopping(
                 patience=settings.training.early_stop, restore_best_weights=True, monitor='val_acc'),
             tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor='val_acc')
+                jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor='val_acc'),
+            tf.keras.callbacks.LearningRateScheduler(lr_scheduler)
         ]
         logger.info("Callback list: %s", callbacks)
 
@@ -520,6 +521,12 @@ class Entropy(tf.keras.metrics.Metric):
 
     def result(self):
         return self.ent
+
+def lr_scheduler(epoch, lr):
+    if epoch < 5:
+        return lr
+    return lr / 3
+
 
 
 if __name__ == "__main__":
