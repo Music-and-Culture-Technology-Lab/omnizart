@@ -15,7 +15,7 @@ from omnizart.utils import get_logger
 logger = get_logger("Music Inference")
 
 
-def roll_down_sample(data, occur_num=3, base=88):
+def roll_down_sample(data, base=88):
     """Down sample feature size for a single pitch.
 
     Down sample the feature size from 354 to 88 for infering the notes.
@@ -24,9 +24,6 @@ def roll_down_sample(data, occur_num=3, base=88):
     ----------
     data: 2D numpy array
         The thresholded 2D prediction..
-    occur_num: int
-        For each pitch, the original prediction expands 4 bins wide. This value determines how many positive bins
-        should there be to say there is a real activation after down sampling.
     base
         Should be constant as there are 88 pitches on the piano.
 
@@ -44,18 +41,15 @@ def roll_down_sample(data, occur_num=3, base=88):
     assert total_roll % base == 0, f"Wrong length: {total_roll}, {total_roll} % {base} should be zero!"
 
     scale = round(total_roll / base)
-    assert 0 < occur_num <= scale
-
-    return_v = np.zeros((len(data), base), dtype=int)
-
+    return_v = np.zeros((len(data), base))
     for i in range(0, data.shape[1], scale):
         total = np.sum(data[:, i:i + scale], axis=1)
-        return_v[:, int(i / scale)] = np.where(total >= occur_num, total / scale, 0)
+        return_v[:, int(i / scale)] = total / scale
 
     return return_v
 
 
-def down_sample(pred, occur_num=3):
+def down_sample(pred):
     """Down sample multi-channel predictions along the feature dimension.
 
     Down sample the feature size from 354 to 88 for infering the notes from a multi-channel prediction.
@@ -64,17 +58,15 @@ def down_sample(pred, occur_num=3):
     ----------
     pred: 3D numpy array
         Thresholded prediction with multiple channels. Dimension: [timesteps x pitch x instruments]
-    occur_num: int
-        Minimum occurance of each pitch for determining true activation of the pitch.
 
     Returns
     -------
     d_sample: 3D numpy array
         Down-sampled prediction. Dimension: [timesteps x 88 x instruments]
     """
-    d_sample = roll_down_sample(pred[:, :, 0], occur_num=occur_num)
+    d_sample = roll_down_sample(pred[:, :, 0])
     for i in range(1, pred.shape[2]):
-        d_sample = np.dstack([d_sample, roll_down_sample(pred[:, :, i], occur_num=occur_num)])
+        d_sample = np.dstack([d_sample, roll_down_sample(pred[:, :, i])])
 
     return d_sample
 
@@ -83,7 +75,7 @@ def infer_pitch(pitch, shortest=10, offset_interval=6):
     w_on = pitch[:, 2]
     w_dura = pitch[:, 1]
 
-    peaks, _ = find_peaks(w_on, distance=shortest, width=7)
+    peaks, _ = find_peaks(w_on, distance=shortest, prominence=1, width=5)
     if len(peaks) == 0:
         return []
 
@@ -198,20 +190,18 @@ def to_midi(notes, t_unit=0.02):
 
     # Some tricky steps to determine the velocity of the notes
     l_bound, u_bound = find_min_max_stren(notes)
-    s_low = 60
+    s_low = 110
     s_up = 127
     v_map = lambda stren: int(
-        s_low + ((s_up-s_low) * ((stren-l_bound) / (u_bound-l_bound+0.0001)))  # noqa: E226
+        s_low + ((s_up-s_low) * ((u_bound-stren) / (u_bound-l_bound+0.0001)))  # noqa: E226
     )
 
     low_b = note_to_midi("A0")
-    coll = set()
     for note in notes:
         pitch = note["pitch"] + low_b
         start = note["start"] * t_unit
         end = note["end"] * t_unit
         volume = v_map(note["stren"])
-        coll.add(pitch)
         m_note = pretty_midi.Note(velocity=volume, pitch=pitch, start=start, end=end)
         piano.notes.append(m_note)
     midi.instruments.append(piano)
@@ -248,7 +238,7 @@ def norm_onset_dura(pred, onset_th, dura_th, interpolate=True, normalize=True):
 
     onset = np.where(onset < dura, 0, onset)
     norm_onset = norm(onset) if normalize else onset
-    onset = np.where(norm_onset < onset_th, 0, norm_onset)
+    onset = np.where(norm_onset < onset_th, 0, norm_onset-onset_th)
     norm_pred[:, :, 2] = onset
 
     norm_dura = norm(dura) + onset if normalize else dura + onset
@@ -347,7 +337,7 @@ def note_inference(
         else:
             norm_pred = norm_onset_dura(pred, onset_th=onset_th, dura_th=dura_th, interpolate=True, normalize=normalize)
 
-        norm_pred = np.where(norm_pred > 0, norm_pred + 1, 0)
+        # norm_pred = np.where(norm_pred > 0, norm_pred + 1, 0)
         notes = infer_piece(down_sample(norm_pred), t_unit=0.01)
         midi = to_midi(notes, t_unit=t_unit / 2)
 

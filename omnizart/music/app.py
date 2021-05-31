@@ -29,8 +29,7 @@ from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription, BaseDatasetLoader
 from omnizart.utils import get_logger, parallel_generator, ensure_path_exists, resolve_dataset_type
 from omnizart.io import dump_pickle, write_yaml
-from omnizart.train import train_epochs, get_train_val_feat_file_list
-from omnizart.callbacks import EarlyStopping, ModelCheckpoint
+from omnizart.train import get_train_val_feat_file_list
 from omnizart.setting_loaders import MusicSettings
 from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, POP_INSTRUMENT_PROGRAMES
 from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
@@ -308,7 +307,7 @@ class MusicTranscription(BaseTranscription):
             "focal": focal_loss,
             "bce": tf.keras.losses.BinaryCrossentropy()
         }[settings.training.loss_function]
-        optim = tf.keras.optimizers.Adam(learning_rate=1e-6)
+        optim = tf.keras.optimizers.Adam(learning_rate=1e-3)
         model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
@@ -323,12 +322,14 @@ class MusicTranscription(BaseTranscription):
         logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
+        weight_name = "weights.h5"  # "weights.{epoch:02d}-{val_loss:.4f}-{val_accuracy:.4f}.h5"
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
-                patience=settings.training.early_stop, restore_best_weights=True, monitor='val_acc'),
+                patience=settings.training.early_stop, monitor='val_acc'),
             tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, "weights.h5"), save_weights_only=True, monitor='val_acc'),
-            tf.keras.callbacks.LearningRateScheduler(lr_scheduler)
+                jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_acc'),
+            tf.keras.callbacks.LearningRateScheduler(
+                lambda epoch, lr: lr_scheduler(epoch, lr, update_after=5, dec_every=3, dec_rate=0.5))
         ]
         logger.info("Callback list: %s", callbacks)
 
@@ -522,11 +523,11 @@ class Entropy(tf.keras.metrics.Metric):
     def result(self):
         return self.ent
 
-def lr_scheduler(epoch, lr):
-    if epoch < 5:
-        return lr
-    return lr / 3
 
+def lr_scheduler(epoch, lr, update_after=5, dec_every=3, dec_rate=0.5):
+    if epoch >= update_after and (epoch - update_after) % dec_every == 0:
+        lr *= dec_rate
+    return max(lr, 5e-8)
 
 
 if __name__ == "__main__":
