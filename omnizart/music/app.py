@@ -307,7 +307,7 @@ class MusicTranscription(BaseTranscription):
             "focal": focal_loss,
             "bce": tf.keras.losses.BinaryCrossentropy()
         }[settings.training.loss_function]
-        optim = tf.keras.optimizers.Adam(learning_rate=1e-3)
+        optim = tf.keras.optimizers.Adam(learning_rate=1e-5)
         model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
@@ -322,12 +322,12 @@ class MusicTranscription(BaseTranscription):
         logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
-        weight_name = "weights.h5"  # "weights.{epoch:02d}-{val_loss:.4f}-{val_accuracy:.4f}.h5"
+        weight_name = "weights.{epoch:02d}-{val_loss:.4f}-{val_accuracy:.4f}.h5"
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
                 patience=settings.training.early_stop, monitor='val_acc'),
             tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_acc'),
+                jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_accuracy'),
             tf.keras.callbacks.LearningRateScheduler(
                 lambda epoch, lr: lr_scheduler(epoch, lr, update_after=5, dec_every=3, dec_rate=0.5))
         ]
