@@ -103,7 +103,7 @@ General:
             OnsetTh:
                 Description: Threshold of predicted onset channel.
                 Type: Float
-                Value: 6.0
+                Value: 4
             DuraTh:
                 Description: Threshold of predicted duration channel.
                 Type: Float

@@ -19,37 +19,36 @@ def validate_down_sample(out, on_pitch):
 
 
 def test_roll_down_sample():
-    frame_size = 200
-    scale = 4
-    occur_num = 3
-    on_pitch = np.random.randint(88, size=frame_size)
+    bar = np.array([
+        [1, 1, 0,   0, 0,   1,   1, 0.6, 0.4, 0.1, 0, 0],
+        [1, 1, 0.5, 0, 0,   0.8, 1, 0.6, 0.2, 0.1, 0, 0.5],
+        [1, 1, 0.2, 0, 0,   0.7, 0, 0.6, 0.3, 0.1, 0, 0.1],
+        [1, 0, 0,   0, 0.1, 0.9, 0, 0.6, 0.2, 0.1, 0, 0.2]
+    ]).T
+    expected_bar = np.array([1, 0.75, 0.175, 0, 0.025, 0.85, 0.5, 0.6, 0.275, 0.1, 0, 0.2])
+    data = np.zeros((200, 352))
+    data[:12, :4] = bar
+    data[50:62, 40:44] = bar
+    out = inf.roll_down_sample(data)
 
-    pred = generate_pred(frame_size, on_pitch, scale=scale, occur_num=occur_num)
-    out = inf.roll_down_sample(pred, occur_num=occur_num)
-
-    assert out.shape == (frame_size, 88)
-    validate_down_sample(out, on_pitch)
-
-    pred_under_th = generate_pred(frame_size, on_pitch, scale=scale, occur_num=occur_num-1)
-    out = inf.roll_down_sample(pred_under_th, occur_num=occur_num)
-    assert np.array_equiv(out, 0)
-
+    assert out.shape == (200, 88)
+    assert np.array_equal(out[:12, 0], expected_bar)
+    assert np.array_equal(out[50:62, 10], expected_bar)
 
 def test_down_sample():
     frame_size = 300
-    occur_num = 3
     channels = 10
 
     preds = []
     on_pitches = []
     for _ in range(channels):
         on_pitch = np.random.randint(88, size=frame_size)
-        pred = generate_pred(frame_size, on_pitch, occur_num=occur_num)
+        pred = generate_pred(frame_size, on_pitch)
         on_pitches.append(on_pitch)
         preds.append(pred)
 
     preds = np.dstack(preds)
-    outs = inf.down_sample(preds, occur_num=occur_num)
+    outs = inf.down_sample(preds)
     assert outs.shape == (frame_size, 88, channels)
     for idx in range(channels):
         validate_down_sample(outs[:,:,idx], on_pitches[idx])
@@ -91,12 +90,12 @@ def test_infer_pitch():
     dura = np.array([
         0, 0, 0.5, 0.8, 1.8, 2, 2, 0.6, 1.5, 1.3, 1.4, 1.9, 2.5, 2.6,
         0, 0, 0, 0, 0, 0.2, 0.3, 0.8, 1.2, 1.4, 1.8, 2, 2, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.3, 0.8, 0, 0, 0,
+        0.8, 0.4, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.3, 0.8, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0
     ])
     expected = [
-        {"start": 5, "end": 18, "stren": 3.3},
-        {"start": 18, "end": 26, "stren": 3.1}
+        {"start": 7, "end": 20, "stren": 3.3},
+        {"start": 20, "end": 30, "stren": 3.1}
     ]
 
     pitch = np.stack([zeros, dura, onset], axis=1)

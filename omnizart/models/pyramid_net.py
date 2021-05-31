@@ -319,7 +319,7 @@ class PyramidNet(tf.keras.Model):
             perturb_pred = self(unsup_feat + perturb)
             dist = self.kl_loss(unsup_pred_copy, perturb_pred)
             grad = tf.gradients(dist, [perturb], aggregation_method=2)[0]
-            perturb_pred = tf.stop_gradient(grad)
+            perturb = tf.stop_gradient(grad)
 
         self._switch_batch_norm_trainable_stat()
         return self.semi_epsilon * _normalize(perturb)

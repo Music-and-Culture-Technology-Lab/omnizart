@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/waveform-list.css">
+</head>
+
+
+<body>
+
+    <div class="container">
+        <div class="wrapper">
+            <article class="post">
+                <div class="post-content">
+                    <div id="top-bar" class="playlist-top-bar">
+                        <div class="playlist-toolbar">
+                            <div class="btn-group">
+                                <span class="btn-pause btn btn-warning"><i class="fa fa-pause"></i></span>
+                                <span class="btn-play btn btn-success"><i class="fa fa-play"></i></span>
+                                <span class="btn-stop btn btn-danger"><i class="fa fa-stop"></i></span>
+                                <span class="btn-rewind btn btn-success"><i class="fa fa-fast-backward"></i></span>
+                                <span class="btn-fast-forward btn btn-success"><i class="fa fa-fast-forward"></i></span>
+                            </div>
+                            <div class="btn-group">
+                                <span title="zoom in" class="btn-zoom-in btn btn-default">
+                                  <i class="fa fa-search-plus"></i>
+                                </span>
+                                <span title="zoom out" class="btn-zoom-out btn btn-default">
+                                  <i class="fa fa-search-minus"></i>
+                                </span>
+                            </div>
+                            <span class="audio-pos">00:00:00.0</span>
+                        </div>
+                    </div>
+                    <div id="playlist"></div>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="master-gain">Master Volume</label>
+                            <input type="range" min="0" max="100" value="50" class="master-gain form-control" id="master-gain">
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                              <input type="checkbox" class="automatic-scroll" checked> Automatic Scroll
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/waveform-playlist.var.js"></script>
+    <script>
+        // Available arguments can be found in the following page.
+        // https://github.com/naomiaro/waveform-playlist/#playlist-options
+        // https://github.com/naomiaro/waveform-playlist/#track-options
+
+        var playlist = WaveformPlaylist.init({
+            container: document.getElementById("playlist"),
+            controls: {
+                show: true, //whether or not to include the track controls
+                width: 180 //width of controls in pixels
+            }
+        });
+
+        playlist.load([{
+            "src": "../_audio/cosmo.mp3",
+            "name": "Original Song",
+            "gain": 0.5
+        }, {
+            "src": "../_audio/cosmo_vocal.mp3",
+            "name": "Vocal",
+            "gain": 1
+        }, {
+            "src": "../_audio/cosmo_vocal_contour.mp3",
+            "name": "Vocal Contour",
+            "gain": 1
+        }, {
+            "src": "../_audio/cosmo_chord.mp3",
+            "name": "Chord",
+            "gain": 1
+        }, {
+            "src": "../_audio/cosmo_drum.mp3",
+            "name": "Drum",
+            "gain": 1
+        }, {
+            "src": "../_audio/cosmo_piano.mp3",
+            "name": "Piano (?)",
+            "gain": 1
+        }])
+    </script>
+
+    <script type="text/javascript" src="js/emitter.js"></script>
+
+</body>
+
+</html>

@@ -51,7 +51,7 @@ install_requires = \
  'spleeter>=2.0.1,<3.0.0',
  'tensorflow>=2.3.0,<3.0.0',
  'tqdm>=4.49.0,<5.0.0',
- 'urllib3>=1.25.11,<2.0.0',
+ 'urllib3==1.26.4',
  'vamp>=1.1.0,<2.0.0']
 
 entry_points = \
