@@ -82,8 +82,8 @@ def create_batches(feature, timesteps, b_size=8, step_size=10):
     batches = []
     batch = []
     cur_len = 0
-    for idx in range(0, len(feature)-timesteps, step_size):
-        feat = feature[idx:idx+timesteps]
+    for idx in range(0, len(feature)-timesteps, step_size):  # noqa: E226
+        feat = feature[idx:idx+timesteps]  # noqa: E226
         batch.append(feat)
         cur_len += timesteps
         if len(batch) == b_size:
@@ -92,7 +92,7 @@ def create_batches(feature, timesteps, b_size=8, step_size=10):
 
     feat = feature[cur_len:]
     if len(feat) < timesteps:
-        pad = np.zeros((timesteps-len(feat),)+feat.shape[1:])
+        pad = np.zeros((timesteps - len(feat),) + feat.shape[1:])
         feat = np.concatenate([feat, pad])
 
     if len(batches[-1]) < b_size:
@@ -136,8 +136,8 @@ def merge_batches(batches, step_size=10):
             idx += 1
 
     mask = np.zeros_like(output)
-    for idx in range(0, out_len-pred_shape[0]+1, step_size):
-        mask[idx:idx+pred_shape[0]] += 1
+    for idx in range(0, out_len-pred_shape[0]+1, step_size):  # noqa: E226
+        mask[idx:idx+pred_shape[0]] += 1  # noqa: E226
     output /= mask
 
     return output

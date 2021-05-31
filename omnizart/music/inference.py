@@ -238,7 +238,7 @@ def norm_onset_dura(pred, onset_th, dura_th, interpolate=True, normalize=True):
 
     onset = np.where(onset < dura, 0, onset)
     norm_onset = norm(onset) if normalize else onset
-    onset = np.where(norm_onset < onset_th, 0, norm_onset-onset_th)
+    onset = np.where(norm_onset < onset_th, 0, norm_onset - onset_th)
     norm_pred[:, :, 2] = onset
 
     norm_dura = norm(dura) + onset if normalize else dura + onset
