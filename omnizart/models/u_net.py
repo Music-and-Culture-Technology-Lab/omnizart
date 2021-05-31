@@ -63,42 +63,34 @@ def transpose_conv_block(input_tensor, channel, kernel_size, strides=(2, 2), dro
 
 
 def semantic_segmentation(
-    feature_num=352, timesteps=256, multi_grid_layer_n=1, multi_grid_n=3, ch_num=1, out_class=2
+    feature_num=352, timesteps=256, multi_grid_layer_n=1, multi_grid_n=5, ch_num=1, out_class=2, dropout=0.4
 ):
     """Improved U-net model with Atrous Spatial Pyramid Pooling (ASPP) block."""
-    layer_out = []
-
     input_score = Input(shape=(timesteps, feature_num, ch_num), name="input_score_48")
-    en = Conv2D(2**5, (7, 7), strides=(1, 1), padding="same")(input_score)
-    layer_out.append(en)
+    en = Conv2D(2**7, (7, 7), strides=(1, 1), padding="same")(input_score)
 
-    en_l1 = conv_block(en, 2**5, (3, 3), strides=(2, 2))
-    en_l1 = conv_block(en_l1, 2**5, (3, 3), strides=(1, 1))
-    layer_out.append(en_l1)
+    en_l1 = conv_block(en, 2**7, (3, 3), strides=(2, 2))
+    en_l1 = conv_block(en_l1, 2**7, (3, 3), strides=(1, 1))
 
-    en_l2 = conv_block(en_l1, 2**6, (3, 3), strides=(2, 2))
-    en_l2 = conv_block(en_l2, 2**6, (3, 3), strides=(1, 1))
-    en_l2 = conv_block(en_l2, 2**6, (3, 3), strides=(1, 1))
-    layer_out.append(en_l2)
+    en_l2 = conv_block(en_l1, 2**7, (3, 3), strides=(2, 2))
+    en_l2 = conv_block(en_l2, 2**7, (3, 3), strides=(1, 1))
+    en_l2 = conv_block(en_l2, 2**7, (3, 3), strides=(1, 1))
 
     en_l3 = conv_block(en_l2, 2**7, (3, 3), strides=(2, 2))
     en_l3 = conv_block(en_l3, 2**7, (3, 3), strides=(1, 1))
     en_l3 = conv_block(en_l3, 2**7, (3, 3), strides=(1, 1))
     en_l3 = conv_block(en_l3, 2**7, (3, 3), strides=(1, 1))
-    layer_out.append(en_l3)
 
     en_l4 = conv_block(en_l3, 2**8, (3, 3), strides=(2, 2))
     en_l4 = conv_block(en_l4, 2**8, (3, 3), strides=(1, 1))
     en_l4 = conv_block(en_l4, 2**8, (3, 3), strides=(1, 1))
     en_l4 = conv_block(en_l4, 2**8, (3, 3), strides=(1, 1))
     en_l4 = conv_block(en_l4, 2**8, (3, 3), strides=(1, 1))
-    layer_out.append(en_l4)
 
     feature = en_l4
-
     for _ in range(multi_grid_layer_n):
         feature = BatchNormalization()(Activation("relu")(feature))
-        feature = Dropout(0.3)(feature)
+        feature = Dropout(dropout)(feature)
         m = BatchNormalization()(Conv2D(2**9, (1, 1), strides=(1, 1), padding="same", activation="relu")(feature))
         multi_grid = m
         for ii in range(multi_grid_n):
@@ -106,46 +98,41 @@ def semantic_segmentation(
                 Conv2D(2**9, (3, 3), strides=(1, 1), dilation_rate=2**ii, padding="same", activation="relu")(feature)
             )
             multi_grid = Concatenate()([multi_grid, m])
-        multi_grid = Dropout(0.3)(multi_grid)
+        multi_grid = Dropout(dropout)(multi_grid)
         feature = Conv2D(2**9, (1, 1), strides=(1, 1), padding="same")(multi_grid)
-        layer_out.append(feature)
 
     feature = BatchNormalization()(Activation("relu")(feature))
 
     feature = Conv2D(2**8, (1, 1), strides=(1, 1), padding="same")(feature)
     feature = Add()([feature, en_l4])
     de_l1 = transpose_conv_block(feature, 2**7, (3, 3), strides=(2, 2))
-    layer_out.append(de_l1)
 
     skip = de_l1
     de_l1 = BatchNormalization()(Activation("relu")(de_l1))
     de_l1 = Concatenate()([de_l1, BatchNormalization()(Activation("relu")(en_l3))])
-    de_l1 = Dropout(0.4)(de_l1)
+    de_l1 = Dropout(dropout)(de_l1)
     de_l1 = Conv2D(2**7, (1, 1), strides=(1, 1), padding="same")(de_l1)
     de_l1 = Add()([de_l1, skip])
-    de_l2 = transpose_conv_block(de_l1, 2**6, (3, 3), strides=(2, 2))
-    layer_out.append(de_l2)
+    de_l2 = transpose_conv_block(de_l1, 2**7, (3, 3), strides=(2, 2))
 
     skip = de_l2
     de_l2 = BatchNormalization()(Activation("relu")(de_l2))
     de_l2 = Concatenate()([de_l2, BatchNormalization()(Activation("relu")(en_l2))])
-    de_l2 = Dropout(0.4)(de_l2)
-    de_l2 = Conv2D(2**6, (1, 1), strides=(1, 1), padding="same")(de_l2)
+    de_l2 = Dropout(dropout)(de_l2)
+    de_l2 = Conv2D(2**7, (1, 1), strides=(1, 1), padding="same")(de_l2)
     de_l2 = Add()([de_l2, skip])
-    de_l3 = transpose_conv_block(de_l2, 2**5, (3, 3), strides=(2, 2))
-    layer_out.append(de_l3)
+    de_l3 = transpose_conv_block(de_l2, 2**7, (3, 3), strides=(2, 2))
 
     skip = de_l3
     de_l3 = BatchNormalization()(Activation("relu")(de_l3))
     de_l3 = Concatenate()([de_l3, BatchNormalization()(Activation("relu")(en_l1))])
-    de_l3 = Dropout(0.4)(de_l3)
-    de_l3 = Conv2D(2**5, (1, 1), strides=(1, 1), padding="same")(de_l3)
+    de_l3 = Dropout(dropout)(de_l3)
+    de_l3 = Conv2D(2**7, (1, 1), strides=(1, 1), padding="same")(de_l3)
     de_l3 = Add()([de_l3, skip])
-    de_l4 = transpose_conv_block(de_l3, 2**5, (3, 3), strides=(2, 2))
-    layer_out.append(de_l4)
+    de_l4 = transpose_conv_block(de_l3, 2**7, (3, 3), strides=(2, 2))
 
     de_l4 = BatchNormalization()(Activation("relu")(de_l4))
-    de_l4 = Dropout(0.4)(de_l4)
+    de_l4 = Dropout(dropout)(de_l4)
     out = Conv2D(out_class, (1, 1), strides=(1, 1), padding="same", name="prediction")(de_l4)
 
     return Model(inputs=input_score, outputs=out)

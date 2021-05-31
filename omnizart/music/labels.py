@@ -260,7 +260,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         print("")
 
     @classmethod
-    def extract_label(cls, label_path, t_unit, onset_len_sec=0.05):
+    def extract_label(cls, label_path, t_unit, onset_len_sec=0.03):
         """Extract labels into customized storage format.
 
         Process the given path of label into list of :class:`Label` instances,
@@ -282,12 +282,12 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         end_note = max(label_list, key=lambda label: label.end_time)
         num_frm = int(round(end_note.end_time / t_unit))
         label_obj = [{} for _ in range(num_frm)]
+        onset_len_frm = int(round(onset_len_sec / t_unit))
         for label in label_list:
             start_frm = int(round(label.start_time / t_unit))
             end_frm = int(round(label.end_time / t_unit))
             pitch = str(label.note - LOWEST_MIDI_NOTE)
             onset_value = 1
-            onset_len_frm = int(round(onset_len_sec / t_unit))
             for idx, frm_idx in enumerate(range(start_frm, end_frm)):
                 if pitch not in label_obj[frm_idx]:
                     label_obj[frm_idx][pitch] = {}
@@ -295,7 +295,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
 
                 # Decrease the onset probability
                 if idx >= onset_len_frm and onset_value > 1e-5:
-                    onset_value /= idx
+                    onset_value = 1 / pow(idx, 2)
         return label_obj
 
     @classmethod
