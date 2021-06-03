@@ -110,7 +110,7 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
-        pred = predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
+        pred = predict(feature[:, :, channels], model)
 
         logger.info("Infering notes....")
         midi = multi_inst_note_inference(
