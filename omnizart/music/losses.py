@@ -59,14 +59,14 @@ def q_func(y_true, gamma=0.1, total_chs=22):
 def smooth_loss(y_true, y_pred, gamma=0.15, total_chs=22, weight=None):
     """Function to compute loss after applying **label-smoothing**."""
 
-    total_chs = min(25, max(total_chs, 5))
-    clip_value = lambda v_in: tf.clip_by_value(v_in, 1e-8, 1.0)
+    total_chs = min(25, max(total_chs, 8))
+    clip_value = lambda v_in: tf.clip_by_value(v_in, 1e-9, 1.0)
     target = clip_value(q_func(y_true, gamma=gamma, total_chs=total_chs))
     neg_target = clip_value(q_func(1 - y_true, gamma=gamma, total_chs=total_chs))
-    sigmoid_p = clip_value(tf.math.sigmoid(y_pred))
-    neg_sigmoid_p = clip_value(1 - sigmoid_p)
+    y_pred = clip_value(tf.math.sigmoid(y_pred))
+    neg_y_pred = clip_value(1 - y_pred)
 
-    loss = -target * tf.math.log(sigmoid_p) - neg_target * tf.math.log(neg_sigmoid_p)
+    loss = -target * tf.math.log(y_pred) - neg_target * tf.math.log(neg_y_pred)
     if weight is not None:
         # 'weight' should be an 1D list with length the same as channel numbers (last axis).
         loss *= weight
