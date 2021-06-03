@@ -233,7 +233,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @classmethod
-    def process(cls, label_list, out_path, t_unit=0.02, onset_len_sec=0.05):
+    def process(cls, label_list, out_path, t_unit=0.02, onset_len_sec=0.03):
         """Process the given list of label files and output to the target folder.
 
         Parameters
@@ -289,13 +289,14 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
             pitch = str(label.note - LOWEST_MIDI_NOTE)
             onset_value = 1
             for idx, frm_idx in enumerate(range(start_frm, end_frm)):
+                # Decrease the onset probability
+                if idx >= onset_len_frm and onset_value > 1e-5:
+                    onset_value = 1 / pow(idx, 2)
+
                 if pitch not in label_obj[frm_idx]:
                     label_obj[frm_idx][pitch] = {}
                 label_obj[frm_idx][pitch][str(label.instrument)] = onset_value
 
-                # Decrease the onset probability
-                if idx >= onset_len_frm and onset_value > 1e-5:
-                    onset_value = 1 / pow(idx, 2)
         return label_obj
 
     @classmethod
