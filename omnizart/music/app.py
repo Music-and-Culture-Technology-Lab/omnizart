@@ -303,11 +303,11 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Compiling model with loss function type: %s", settings.training.loss_function)
         loss_func = {
-            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes()),
+            "smooth": lambda y, x: smooth_loss(y, x, gamma=0.25, total_chs=l_type.get_out_classes()),
             "focal": focal_loss,
-            "bce": tf.keras.losses.BinaryCrossentropy()
+            "bce": tf.keras.losses.BinaryCrossentropy(label_smoothing=0.1)
         }[settings.training.loss_function]
-        optim = tf.keras.optimizers.Adam(learning_rate=1e-5)
+        optim = tf.keras.optimizers.Adam(learning_rate=1e-3)
         model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
 
         logger.info("Resolving model output path")
@@ -329,7 +329,7 @@ class MusicTranscription(BaseTranscription):
             tf.keras.callbacks.ModelCheckpoint(
                 jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_accuracy'),
             tf.keras.callbacks.LearningRateScheduler(
-                lambda epoch, lr: lr_scheduler(epoch, lr, update_after=5, dec_every=3, dec_rate=0.5))
+                lambda epoch, lr: lr_scheduler(epoch, lr, update_after=3, dec_every=3, dec_rate=0.25))
         ]
         logger.info("Callback list: %s", callbacks)
 

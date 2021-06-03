@@ -143,7 +143,7 @@ def merge_batches(batches, step_size=10):
     return output
 
 
-def predict(feature, model, timesteps=128, batch_size=4, step_size=64):
+def predict(feature, model, batch_size=4, step_size=64):
     """Make predictions on the feature.
 
     Generate predictions by using the loaded model.
@@ -165,17 +165,35 @@ def predict(feature, model, timesteps=128, batch_size=4, step_size=64):
     pred: numpy.ndarray
         The predicted results.
     """
+    timesteps, feature_num = model.input_shape[1:3]
+
+    # Padding to the required feature length
+    diff = feature_num - feature.shape[1]
+    if diff > 0:
+        pb = diff // 2
+        pt = diff - pb
+        pad_shape = ((0, 0), (pb, pt), (0, 0))
+        feature = np.pad(feature, pad_shape, constant_values=0)
+
+    # Create input batches
     batches = create_batches(feature, timesteps, b_size=batch_size, step_size=step_size)
     batch_pred = []
     for idx, batch in enumerate(batches):
         print(f"{idx+1}/{len(batches)}", end='\r')
         pred = model.predict(np.array(batch))
+        # batch_pred.append(pred)
         batch_pred.append(expit(pred))
+
+    # Merge batch predictions into complete output
     pred = merge_batches(batch_pred, step_size=step_size)
+
+    # Remove paddings
+    if diff > 0:
+        pred = pred[:, pb:-pt]
     return pred
 
 
-def predict_old(feature, model, timesteps=128, feature_num=384, batch_size=4):
+def predict_old(feature, model, batch_size=4):
     """Make predictions on the feature.
 
     Generate predictions by using the loaded model.
@@ -187,8 +205,6 @@ def predict_old(feature, model, timesteps=128, feature_num=384, batch_size=4):
         Dimension:  timesteps x feature_size x channels
     model: keras.Model
         The loaded model instance
-    feature_num: int
-        Padding along the feature dimension to the size `feature_num`
     batch_size: int
         Batch size for each step of prediction. The size is depending on the available GPU memory.
 
@@ -197,6 +213,7 @@ def predict_old(feature, model, timesteps=128, feature_num=384, batch_size=4):
     pred: numpy.ndarray
         The predicted results. The values are ranging from 0~1.
     """
+    timesteps, feature_num = model.input_shape[1:3]
 
     # Create batches of the feature
     features = create_batches_old(feature, b_size=batch_size, timesteps=timesteps, feature_num=feature_num)
@@ -240,5 +257,6 @@ def predict_old(feature, model, timesteps=128, feature_num=384, batch_size=4):
             frm = np.concatenate([p_one[ii], p_two[ii]])
             pred.append(cut_frm(frm))
 
-    pred = expit(np.concatenate(pred))  # sigmoid function, mapping the ReLU output value to [0, 1]
+    # pred = np.concatenate(pred)
+    pred = np.concatenate(expit(pred))
     return pred
