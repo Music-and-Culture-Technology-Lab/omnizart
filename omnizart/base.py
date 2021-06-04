@@ -99,8 +99,13 @@ class BaseTranscription(metaclass=ABCMeta):
                 logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
             model_path = os.path.join(model_path, cand_dirs[0])
 
+        # Parse weight files if there are multiple
+        weight_files = glob.glob(os.path.join(model_path, "*.h5"))
+        if len(weight_files) == 0:
+            weight_path = os.path.join(model_path, "weights.h5")
+        else:
+            weight_path = sorted(weight_files)[-1]
         arch_path = os.path.join(model_path, "arch.yaml")
-        weight_path = os.path.join(model_path, "weights.h5")
         conf_path = os.path.join(model_path, "configurations.yaml")
 
         return arch_path, weight_path, conf_path

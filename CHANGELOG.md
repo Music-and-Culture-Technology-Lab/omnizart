@@ -1,11 +1,30 @@
 # Changelog
 
+## 0.4.0 - 2021-05-
+Various improvements on music module and some critical bug fixes.
+
+## Enhancement
+- Improve the peak finding and thresholding strategy for more stable and better performance.
+- Modify the feeding strategy of feature slices with adjustable overlapping rate while making predictions.
+- Apply learning rate scheduler for music module.
+- Replace the usage of custom training loop of music module with the built-in TF `.fit()` function.
+
+## Bugs
+- Fix a critical bug of inference of music module that would lead to missing onsets.
+- Fix generation of pertubation of vocal module while training.
+
+## Documentation
+- Merge the demo page into master from `build_doc` branch.
+
+---
+
 ## 0.3.4 - 2021-05-10
 Hotifx version according to issue #19.
 
 ## Bugs
 - Fix bug of treating numpy array as list while appending elements.
 
+---
 
 ## 0.3.3 - 2021-05-07
 Hotfix version according to issue #19.
@@ -14,6 +33,7 @@ Hotfix version according to issue #19.
 - Fix column inconsistency of `aggregate_f0_info` and `write_agg_f0_results`.
 - Update version of dependencies according to the security alert.
 
+---
 
 ## 0.3.2 - 2021-02-13
 
@@ -26,12 +46,16 @@ Hotfix version according to issue #19.
 - Fix wrong access name of the dict in vocal midi inference function.
 - Fix bug of generating beat module training labels.
 
+---
+
 ## 0.3.1 - 2021-01-18
 
 Hotfix release of spleeter error.
 
 ### Bugs
 - Call Spleeter in CLI mode instead of using python class.
+
+---
 
 ## 0.3.0 - 2021-01-17
 

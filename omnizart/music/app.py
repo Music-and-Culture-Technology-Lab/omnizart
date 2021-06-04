@@ -110,7 +110,7 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Predicting...")
         channels = [FEATURE_NAME_TO_NUMBER[ch_name] for ch_name in model_settings.training.channels]
-        pred = predict(feature[:, :, channels], model, timesteps=model_settings.training.timesteps)
+        pred = predict(feature[:, :, channels], model)
 
         logger.info("Infering notes....")
         midi = multi_inst_note_inference(
@@ -303,9 +303,9 @@ class MusicTranscription(BaseTranscription):
 
         logger.info("Compiling model with loss function type: %s", settings.training.loss_function)
         loss_func = {
-            "smooth": lambda y, x: smooth_loss(y, x, total_chs=l_type.get_out_classes()),
+            "smooth": lambda y, x: smooth_loss(y, x, gamma=0.25, total_chs=l_type.get_out_classes()),
             "focal": focal_loss,
-            "bce": tf.keras.losses.BinaryCrossentropy()
+            "bce": tf.keras.losses.BinaryCrossentropy(label_smoothing=0.1)
         }[settings.training.loss_function]
         optim = tf.keras.optimizers.Adam(learning_rate=1e-3)
         model.compile(optimizer=optim, loss=loss_func, metrics=['accuracy'])
@@ -322,14 +322,14 @@ class MusicTranscription(BaseTranscription):
         logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
-        weight_name = "weights.h5"  # "weights.{epoch:02d}-{val_loss:.4f}-{val_accuracy:.4f}.h5"
+        weight_name = "weights.{epoch:02d}-{val_loss:.4f}-{val_accuracy:.4f}.h5"
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
                 patience=settings.training.early_stop, monitor='val_acc'),
             tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_acc'),
+                jpath(model_save_path, weight_name), save_weights_only=True, monitor='val_accuracy'),
             tf.keras.callbacks.LearningRateScheduler(
-                lambda epoch, lr: lr_scheduler(epoch, lr, update_after=5, dec_every=3, dec_rate=0.5))
+                lambda epoch, lr: lr_scheduler(epoch, lr, update_after=3, dec_every=3, dec_rate=0.25))
         ]
         logger.info("Callback list: %s", callbacks)
 

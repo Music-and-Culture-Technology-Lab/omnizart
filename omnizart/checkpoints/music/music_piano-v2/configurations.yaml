@@ -1,0 +1,88 @@
+General:
+  CheckpointPath:
+    Value:
+      Piano: checkpoints/music/music_piano
+      Pop: checkpoints/music/music_pop
+      Stream: checkpoints/music/music_note_stream
+  Dataset:
+    Settings:
+      FeatureSavePath:
+        Value: +
+      FeatureType:
+        Value: CFP
+      SavePath:
+        Value: ./
+  Feature:
+    Settings:
+      BinsPerOctave:
+        Value: 48
+      FrequencyCenter:
+        Value: 27.5
+      FrequencyResolution:
+        Value: 2.0
+      Gamma:
+        Value:
+        - 0.24
+        - 0.6
+        - 1.0
+      Harmonic:
+        Value: false
+      HarmonicNumber:
+        Value: 6
+      HopSize:
+        Value: 0.02
+      SamplingRate:
+        Value: 44100
+      TimeCenter:
+        Value: 0.00022287
+      WindowSize:
+        Value: 7939
+  Inference:
+    Settings:
+      DuraTh:
+        Value: 0.5
+      FrameTh:
+        Value: 0.5
+      InstTh:
+        Value: 1.1
+      MinLength:
+        Value: 0.05
+      OnsetTh:
+        Value: 4
+  Model:
+    Settings:
+      ModelType:
+        Value: aspp
+      SavePath:
+        Value: ./checkpoints/music
+      SavePrefix:
+        Value: music
+  Training:
+    Settings:
+      BatchSize:
+        Value: 16
+      Channels:
+        Value:
+        - Spec
+        - Ceps
+        - GCoS
+      EarlyStop:
+        Value: 6
+      Epoch:
+        Value: 30
+      FeatureNum:
+        Value: 352
+      LabelType:
+        Value: note
+      LossFunction:
+        Value: smooth
+      Steps:
+        Value: 1500
+      Timesteps:
+        Value: 256
+      ValBatchSize:
+        Value: 8
+      ValSteps:
+        Value: 150
+  TranscriptionMode:
+    Value: Piano

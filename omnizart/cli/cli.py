@@ -127,6 +127,11 @@ def download_checkpoints(output_path):
             "save_as": "checkpoints/music/music_piano/weights.h5",
             "file_length": 50738464
         },
+        "music_pinao-v2": {
+            "fid": "1RzILbSf2JVpR0P4GmtBoHfipdPcBzEXB",
+            "save_as": "checkpoints/music/music_piano-v2/weights.h5",
+            "file_length": 85018376
+        },
         "music_note_stream": {
             "fid": "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
             "save_as": "checkpoints/music/music_note_stream/weights.h5",
