@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.4.0 - 2021-05-
+## 0.4.1-rc0 - 2021-06-04
+Hotfix version according to issue [#23](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/23)
+
+## Feature
+- Add a new piano transcription model and set it as the default model while using `music` module.
+
+## Bugs
+- Fix bug while parsing weight files in the checkpoint folder.
+
+---
+
+## 0.4.0 - 2021-05-31
 Various improvements on music module and some critical bug fixes.
 
 ## Enhancement
