@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "omnizart"
-version = "0.3.4"
+version = "0.4.1-rc0"
 description = "Omniscient Mozart, being able to transcribe everything in the music."
 readme = "README.md"
 authors = ["BreezeWhite <freedombluewater@gmail.com>", "yjlolo <yjlolo125@gmail.com>"]
