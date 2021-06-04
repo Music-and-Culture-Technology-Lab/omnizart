@@ -16,6 +16,7 @@ General:
             Piano: checkpoints/music/music_piano
             Pop: checkpoints/music/music_pop
             Stream: checkpoints/music/music_note_stream
+            PianoV2: checkpoints/music/music_piano-v2
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -103,7 +104,7 @@ General:
             OnsetTh:
                 Description: Threshold of predicted onset channel.
                 Type: Float
-                Value: 6.0
+                Value: 3.5
             DuraTh:
                 Description: Threshold of predicted duration channel.
                 Type: Float
