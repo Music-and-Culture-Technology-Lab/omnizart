@@ -49,7 +49,7 @@ Omnizart is based on Tensorflow  [@abadi2016tensorflow].
 The complete code base, command-line interface, documentation, as well as demo examples can all be accessed from the [project website](https://github.com/Music-and-Culture-Technology-Lab/omnizart).
 
 
-# Purpose
+# Statement of need
 
 AMT has been one of the core challenges in MIR because of the multifaceted nature of musical signals. 
 Typically, streams of musical notes performed with various instruments overlap with each other and then create a hierarchy of abstraction. This complicates the task to identify the melodic, timbral, and rhythmic attributes of the music. 
