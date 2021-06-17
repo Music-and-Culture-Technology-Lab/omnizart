@@ -57,11 +57,8 @@ Typically, streams of musical notes performed with various instruments overlap w
 While the majority of the previous solution focuses on single-instrument transcription, Omnizart collects several state-of-tha-art (SoTA) models for transcribing multiple pitched and percussive instruments, as well as vocal out of the interference with rich music polyphony.
 Omnizart also finds it applicability for chord recognition and beat tracking.
 As such, the proposed library offers a unified solution to music transcription for multi-track and modalities.
-Additionally, researchers can leverage the transcribed outputs as supervisory resources to approach other MIR tasks such as source separation and music generation.
 
-Omnizart provides pre-trained models that closely reproduce the performances reported in the original papers, which can be fine-tuned with separate datasets for benchmarking purposes.
-We believe the release of Omnizart can accelerate the advance of AMT research and contribute to the MIR community.
-
+In short conclusion, Omnizart represents an AMT tool which unifies multiple transcription utilities and enables further productivity. Omnizart can save one's time and labor in generating massive amount of multi-track MIDI files, which could have a great impact on music production, music generation, education, and musicology research.
 
 # Implementation Details
 
