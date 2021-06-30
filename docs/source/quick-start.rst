@@ -79,10 +79,10 @@ To enable auto completion, type the following according to your environment type
 .. code-block:: bash
 
     # For bash
-    _OMNIZART_COMPLETE=source_bash > omnizart-complete.sh
+    _OMNIZART_COMPLETE=source_bash omnizart > omnizart-complete.sh
 
     # For zsh
-    _OMNIZART_COMPLETE=source_zsh > omnizart-complete.sh
+    _OMNIZART_COMPLETE=source_zsh omnizart > omnizart-complete.sh
 
     # Source the generated script to enable
     source omnizart-complete.sh
