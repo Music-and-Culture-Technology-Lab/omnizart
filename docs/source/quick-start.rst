@@ -69,3 +69,20 @@ For the first-time execution, it is expected to take a bit for downloading the f
 .. code-block:: bash
 
     omnizart synth example.mid
+
+
+Auto Completion
+***************
+
+To enable auto completion, type the following according to your environment type.
+
+.. code-block:: bash
+
+    # For bash
+    _OMNIZART_COMPLETE=source_bash > omnizart-complete.sh
+
+    # For zsh
+    _OMNIZART_COMPLETE=source_zsh > omnizart-complete.sh
+
+    # Source the generated script to enable
+    source omnizart-complete.sh
