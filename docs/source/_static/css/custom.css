@@ -21,3 +21,7 @@ iframe {
 @media (min-width: 1200px) {
     iframe { width: 800px; }
 }
+
+img {
+    width: 100%;
+}

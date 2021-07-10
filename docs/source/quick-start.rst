@@ -17,6 +17,11 @@ Use ``pip`` to install the latest stable version.
 
 .. code-block:: bash
 
+    # Install the prerequisites manually since there are some dependencies can't be
+    # resolved automatically.
+    pip install numpy Cython
+    sudo apt-get install libsndfile-dev
+
     # Install Omnizart
     pip install omnizart
 
