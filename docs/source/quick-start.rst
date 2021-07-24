@@ -20,7 +20,9 @@ Use ``pip`` to install the latest stable version.
     # Install the prerequisites manually since there are some dependencies can't be
     # resolved automatically.
     pip install numpy Cython
-    sudo apt-get install libsndfile-dev
+
+    # Additional system pacakges are required to fully use Omnizart.
+    sudo apt-get install libsndfile-dev fluidsynth libgl1-mesa-glx ffmpeg
 
     # Install Omnizart
     pip install omnizart
