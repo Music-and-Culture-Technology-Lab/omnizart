@@ -140,7 +140,7 @@ def download_checkpoints(output_path):
         "vocal_semi": {
             "fid": "1F3_qns6jc7MjDYigNsKQLJeawsAWAq_x",
             "save_as": "checkpoints/vocal/vocal_semi.zip",
-            "file_length": 213112805,
+            "file_length": 342863952,
             "unzip": True
         },
         "vocal_contour": {
