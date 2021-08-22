@@ -56,6 +56,12 @@ export:
 install:
 	@./scripts/install.sh venv
 
+.PHONY: install-dev
+install-dev:
+	@poetry config virtualenvs.create false
+	@poetry install
+	@./scripts/download_dev_resource.sh
+
 .PHONY: clean
 clean:
 	@rm -rf .venv/

@@ -51,6 +51,7 @@ activate_venv_with_venv() {
 install_with_poetry() {
     if [ "$USE_VENV" = "false" ]; then
         poetry config virtualenvs.create false
+        poetry config virtualenvs.in-project false
     fi
     poetry install --no-dev
 }
