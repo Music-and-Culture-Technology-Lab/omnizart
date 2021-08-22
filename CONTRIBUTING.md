@@ -12,7 +12,7 @@ cd omnizart
 make install
 
 # For developers, you have to install Dev dependencies as well, since they will not be installed by default.
-poetry install
+make install-dev
 ```
 
 ## Package management
