@@ -51,3 +51,6 @@ docker run -it mctlab/omnizart:latest bash
 The current implementation for the drum model has unknown bugs, preventing loss convergence when training from scratch.
 Fortunately, you can still enjoy drum transcription with the provided checkpoints.
 
+## Compatibility Issue
+Currently, Omnizart is **incompatible for ARM-based MacOS** system due to the underlying dependencies.
+More details can be found in the [issue #38](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/38).
