@@ -1,5 +1,5 @@
-import cv2
 import numpy as np
+from PIL import Image
 
 from omnizart.feature.cfp import extract_cfp
 from omnizart.feature.hcfp import extract_hcfp
@@ -65,8 +65,8 @@ def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
         )
 
         m_beat_cqt_patch = cqt_ext[m_beat_f_cqt_range_stt_w_offset:m_beat_f_cqt_range_end_w_offset, :]
-        m_beat_cqt_patch = cv2.resize(m_beat_cqt_patch, dsize=(120, 120), interpolation=cv2.INTER_CUBIC)
-        m_beat_cqt_patch_list.append(m_beat_cqt_patch)
+        m_beat_cqt_patch = Image.fromarray(m_beat_cqt_patch).resize((120, 120), resample=Image.BICUBIC)
+        m_beat_cqt_patch_list.append(np.array(m_beat_cqt_patch))
 
     # convert cqt patch into cqt array
     return np.array(m_beat_cqt_patch_list), mini_beat_arr
