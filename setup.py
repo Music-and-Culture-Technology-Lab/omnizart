@@ -45,7 +45,7 @@ install_requires = \
  'madmom>=0.16.1,<0.17.0',
  'mir_eval>=0.6,<0.7',
  'numba==0.48',
- 'opencv-python>=4.4.0,<5.0.0',
+ 'pillow>=8.3.2,<9.0.0',
  'pretty_midi>=0.2.9,<0.3.0',
  'pyfluidsynth>=1.2.5,<2.0.0',
  'pyyaml>=5.3.1,<6.0.0',
