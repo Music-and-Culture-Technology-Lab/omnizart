@@ -57,20 +57,14 @@ class BaseTranscription(metaclass=ABCMeta):
             model_path = os.path.join(MODULE_PATH, default_path)
             logger.info("Using built-in model %s for transcription.", model_path)
 
-        arch_path, weight_path, conf_path = self._resolve_model_path(model_path)
+        model_path, conf_path = self._resolve_model_path(model_path)
         settings = self.setting_class(conf_path=conf_path)
 
         try:
-            if not os.path.exists(arch_path):
-                model = self.get_model(settings)
-                weight_path = weight_path.replace(".h5", "")
-                model.load_weights(weight_path).expect_partial()
-            else:
-                model = self._get_model_from_yaml(arch_path, custom_objects=custom_objects)
-                model.load_weights(weight_path)
+            model = tf.keras.models.load_model(model_path)
         except (OSError, tf.python.framework.errors_impl.OpError):
             raise FileNotFoundError(
-                f"Checkpoint file not found: {weight_path}. Perhaps not yet downloaded?\n"
+                f"Checkpoint file not found: {model_path}/variables/variables.data*. Perhaps not yet downloaded?\n"
                 "Try execute 'omnizart download-checkpoints'"
             )
 
@@ -99,16 +93,9 @@ class BaseTranscription(metaclass=ABCMeta):
                 logger.warning("There are multiple checkpoints in the directory. Default to use %s", cand_dirs[0])
             model_path = os.path.join(model_path, cand_dirs[0])
 
-        # Parse weight files if there are multiple
-        weight_files = glob.glob(os.path.join(model_path, "*.h5"))
-        if len(weight_files) == 0:
-            weight_path = os.path.join(model_path, "weights.h5")
-        else:
-            weight_path = sorted(weight_files)[-1]
-        arch_path = os.path.join(model_path, "arch.yaml")
+        # There should be one configuration file of this checkpoint.
         conf_path = os.path.join(model_path, "configurations.yaml")
-
-        return arch_path, weight_path, conf_path
+        return model_path, conf_path
 
     def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
         return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)
