@@ -105,58 +105,47 @@ def download_dataset(dataset, output):
 @click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
 def download_checkpoints(output_path):
     """Download the archived checkpoints of different models."""
+    release_url = "https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001/"
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": "1sz83HC_bkA0Gp9G0TtX7cy3jKkANbR8R",
-            "save_as": "checkpoints/chord/chord_v1.zip",
-            "file_length": 87005425,
-            "unzip": True
+            "fid": release_url+"chord_v1@variables.data-00000-of-00001",  # "1sz83HC_bkA0Gp9G0TtX7cy3jKkANbR8R",
+            "save_as": "checkpoints/chord/chord_v1/variables/variables.data-00000-of-00001"
         },
         "drum_keras": {
-            "fid": "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
-            "save_as": "checkpoints/drum/drum_keras/weights.h5",
-            "file_length": 31204608
+            "fid": release_url+"drum_keras@variables.data-00000-of-00001",  # "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
+            "save_as": "checkpoints/drum/drum_keras/variables/variables.data-00000-of-00001",
         },
         "music_pop": {
-            "fid": "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
-            "save_as": "checkpoints/music/music_pop/weights.h5",
-            "file_length": 33820096
+            "fid": release_url+"music_pop@variables.data-00000-of-00001",  # "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
+            "save_as": "checkpoints/music/music_pop/variables/variables.data-00000-of-00001",
         },
         "music_piano": {
-            "fid": "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
-            "save_as": "checkpoints/music/music_piano/weights.h5",
-            "file_length": 50738464
+            "fid": release_url+"music_piano@variables.data-00000-of-00001",  # "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
+            "save_as": "checkpoints/music/music_piano/variables/variables.data-00000-of-00001",
         },
-        "music_pinao-v2": {
-            "fid": "1RzILbSf2JVpR0P4GmtBoHfipdPcBzEXB",
-            "save_as": "checkpoints/music/music_piano-v2/weights.h5",
-            "file_length": 85018376
+        "music_piano-v2": {
+            "fid": release_url+"music_piano-v2@variables.data-00000-of-00001",  # "1RzILbSf2JVpR0P4GmtBoHfipdPcBzEXB",
+            "save_as": "checkpoints/music/music_piano-v2/variables/variables.data-00000-of-00001",
         },
         "music_note_stream": {
-            "fid": "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
-            "save_as": "checkpoints/music/music_note_stream/weights.h5",
-            "file_length": 33816384
+            "fid": release_url+"music_note_stream@variables.data-00000-of-00001",  # "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
+            "save_as": "checkpoints/music/music_note_stream/variables/variables.data-00000-of-00001",
         },
         "vocal_semi": {
-            "fid": "1F3_qns6jc7MjDYigNsKQLJeawsAWAq_x",
-            "save_as": "checkpoints/vocal/vocal_semi.zip",
-            "file_length": 342863952,
-            "unzip": True
+            "fid": release_url+"vocal_semi@variables.data-00000-of-00001",  # "1F3_qns6jc7MjDYigNsKQLJeawsAWAq_x",
+            "save_as": "checkpoints/vocal/vocal_semi/variables/variables.data-00000-of-00001",
         },
         "vocal_contour": {
-            "fid": "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
-            "save_as": "checkpoints/vocal/contour/weights.h5",
-            "file_length": 50732192
+            "fid": release_url+"contour@variables.data-00000-of-00001",  # "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
+            "save_as": "checkpoints/vocal/contour/variables/variables.data-00000-of-00001",
         },
         "beat": {
-            "fid": "1YigN_eR1s_iZzam13JrkDVAb0ysTX84q",
-            "save_as": "checkpoints/beat/beat_blstm/weights.h5",
-            "file_length": 400267656
+            "fid": release_url+"beat_blstm@variables.data-00000-of-00001",  # "1YigN_eR1s_iZzam13JrkDVAb0ysTX84q",
+            "save_as": "checkpoints/beat/beat_blstm/variables/variables.data-00000-of-00001",
         },
         "patch_cnn_melody": {
-            "fid": "17vl7t3pQwzYqPgRN1HPOCVQjvUF8Jtbu",
-            "save_as": "checkpoints/patch_cnn/patch_cnn_melody/weights.h5",
-            "file_length": 729904
+            "fid": release_url+"patch_cnn_melody@variables.data-00000-of-00001",  # "17vl7t3pQwzYqPgRN1HPOCVQjvUF8Jtbu",
+            "save_as": "checkpoints/patch_cnn/patch_cnn_melody/variables/variables.data-00000-of-00001",
         }
     }
 
@@ -173,7 +162,7 @@ def download_checkpoints(output_path):
         save_path = os.path.join(output_path, save_path)
         unzip = info.get("unzip", False)
         download_large_file_from_google_drive(
-            info["fid"], file_length=info["file_length"], save_path=save_path, save_name=save_name, unzip=unzip
+            info["fid"], file_length=info.get("file_length", None), save_path=save_path, save_name=save_name, unzip=unzip
         )
         if unzip:
             os.remove(os.path.join(save_path, save_name))
