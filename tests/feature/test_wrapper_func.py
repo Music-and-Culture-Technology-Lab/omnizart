@@ -16,11 +16,13 @@ def test_extract_patch_cqt(mocker):
         cqt = fin["cqt"][:]
         patch_cqt = fin["patch_cqt"][:]
 
-    mocked_extract_cqt = mocker.patch("omnizart.feature.wrapper_func.extract_cqt")
-    mocked_extract_mini_beat = mocker.patch("omnizart.feature.wrapper_func.extract_mini_beat_from_audio_path")
-    mocked_extract_cqt.return_value = cqt
-    mocked_extract_mini_beat.return_value = mini_beat_arr
+    mocked_cqt_loader = mocker.patch("omnizart.feature.wrapper_func.cqt")
+    mocked_cqt_loader.extract_cqt = mocker.MagicMock(return_value=cqt)
+
+    mocked_b4d_loader = mocker.patch("omnizart.feature.wrapper_func.b4d")
+    mocked_b4d_loader.extract_mini_beat_from_audio_path = mocker.MagicMock(return_value=mini_beat_arr)
+
     extracted, _ = wfunc.extract_patch_cqt("audio/path", sampling_rate=44100, hop_size=256)
 
     assert extracted.shape == (1100, 120, 120)
-    assert np.array_equiv(patch_cqt, extracted)
+    assert np.all(np.abs(patch_cqt-extracted) < 0.01)
