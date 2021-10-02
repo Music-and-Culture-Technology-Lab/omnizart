@@ -1,11 +1,14 @@
 import numpy as np
 from PIL import Image
 
-from omnizart.feature.cfp import extract_cfp
-from omnizart.feature.hcfp import extract_hcfp
-from omnizart.feature.cqt import extract_cqt
-from omnizart.feature.beat_for_drum import extract_mini_beat_from_audio_path
-from omnizart.feature.chroma import extract_chroma
+from omnizart.utils import LazyLoader
+
+
+cfp = LazyLoader("cfp", globals(), "omnizart.feature.cfp")
+cqt = LazyLoader("cqt", globals(), "omnizart.feature.cqt")
+b4d = LazyLoader("b4d", globals(), "omnizart.feature.beat_for_drum")
+hcfp = LazyLoader("hcfp", globals(), "omnizart.feature.hcfp")
+chrom = LazyLoader("chrom", globals(), "omnizart.feature.chroma")
 
 
 def extract_cfp_feature(audio_path, harmonic=False, harmonic_num=6, **kwargs):
@@ -14,10 +17,10 @@ def extract_cfp_feature(audio_path, harmonic=False, harmonic_num=6, **kwargs):
     Detailed available arguments can be found from the individual function.
     """
     if harmonic:
-        spec, gcos, ceps, _ = extract_hcfp(audio_path, harmonic_num=harmonic_num, **kwargs)
+        spec, gcos, ceps, _ = hcfp.extract_hcfp(audio_path, harmonic_num=harmonic_num, **kwargs)
         return np.dstack([spec, gcos, ceps])
 
-    z, spec, gcos, ceps, _ = extract_cfp(audio_path, **kwargs)
+    z, spec, gcos, ceps, _ = cfp.extract_cfp(audio_path, **kwargs)
     return np.dstack([z.T, spec.T, gcos.T, ceps.T])
 
 
@@ -47,8 +50,8 @@ def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
     omnizart.feature.cqt.extract_cqt: Function for extracting CQT feature.
     omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path: Function for extracting mini-beat.
     """
-    cqt_ext = extract_cqt(audio_path, sampling_rate=sampling_rate, a_hop=hop_size)
-    mini_beat_arr = extract_mini_beat_from_audio_path(audio_path, sampling_rate=sampling_rate)
+    cqt_ext = cqt.extract_cqt(audio_path, sampling_rate=sampling_rate, a_hop=hop_size)
+    mini_beat_arr = b4d.extract_mini_beat_from_audio_path(audio_path, sampling_rate=sampling_rate)
 
     m_beat_cqt_patch_list = []
     for m_beat_t_cur in mini_beat_arr:
@@ -73,7 +76,7 @@ def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
 
 
 def extract_chord_chroma(audio_path, segment_width=21, segment_hop=5, num_steps=100):
-    _, chroma = extract_chroma(audio_path)
+    _, chroma = chrom.extract_chroma(audio_path)
 
     pad_size = segment_width // 2
     chroma_pad = np.pad(chroma, ((pad_size, pad_size), (0, 0)), constant_values=0)
