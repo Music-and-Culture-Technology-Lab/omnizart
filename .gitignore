@@ -16,6 +16,7 @@ __pycache__/
 bootstrap_data/
 tf_dataset_experiment/
 htmlcov/
+all_weights/
 .vscode/
 .python-version
 .coverage
@@ -46,3 +47,4 @@ checkpoints/
 test.sh
 *.ipynb
 *.pptx
+copy_weights_to_dir.py
