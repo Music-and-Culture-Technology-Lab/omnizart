@@ -294,6 +294,22 @@ class MusicNetStructure(BaseStructure):
                 )
                 labels.append(label)
         return labels
+    
+class NewTestingStructure(MusicNetStructure):
+    url = None
+
+    #: Folder to train wavs
+    train_wavs = [r"D:\MusicNet Dataset\musicnet\train_data"]
+
+    #: Folder to test wavs
+    test_wavs = [r"D:\MusicNet Dataset\musicnet\test_data"]
+
+    #: Folder to train labels
+    train_labels = [r"D:\MusicNet Dataset\musicnet\train_labels"]
+
+    #: Folder to test labels
+    test_labels = [r"D:\MusicNet Dataset\musicnet\test_labels"]
+
 
 
 class MaestroStructure(BaseStructure):
