@@ -23,7 +23,7 @@ from omnizart.models.u_net import MultiHeadAttention, semantic_segmentation, sem
 from omnizart.music.inference import multi_inst_note_inference
 from omnizart.music.prediction import predict
 from omnizart.music.labels import (
-    LabelType, MaestroLabelExtraction, MapsLabelExtraction, MusicNetLabelExtraction, PopLabelExtraction
+    LabelType, MaestroLabelExtraction, MapsLabelExtraction, MusicNetLabelExtraction, PopLabelExtraction, NewTestingLabelExtraction
 )
 from omnizart.music.losses import focal_loss, smooth_loss
 from omnizart.base import BaseTranscription, BaseDatasetLoader
@@ -177,13 +177,15 @@ class MusicTranscription(BaseTranscription):
             "maps": d_struct.MapsStructure,
             "musicnet": d_struct.MusicNetStructure,
             "maestro": d_struct.MaestroStructure,
-            "pop": d_struct.PopStructure
+            "pop": d_struct.PopStructure,
+            "newtesting": d_struct.NewTestingStructure
         }[dataset_type]
         label_extractor = {
             "maps": MapsLabelExtraction,
             "musicnet": MusicNetLabelExtraction,
             "maestro": MaestroLabelExtraction,
-            "pop": PopLabelExtraction
+            "pop": PopLabelExtraction,
+            "newtesting": NewTestingLabelExtraction
         }[dataset_type]
 
         # Fetching wav files
