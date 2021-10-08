@@ -335,6 +335,12 @@ class MusicNetLabelExtraction(BaseLabelExtraction):
     @classmethod
     def load_label(cls, label_path):
         return dset.MusicNetStructure.load_label(label_path)
+    
+class NewTestingLabelExtraction(BaseLabelExtraction):
+    """Label extraction class for MusicNet dataset"""
+    @classmethod
+    def load_label(cls, label_path):
+        return dset.NewTestingStructure.load_label(label_path)
 
 
 class SuLabelExtraction(MaestroLabelExtraction):
