@@ -162,7 +162,7 @@ class MusicTranscription(BaseTranscription):
 
         dataset_type = resolve_dataset_type(
             dataset_path,
-            keywords={"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop"}
+            keywords={"maps": "maps", "musicnet": "musicnet", "maestro": "maestro", "rhythm": "pop", "pop": "pop", "newtesting":"newtesting"}
         )
         if dataset_type is None:
             logger.warning(
