@@ -196,9 +196,7 @@ class ChordTranscription(BaseTranscription):
 
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            tf.keras.callbacks.ModelCheckpoint(
-                jpath(model_save_path, "weights"), save_weights_only=True, monitor="val_loss"
-            ),
+            tf.keras.callbacks.ModelCheckpoint(model_save_path, monitor="val_loss"),
             ReduceSlope()
         ]
 

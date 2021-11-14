@@ -207,13 +207,12 @@ class DrumTranscription(BaseTranscription):
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
-        write_yaml(model.to_yaml(), jpath(model_save_path, "arch.yaml"), dump=False)
         logger.info("Model output to: %s", model_save_path)
 
         logger.info("Constructing callbacks")
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            tf.keras.callbacks.ModelCheckpoint(jpath(model_save_path, "weights.h5"), save_weights_only=True)
+            tf.keras.callbacks.ModelCheckpoint(model_save_path, monitor='val_accuracy')
         ]
         logger.info("Callback list: %s", callbacks)
 
