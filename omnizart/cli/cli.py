@@ -108,43 +108,43 @@ def download_checkpoints(output_path):
     release_url = "https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001/"
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": release_url+"chord_v1@variables.data-00000-of-00001",  # "1sz83HC_bkA0Gp9G0TtX7cy3jKkANbR8R",
+            "fid": release_url + "chord_v1@variables.data-00000-of-00001",
             "save_as": "checkpoints/chord/chord_v1/variables/variables.data-00000-of-00001"
         },
         "drum_keras": {
-            "fid": release_url+"drum_keras@variables.data-00000-of-00001",  # "1seqz_pi20zB8rq1YJE0Jbk1SwkJ9hOCK",
+            "fid": release_url + "drum_keras@variables.data-00000-of-00001",
             "save_as": "checkpoints/drum/drum_keras/variables/variables.data-00000-of-00001",
         },
         "music_pop": {
-            "fid": release_url+"music_pop@variables.data-00000-of-00001",  # "1-kM27jR_iCvF8Z-3pAFG-nrMRktyxxJ0",
+            "fid": release_url + "music_pop@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_pop/variables/variables.data-00000-of-00001",
         },
         "music_piano": {
-            "fid": release_url+"music_piano@variables.data-00000-of-00001",  # "1x9_qjXSiM4GAxpvKfdYJK5S3SLdlCl2I",
+            "fid": release_url + "music_piano@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_piano/variables/variables.data-00000-of-00001",
         },
         "music_piano-v2": {
-            "fid": release_url+"music_piano-v2@variables.data-00000-of-00001",  # "1RzILbSf2JVpR0P4GmtBoHfipdPcBzEXB",
+            "fid": release_url + "music_piano-v2@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_piano-v2/variables/variables.data-00000-of-00001",
         },
         "music_note_stream": {
-            "fid": release_url+"music_note_stream@variables.data-00000-of-00001",  # "18IqdrR3IhFP52H6w1HgTlPQUJXKHXm9u",
+            "fid": release_url + "music_note_stream@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_note_stream/variables/variables.data-00000-of-00001",
         },
         "vocal_semi": {
-            "fid": release_url+"vocal_semi@variables.data-00000-of-00001",  # "1F3_qns6jc7MjDYigNsKQLJeawsAWAq_x",
+            "fid": release_url + "vocal_semi@variables.data-00000-of-00001",
             "save_as": "checkpoints/vocal/vocal_semi/variables/variables.data-00000-of-00001",
         },
         "vocal_contour": {
-            "fid": release_url+"contour@variables.data-00000-of-00001",  # "1w0k0wioN8dnf63E0RgdLB8r-FeBnhwJt",
-            "save_as": "checkpoints/vocal/contour/variables/variables.data-00000-of-00001",
+            "fid": release_url + "contour@variables.data-00000-of-00001",
+            "save_as": "checkpoints/vocal/vocal_contour/variables/variables.data-00000-of-00001",
         },
         "beat": {
-            "fid": release_url+"beat_blstm@variables.data-00000-of-00001",  # "1YigN_eR1s_iZzam13JrkDVAb0ysTX84q",
+            "fid": release_url + "beat_blstm@variables.data-00000-of-00001",
             "save_as": "checkpoints/beat/beat_blstm/variables/variables.data-00000-of-00001",
         },
         "patch_cnn_melody": {
-            "fid": release_url+"patch_cnn_melody@variables.data-00000-of-00001",  # "17vl7t3pQwzYqPgRN1HPOCVQjvUF8Jtbu",
+            "fid": release_url + "patch_cnn_melody@variables.data-00000-of-00001",
             "save_as": "checkpoints/patch_cnn/patch_cnn_melody/variables/variables.data-00000-of-00001",
         }
     }
@@ -162,7 +162,11 @@ def download_checkpoints(output_path):
         save_path = os.path.join(output_path, save_path)
         unzip = info.get("unzip", False)
         download_large_file_from_google_drive(
-            info["fid"], file_length=info.get("file_length", None), save_path=save_path, save_name=save_name, unzip=unzip
+            info["fid"],
+            file_length=info.get("file_length", None),
+            save_path=save_path,
+            save_name=save_name,
+            unzip=unzip
         )
         if unzip:
             os.remove(os.path.join(save_path, save_name))
