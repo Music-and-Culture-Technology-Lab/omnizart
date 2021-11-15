@@ -8,7 +8,7 @@ General:
         Type: Map
         SubType: [String, String]
         Value: 
-            VocalContour: checkpoints/vocal/contour
+            VocalContour: checkpoints/vocal/vocal_contour
     Feature:
         Description: Default settings of feature extraction
         Settings:
@@ -40,7 +40,7 @@ General:
             SavePrefix:
                 Description: Prefix of the trained model's name to be saved.
                 Type: String
-                Value: vocal-contour
+                Value: vocal_contour
             SavePath:
                 Description: Path to save the trained model.
                 Type: String
