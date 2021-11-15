@@ -71,3 +71,7 @@ clean:
 	@rm -rf .venv/
 	@rm -rf ~/.cache/pypoetry/
 
+
+.PHONY: build-docker
+build-docker:
+	docker build --network=host -t omnizart:dev ./
