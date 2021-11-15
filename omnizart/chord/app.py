@@ -12,6 +12,7 @@ from omnizart.io import write_yaml
 from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
 from omnizart.constants.datasets import McGillBillBoard
 from omnizart.feature.chroma import extract_chroma
+from omnizart.models.t2t import MultiHeadAttention
 from omnizart.chord.features import extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
@@ -25,6 +26,7 @@ class ChordTranscription(BaseTranscription):
     """Application class for chord transcription."""
     def __init__(self, conf_path=None):
         super().__init__(ChordSettings, conf_path=conf_path)
+        self.custom_objects = {"MultiHeadAttention": MultiHeadAttention}
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe chords in the audio.
