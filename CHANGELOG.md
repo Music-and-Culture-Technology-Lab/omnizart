@@ -1,6 +1,41 @@
 # Changelog
 
-## 0.4.1-rc0 - 2021-06-04
+## 0.4.2 - 2021-11-16
+
+Accumulated release. Various improvements and bug fix. See details below.
+
+## Feature
+- Migrate checkpoints from private Google Drive to Github release. 
+See [here](https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/tag/checkpoints-20211001)
+- Replace opencv 
+
+## Dependency
+- Upgrade Tensorflow version to 2.5.0 for Nvidia 30 series GPU compatibility.
+- Upgrade Spleeter version to 2.3.0 for new TF version compatibility.
+- Replace Opencv with PIL for drum feature resizing and remove opencv from the dependency.
+
+## Enhancement
+- Simplify model loading mechanism by unifying the all checkpoint format to use TF format.
+- Lazy import extraction functions to boost loading time.
+- Change the order of Dockerfile commands for better utilizing cache.
+
+## Documentation
+- Add notice about compatibility issue of running on certain CPU architecture.
+- Add explaination about enabling auto completion.
+- Rephrase sentences in paper according to JOSS review feedback.
+- Add explaination about installing development dependencies.
+- Use pepy as the alternative source for 'download' state badge.
+
+
+## Bugs
+- Fix bug of unable to find vocal contour checkpoint.
+- Fix bug of fail to custom layers of chord module.
+- Fix various unit tests bugs.
+- Fix minor linter errors.
+
+
+
+## 0.4.1 - 2021-06-04
 Hotfix version according to issue [#23](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/23)
 
 ## Feature
