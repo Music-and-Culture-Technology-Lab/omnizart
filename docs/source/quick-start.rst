@@ -45,7 +45,7 @@ creates a virtual environment under the directory *omnizart/* by default.
     make install
 
     # Install Dev dependencies, since they will not be installed by default
-    poetry install
+    make install-dev
 
 
 CLI
