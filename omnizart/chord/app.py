@@ -60,7 +60,7 @@ class ChordTranscription(BaseTranscription):
         t_unit, chroma = extract_chroma(input_audio)
 
         logger.info("Loading model")
-        model, settings = self._load_model(model_path)
+        model, settings = self._load_model(model_path, custom_objects=self.custom_objects)
 
         logger.info("Preparing feature for model prediction")
         pad_size = settings.feature.segment_width // 2
