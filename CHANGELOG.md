@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 - 2021-12-09
+
+Official Open JOSS reviewed version.
+
+## Bugs
+- Fix bug of name conflict while loading chord model.
+
+
 ## 0.4.2 - 2021-11-16
 
 Accumulated release. Various improvements and bug fix. See details below.
