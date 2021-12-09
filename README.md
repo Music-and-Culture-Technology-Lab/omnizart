@@ -7,6 +7,8 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/omnizart?period=month&units=international_system&left_color=grey&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/omnizart)
 [![Docker Pulls](https://img.shields.io/docker/pulls/mctlab/omnizart)](https://hub.docker.com/r/mctlab/omnizart)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5769022.svg)](https://doi.org/10.5281/zenodo.5769022)
+
 Omnizart is a Python library that aims for democratizing automatic music transcription.
 Given polyphonic music, it is able to transcribe pitched instruments, vocal melody, chords, drum events, and beat.
 This is powered by the research outcomes from [Music and Culture Technology (MCT) Lab](https://sites.google.com/view/mctl/home).
@@ -54,3 +56,26 @@ Fortunately, you can still enjoy drum transcription with the provided checkpoint
 ## Compatibility Issue
 Currently, Omnizart is **incompatible for ARM-based MacOS** system due to the underlying dependencies.
 More details can be found in the [issue #38](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/38).
+
+## Citation
+If you use this software in your work, please cite:
+
+```
+@software{yu_te_wu_2021_5769022,
+  author       = {Yu-Te Wu and
+                  Yin-Jyun Luo and
+                  Tsung-Ping Chen and
+                  I-Chieh Wei and
+                  Jui-Yang Hsu and
+                  Yi-Chin Chuang and
+                  Li Su},
+  title        = {{Omnizart: A General Toolbox for Automatic Music 
+                   Transcription}},
+  month        = dec,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.5.0},
+  doi          = {10.5281/zenodo.5769022},
+  url          = {https://doi.org/10.5281/zenodo.5769022}
+}
+```
