@@ -7,9 +7,13 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/omnizart?period=month&units=international_system&left_color=grey&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/omnizart)
 [![Docker Pulls](https://img.shields.io/docker/pulls/mctlab/omnizart)](https://hub.docker.com/r/mctlab/omnizart)
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.03391/status.svg)](https://doi.org/10.21105/joss.03391)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5769022.svg)](https://doi.org/10.5281/zenodo.5769022)
+
+
 Omnizart is a Python library that aims for democratizing automatic music transcription.
 Given polyphonic music, it is able to transcribe pitched instruments, vocal melody, chords, drum events, and beat.
-This is powered by the research outcomes from [Music and Culture Technology (MCT) Lab](https://sites.google.com/view/mctl/home).
+This is powered by the research outcomes from [Music and Culture Technology (MCT) Lab](https://sites.google.com/view/mctl/home). The paper has been published to [Journal of Open Source Software (JOSS)](https://doi.org/10.21105/joss.03391).
 
 ### Transcribe your favorite songs now in Colab! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/OmnizartColab)
 
@@ -54,3 +58,21 @@ Fortunately, you can still enjoy drum transcription with the provided checkpoint
 ## Compatibility Issue
 Currently, Omnizart is **incompatible for ARM-based MacOS** system due to the underlying dependencies.
 More details can be found in the [issue #38](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/38).
+
+## Citation
+If you use this software in your work, please cite:
+
+```
+@article{Wu2021,
+  doi = {10.21105/joss.03391},
+  url = {https://doi.org/10.21105/joss.03391},
+  year = {2021},
+  publisher = {The Open Journal},
+  volume = {6},
+  number = {68},
+  pages = {3391},
+  author = {Yu-Te Wu and Yin-Jyun Luo and Tsung-Ping Chen and I-Chieh Wei and Jui-Yang Hsu and Yi-Chin Chuang and Li Su},
+  title = {Omnizart: A General Toolbox for Automatic Music Transcription},
+  journal = {Journal of Open Source Software}
+}
+```
