@@ -23,7 +23,8 @@ analyzing polyphonic music and transcribes
 
 Omnizart provides the main functionalities that construct the life-cycle of deep learning-based music transcription,
 covering from *dataset downloading*, *feature pre-processing*, *model training*, to *transcription* and *sonification*.
-Pre-trained checkpoints are also provided for the immediate usage of transcription.
+Pre-trained checkpoints are also provided for the immediate usage of transcription. The paper can be found from
+`Journal of Open Source Software (JOSS) <https://doi.org/10.21105/joss.03391>`_.
 
 Demonstration
 #############
