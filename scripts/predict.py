@@ -7,9 +7,11 @@ import os
 import tempfile
 import subprocess
 import shutil
+from pathlib import Path
+
 import cog
 import scipy.io.wavfile as wave
-from pathlib import Path
+
 from omnizart.remote import download_large_file_from_google_drive
 from omnizart.beat import app as bapp
 from omnizart.chord import app as capp
@@ -33,17 +35,17 @@ class Predictor(cog.Predictor):
     @cog.input(
         "audio",
         type=Path,
-        help="input polyphonic music file, supports mp3 and wav files",
+        help="Path to the input music. Supports mp3 and wav format.",
     )
     @cog.input(
         "mode",
         type=str,
         default="music-piano-v2",
         options=["music-piano", "music-piano-v2", "music-assemble", "chord", "drum", "vocal", "vocal-contour", "beat"],
-        help="transcribe mode",
+        help="Transcription mode",
     )
     def predict(self, audio, mode):
-        assert str(audio).endswith(".mp3") or str(audio).endswith(".wav"), "please upload mp3 or wav file"
+        assert str(audio).endswith(".mp3") or str(audio).endswith(".wav"), "Please upload mp3 or wav file."
         temp_folder = "cog_temp"
         os.makedirs(temp_folder, exist_ok=True)
         try:
