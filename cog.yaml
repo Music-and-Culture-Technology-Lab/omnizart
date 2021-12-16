@@ -16,4 +16,4 @@ build:
     - apt-get update && apt-get install -y fluidsynth
     - pip install pyfluidsynth
 
-predict: "predict.py:Predictor"
+predict: "scripts/predict.py:Predictor"

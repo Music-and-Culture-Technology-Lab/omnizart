@@ -5,18 +5,18 @@ Then run cog push. Further documentation can be found at https://replicate.com/d
 
 import os
 import tempfile
-from pathlib import Path
 import subprocess
 import shutil
 import cog
 import scipy.io.wavfile as wave
-from omnizart.music import app as mapp
+from pathlib import Path
+from omnizart.remote import download_large_file_from_google_drive
+from omnizart.beat import app as bapp
 from omnizart.chord import app as capp
 from omnizart.drum import app as dapp
+from omnizart.music import app as mapp
 from omnizart.vocal import app as vapp
 from omnizart.vocal_contour import app as vcapp
-from omnizart.beat import app as bapp
-from omnizart.remote import download_large_file_from_google_drive
 
 
 class Predictor(cog.Predictor):
@@ -33,7 +33,7 @@ class Predictor(cog.Predictor):
     @cog.input(
         "audio",
         type=Path,
-        help="input polyphonic music mp3 file",
+        help="input polyphonic music file, supports mp3 and wav files",
     )
     @cog.input(
         "mode",
@@ -43,13 +43,16 @@ class Predictor(cog.Predictor):
         help="transcribe mode",
     )
     def predict(self, audio, mode):
-        assert str(audio).rsplit('.', maxsplit=1)[-1] == "mp3", "supports mp3 file"
-        temp_folder = 'cog_temp'
+        assert str(audio).endswith(".mp3") or str(audio).endswith(".wav"), "please upload mp3 or wav file"
+        temp_folder = "cog_temp"
         os.makedirs(temp_folder, exist_ok=True)
         try:
-            audio_name = str(os.path.basename(audio).split(".")[0])
-            wav_file_path = f'{temp_folder}/{audio_name}.wav'
-            subprocess.run(["ffmpeg", "-y", "-i", str(audio), wav_file_path])
+            audio_name = str(os.path.splitext(os.path.basename(audio))[0])
+            if str(audio).endswith(".wav"):
+                wav_file_path = str(audio)
+            else:
+                wav_file_path = f"{temp_folder}/{audio_name}.wav"
+                subprocess.run(["ffmpeg", "-y", "-i", str(audio), wav_file_path])
             model = ""
             if mode.startswith("music"):
                 mode_list = mode.split("-")
@@ -68,24 +71,12 @@ class Predictor(cog.Predictor):
                 raw_wav = midi.fluidsynth(fs=44100, sf2_path=self.SF2_FILE)
                 wave.write(out_name, 44100, raw_wav)
 
-            out_path = Path(tempfile.mkdtemp()) / "out.mp3"
+            out_path = Path(tempfile.mkdtemp()) / "out.mp3"  # out_path is automatically cleaned up by cog
             subprocess.run(["ffmpeg", "-y", "-i", out_name, str(out_path)])
         finally:
-            clean_folder(temp_folder)
-            if os.path.exists(f'{audio_name}.mid'):
-                os.remove(f'{audio_name}.mid')
-            if os.path.exists(f'{audio_name}_trans.wav'):
-                os.remove(f'{audio_name}_trans.wav')
+            shutil.rmtree(temp_folder)
+            if os.path.exists(f"{audio_name}.mid"):
+                os.remove(f"{audio_name}.mid")
+            if os.path.exists(f"{audio_name}_trans.wav"):
+                os.remove(f"{audio_name}_trans.wav")
         return out_path
-
-
-def clean_folder(folder):
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
