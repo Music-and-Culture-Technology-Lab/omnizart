@@ -32,7 +32,12 @@ Demonstration
 Colab
 *****
 
-Play with the `Colab notebook <https://bit.ly/omnizart-colab>`_ to transcribe your favorite song almost immediately!
+Play with the `Colab notebook <https://bit.ly/OmnizartColab>`_ to transcribe your favorite song almost immediately!
+
+Replicate web demo
+******************
+
+Transcribe music with `Replicate web UI <https://replicate.com/breezewhite/omnizart>`_.
 
 Sound samples
 *************
