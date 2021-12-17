@@ -1,0 +1,19 @@
+build:
+  gpu: true
+  python_version: "3.8"
+  system_packages:
+    - "libgl1-mesa-glx"
+    - "libglib2.0-0"
+    - "libsndfile1-dev"
+    - "ffmpeg"
+  python_packages:
+    - "ipython==7.30.1"
+    - "numpy==1.21.4"
+  run:
+    - pip install -U pip
+    - pip install --upgrade cython
+    - pip install omnizart
+    - apt-get update && apt-get install -y fluidsynth
+    - pip install pyfluidsynth
+
+predict: "scripts/predict.py:Predictor"

@@ -15,7 +15,7 @@ Omnizart is a Python library that aims for democratizing automatic music transcr
 Given polyphonic music, it is able to transcribe pitched instruments, vocal melody, chords, drum events, and beat.
 This is powered by the research outcomes from [Music and Culture Technology (MCT) Lab](https://sites.google.com/view/mctl/home). The paper has been published to [Journal of Open Source Software (JOSS)](https://doi.org/10.21105/joss.03391).
 
-### Transcribe your favorite songs now in Colab! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/OmnizartColab)
+### Transcribe your favorite songs now in Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://bit.ly/OmnizartColab) or [![Replicate](https://replicate.com/breezewhite/omnizart/badge)](https://replicate.ai/breezewhite/omnizart)
 
 # Quick start
 
