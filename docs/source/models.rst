@@ -48,7 +48,7 @@ Pyramid Net
 .. automodule:: omnizart.models.pyramid_net
     :members:
     :undoc-members:
-    :show-inferitance:
+    :show-inheritance:
 
 
 Utils

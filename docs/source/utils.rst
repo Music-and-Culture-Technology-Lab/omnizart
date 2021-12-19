@@ -1,7 +1,7 @@
 Utilities
 =========
 
-Some common utility functionalities.
+Some common utility functions.
 
 
 Remote
