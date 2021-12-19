@@ -4,7 +4,7 @@
 [![docs](https://github.com/Music-and-Culture-Technology-Lab/omnizart/workflows/docs/badge.svg?branch=build_doc)](https://music-and-culture-technology-lab.github.io/omnizart-doc/)
 [![PyPI version](https://badge.fury.io/py/omnizart.svg)](https://badge.fury.io/py/omnizart)
 ![PyPI - License](https://img.shields.io/pypi/l/omnizart)
-[![Downloads](https://static.pepy.tech/personalized-badge/omnizart?period=month&units=international_system&left_color=grey&right_color=brightgreen&left_text=downloads/month)](https://pepy.tech/project/omnizart)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/omnizart)
 [![Docker Pulls](https://img.shields.io/docker/pulls/mctlab/omnizart)](https://hub.docker.com/r/mctlab/omnizart)
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.03391/status.svg)](https://doi.org/10.21105/joss.03391)
