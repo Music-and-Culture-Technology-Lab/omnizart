@@ -12,7 +12,8 @@ Installation
 
 Using pip
 *********
-Omnizart is under developement and will be updated regularly on PyPI.
+
+Omnizart is under development and will be updated regularly on PyPI.
 Use ``pip`` to install the latest stable version.
 
 .. code-block:: bash
@@ -21,7 +22,7 @@ Use ``pip`` to install the latest stable version.
     # resolved automatically.
     pip install numpy Cython
 
-    # Additional system pacakges are required to fully use Omnizart.
+    # Additional system packages are required to fully use Omnizart.
     sudo apt-get install libsndfile-dev fluidsynth ffmpeg
 
     # Install Omnizart
@@ -33,14 +34,16 @@ Use ``pip`` to install the latest stable version.
 
 Development installation
 ************************
-For the development installation, clone the git repo and the installation 
+
+For the development installation, clone the git repo and the installation
 creates a virtual environment under the directory *omnizart/* by default.
 
 .. code-block:: bash
 
+    # Clone the omnizart repository from GitHub
     git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart.git
 
-    # Install dependenies, with checkpoints automatically downloaded
+    # Install dependencies, with checkpoints automatically downloaded
     cd omnizart
     make install
 
@@ -51,14 +54,14 @@ creates a virtual environment under the directory *omnizart/* by default.
 CLI
 ###
 
-Below is an example usuage of pitched instrument transcription with the command-line interface, 
+Below is an example usage of pitched instrument transcription with the command-line interface,
 first transcribing a piece of music and then synthesizing the results.
 For more details and other types of transcription, refer to :doc:`tutorial`.
 
 Transcription
 *************
 
-The example transcribes a piece of music, being monophonic or polyphonic, 
+The example transcribes a piece of music, being monophonic or polyphonic,
 to a MIDI file of the transcribed pitched notes and a CSV file with more information.
 
 .. code-block:: bash

@@ -20,7 +20,7 @@ Principles
   small part of them to adapt to your task.
 * **Try not to make your own wheels** - There have been many useful and validated functions that are
   developed to deal with the daily works. They are already there to cover 90% of every details of a
-  module, thus new logics are in very small chances being needed. 
+  module, thus new logics are in very small chances being needed.
   Most of the time you need to implement the most would be the part of feature and label extraction,
   which will be explained in the upcoming sections.
 * **Check with linters frequently** - You should always do ``make lint`` before you push to github,
@@ -30,11 +30,11 @@ Principles
   saves lots of time fixing those lint errors. But it should not be the main concern now, as the
   architecture is more stable and less error prone. You should follow every hints by the linters
   and fix them before you file a pull request.
- 
+
 
 ----
 
-So now we are all set and ready to add a new module to omnizart. Here we will take the 
+So now we are all set and ready to add a new module to omnizart. Here we will take the
 `PR #11 <https://github.com/Music-and-Culture-Technology-Lab/omnizart/pull/11>`_ as the example.
 
 Setup
@@ -74,9 +74,9 @@ Critical Files/Functions
 * `omnizart.patch_cnn.app.extract_label <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L278-L327>`_
   - The function for label extraction, generating the representation of ground-truth. Accepts the path to the ground-truth file, parses the contents
   into intermediate format (see :class:`omnizart.base.Label`), and extracts necessary informations.
-  
+
   Normally, it should be defined in a separate file called ``labels.py`` under *omnizart/<module>/* when the extraction process contains lots of logics.
-  Since the label extraction in this example is relativly simple, it is okay to put it under ``omnizart.patch_cnn.app``.
+  Since the label extraction in this example is relatively simple, it is okay to put it under ``omnizart.patch_cnn.app``.
   See the conventional case :class:`omnizart.drum.labels`.
 
 * `omnizart.patch_cnn._parallel_feature_extraction <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L336-L373>`_
@@ -96,7 +96,7 @@ Overall Process Flow
 
 1. Determine the dataset type from the given dataset path.
     * `music module <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/music/app.py#L169-L179>`_
-2. Choose the coressponding dataset strcuture class.
+2. Choose the corresponding dataset structure class.
     * `patch-cnn <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L135>`_
     * `music module <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/master/omnizart/music/app.py#L182-L186>`_
 3. Parse audio/ground-truth file pairs.
@@ -134,14 +134,14 @@ Critical Files/Functions
 
 * `omnizart.patch_cnn.app.PatchCNNDatasetLoader <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/patch_cnn/app.py#L376-L380>`_
   - The dataset loader for feeding data to models. Dealing with listing files, iterating through all feature/label pairs,
-  indexing, and additionally augmenting, cliping, or transforming the feature/label on the fly.
+  indexing, and additionally augmenting, clipping, or transforming the feature/label on the fly.
 
 * `omnizart.setting_loaders.PatchCNNSettings <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/setting_loaders.py#L366-L386>`_
   - The data class that holds the necessary hyper parameters that will be used by different functions of this module. For model training,
   related hyper parameters are registered under ``PatchCNNSettings.dataset``, ``PatchCNNSettings.model``, and
   ``PatchCNNSettings.training`` attributes.
 
-* `omnizart/defatuls/patch_cnn.yaml (1) <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/checkpoints/patch_cnn/patch_cnn_melody/configurations.yaml#L54-L75>`_ / 
+* `omnizart/defatuls/patch_cnn.yaml (1) <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/checkpoints/patch_cnn/patch_cnn_melody/configurations.yaml#L54-L75>`_ /
   `omnizart/defatuls/patch_cnn.yaml (2) <https://github.com/Music-and-Culture-Technology-Lab/omnizart/blob/273fc60fbc6e3728c07abf71e06cf8f092bfabeb/omnizart/checkpoints/patch_cnn/patch_cnn_melody/configurations.yaml#L88-L118>`_
   - The configuration file of the module, records the values of hyper parameters and will be consumed by the data class (i.e. PatchCNNSettings).
 
@@ -198,5 +198,4 @@ Add new supported datasets
 If you want to add a new dataset that is currently not supported by ``omnizart`` (which is defined in
 :class:`omnizart.constants.datasets`), things should be noticed are explained in this section.
 
-(To be continue...)
-
+(To be continued...)
