@@ -1,6 +1,6 @@
 .. Documents are written in reStructured Text (.rst) format.
    Learn the syntax from: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-   
+
    Heading Level (most significant to least):
      Underline with '='
      Underline with '#'
@@ -10,7 +10,7 @@
 Tutorial
 ========
 
-This page describes the workflow and usage of ``omnizart`` command-line interface, 
+This page describes the workflow and usage of ``omnizart`` command-line interface,
 covering core and utility.
 
 The root entry is ``omnizart`` followed by sub-commands.
@@ -28,8 +28,8 @@ In general, the core sub-commands follow a pipeline of ``application``-``action`
 where we apply an ``action`` to the ``application`` of interest, with corresponding ``arguments``.
 Detailed descriptions for the usage of each sub-command can be found in the dedicated pages for each ``application``:
 
-* :doc:`music/cli` 
-* :doc:`drum/cli` 
+* :doc:`music/cli`
+* :doc:`drum/cli`
 * :doc:`chord/cli`
 * :doc:`vocal-contour/cli`
 * :doc:`vocal/cli`
@@ -60,7 +60,7 @@ Example usage:
    # Transcribe percussive events given pop.wav, with specified model path and output directory
    omnizart drum transcribe pop.wav --model-path ./my-model --output ./trans_pop.mid
 
-Note: ``--model-path`` can be left unspecified, and the default will be the downloaded checkpoints. 
+Note: ``--model-path`` can be left unspecified, and the default will be the downloaded checkpoints.
 Execute ``omnizart download-checkpoints`` if you have not done in the installation from :doc:`quick-start`.
 
 
@@ -129,7 +129,7 @@ Utility
 Download Datasets
 *****************
 
-This sub-command belongs to the utility, used to download the datasets for training and testing the models. 
+This sub-command belongs to the utility, used to download the datasets for training and testing the models.
 Current supported datasets are:
 
 * `Maestro <https://magenta.tensorflow.org/datasets/maestro>`_ - MIDI and Audio Edited for Synchronous TRacks and Organization dataset.
@@ -147,7 +147,7 @@ Example usage:
    # Download the MAESTRO dataset and output to the */data* folder.
    omnizart download-dataset Maestro --output /data
 
-   # Downlaod the MusicNet dataset and unzip the dataset after download.
+   # Download the MusicNet dataset and unzip the dataset after download.
    omnizart download-dataset MusicNet --unzip
 
    # To see a complete list of available datasets, execute the following command

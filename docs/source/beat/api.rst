@@ -46,11 +46,11 @@ Settings
 ########
 Below are the default settings for building the beat model. It will be loaded
 by the class :class:`omnizart.setting_loaders.BeatSettings`. The name of the
-attributes will be converted to snake-case (e.g. HopSize -> hop_size). There
+attributes will be converted to snake-case (e.g., HopSize -> hop_size). There
 is also a path transformation process when applying the settings into the
 ``BeatSettings`` instance. For example, if you want to access the attribute
 ``BatchSize`` defined in the yaml path *General/Training/Settings/BatchSize*,
-the coressponding attribute will be *BeatSettings.training.batch_size*.
+the corresponding attribute will be *BeatSettings.training.batch_size*.
 The level of */Settings* is removed among all fields.
 
 .. literalinclude:: ../../../omnizart/defaults/beat.yaml
