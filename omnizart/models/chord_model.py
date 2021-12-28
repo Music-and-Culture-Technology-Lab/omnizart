@@ -197,6 +197,104 @@ class EncodeSegmentFrequency(tf.keras.layers.Layer):
         return config
 
 
+class EncodeCQT(tf.keras.layers.Layer):
+    """Encode CQT features using convolutions.
+    Parameters
+    ----------
+    n_units: int
+        Output embedding size.
+    n_steps: int
+        Time length of the feature.
+    dropout_rate: float
+        Dropout rate of all dropout layers.
+    kernel2d_size: tuple of ints
+        kernel size of 2d convolution layers.
+    kernel1d_size: int
+        kernel size of 1d convolution layers
+    """
+    def __init__(
+        self,
+        n_units=512,
+        n_steps=256,
+        dropout_rate=0,
+        kernel2d_size=(5,25),
+        kernel1d_size=5,
+        activation_func="relu",
+    ):
+        super().__init__()
+
+        self.n_steps = n_steps
+        self.n_units = n_units
+        self.dropout_rate = dropout_rate
+        self.kernel2d_size= kernel2d_size
+        self.kernel1d_size = kernel1d_size
+
+        self.conv2d_layer1 = tf.keras.layers.Conv2D(
+            filters=n_units//2,
+            kernel_size=kernel2d_size,
+            padding='same',
+            activation=activation_func
+        )
+        self.conv2d_layer2 = tf.keras.layers.Conv2D(
+            filters=n_units//2,
+            kernel_size=kernel2d_size,
+            padding='same',
+            activation=activation_func
+        )
+        self.freq_dense = tf.keras.layers.Dense(1, activation=activation_func)
+        self.conv1d_layer1 = tf.keras.layers.Conv1D(
+            filters=n_units,
+            kernel_size=kernel1d_size,
+            padding='same',
+            activation=activation_func
+        )
+        self.conv1d_layer2 = tf.keras.layers.Conv1D(
+            filters=n_units,
+            kernel_size=kernel1d_size,
+            padding='same',
+            activation=activation_func
+        )
+        self.dropout_layer2d = tf.keras.layers.SpatialDropout2D(dropout_rate, data_format='channels_last')
+        self.dropout_layer1d = tf.keras.layers.SpatialDropout1D(dropout_rate)
+        self.norm2d = tf.keras.layers.BatchNormalization()
+        self.norm1d = tf.keras.layers.BatchNormalization()
+
+    def call(self, inp, training=None):
+        # input dim: [batch_size, n_steps, n_bins]
+        inp_expand = inp[:, :, :, None]
+
+        # Convolue along frequency & time axes
+        enc2d = self.conv2d_layer1(inp_expand)
+        enc2d = self.conv2d_layer2(enc2d)
+        enc2d = self.dropout_layer2d(enc2d, training=training)
+        enc2d = self.norm2d(enc2d + inp_expand, training=training)
+
+        # Pool along frequency axis
+        enc_reduce = tf.reduce_mean(enc2d, axis=2)
+        enc_dence = tf.squeeze(self.freq_dense(tf.transpose(enc2d, [0,1,3,2])), axis=-1)
+        enc_pool = tf.concat([enc_reduce, enc_dence], axis=-1)
+
+        # Convolue along time axis
+        enc1d = self.conv1d_layer1(enc_pool)
+        enc1d = self.conv1d_layer2(enc1d)
+        enc1d = self.dropout_layer1d(enc1d, training=training)
+        enc1d = self.norm1d(enc1d + enc_pool, training=training)
+        return enc1d
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                "n_steps": self.n_steps,
+                "kernel2d_size": self.kernel2d_size,
+                "kernel1d_size": self.kernel1d_size,
+                "n_units": self.n_units,
+                "dropout_rate": self.dropout_rate
+            }
+        )
+        return config
+    
+    
 def chord_block_compression(hidden_states, chord_changes):
     block_ids = tf.cumsum(chord_changes, axis=1)
     modify_ids = lambda x: tf.cond(pred=tf.equal(x[0], 0), true_fn=lambda: x, false_fn=lambda: x - 1)
@@ -326,6 +424,98 @@ class Encoder(tf.keras.layers.Layer):
         return config
 
 
+class Encoder_2(tf.keras.layers.Layer):
+    """Encoder layer of the transformer model (ChordModel_2) with CQT as input.
+    Parameters
+    ----------
+    num_attn_blocks:
+        Number of attention blocks.
+    n_steps: int
+        Time length of the feature.
+    enc_input_emb_size: int
+        Embedding size of the encoder's input.
+    kernel2d_size: tuple of ints
+        kernel size of 2d convolution layers.
+    kernel1d_size: int
+        kernel size of 1d convolution layers.
+    dropout_rate: float
+        Dropout rate of all the dropout layers.
+    **kwargs:
+        Other keyword parameters that will be passed to initialize keras.layers.Layer.
+    """
+    def __init__(
+        self,
+        num_attn_blocks=2,
+        n_steps=256,
+        enc_input_emb_size=512,
+        kernel2d_size=(5,25),
+        kernel1d_size=5,
+        dropout_rate=0,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+
+        self.n_steps = n_steps
+        self.num_attn_blocks = num_attn_blocks
+        self.enc_input_emb_size = enc_input_emb_size
+        self.dropout_rate = dropout_rate
+
+        self.layer_weights = tf.Variable(initial_value=tf.zeros(num_attn_blocks), trainable=True)
+        self.encode = EncodeCQT(
+            n_units=enc_input_emb_size,
+            dropout_rate=dropout_rate,
+            n_steps=n_steps,
+            kernel1d_size=kernel1d_size,
+            activation_func="relu",
+        )
+        self.attn_layers = [
+            MultiHeadAttention(n_units=enc_input_emb_size, n_heads=8, max_dist=16, dropout_rate=dropout_rate)
+            for _ in range(num_attn_blocks)
+        ]
+        self.ff_layers = [
+            FeedForward(n_units=[enc_input_emb_size * 4, enc_input_emb_size], dropout_rate=dropout_rate)
+            for _ in range(num_attn_blocks)
+        ]
+        self.logit_dense = tf.keras.layers.Dense(1)
+        self.dropout = tf.keras.layers.Dropout(dropout_rate)
+
+    def call(self, inp, inp_len, slope=1, training=None):
+        inp_mask = tf.sequence_mask(inp_len, maxlen=self.n_steps, dtype=tf.float32)
+        segment_encodings = self.encode(inp, training=training)
+        segment_encodings += positional_encoding(
+            batch_size=shape_list(segment_encodings)[0], timesteps=self.n_steps, n_units=self.enc_input_emb_size
+        )
+        segment_encodings *= inp_mask[:, :, None]
+
+        weight = tf.nn.softmax(self.layer_weights)
+        weighted_hidden_enc = tf.zeros(shape=shape_list(segment_encodings))
+        for idx, (attn_layer, feed_forward) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            segment_encodings = attn_layer(q=segment_encodings, k=segment_encodings, v=segment_encodings, training=training)
+            segment_encodings = feed_forward(segment_encodings, training=training)
+            weighted_hidden_enc += weight[idx] * segment_encodings
+
+        weighted_hidden_enc *= inp_mask[:, :, None]
+        chord_change_logits = tf.squeeze(self.logit_dense(weighted_hidden_enc)) * slope
+        chord_change_prob = tf.sigmoid(chord_change_logits)
+        chord_change_pred = binary_round(chord_change_prob, cast_to_int=True)
+
+        return weighted_hidden_enc, chord_change_logits, chord_change_pred
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                "n_steps": self.n_steps,
+                "kernel2d_size": self.kernel2d_size,
+                "kernel1d_size": self.kernel1d_size,
+                "enc_input_emb_size": self.enc_input_emb_size,
+                "num_attn_blocks": self.num_attn_blocks,
+                "dropout_rate": self.dropout_rate
+            }
+        )
+        return config 
+    
+
 class Decoder(tf.keras.layers.Layer):
     """Decoder layer of the transformer model.
 
@@ -445,6 +635,125 @@ class Decoder(tf.keras.layers.Layer):
             }
         )
         return config
+
+    
+class Decoder_2(tf.keras.layers.Layer):
+    """Decoder layer of the transformer model (ChordModel_2) with CQT as input.
+    Parameters
+    ----------
+    out_classes: int
+        Number of output classes. Currently supports 26 types of chords.
+    num_attn_blocks:
+        Number of attention blocks.
+    n_steps: int
+        Time length of the feature.
+    dec_input_emb_size: int
+        Embedding size of the decoder's input.
+    kernel2d_size: tuple of ints
+        kernel size of 2d convolution layers.
+    kernel1d_size: int
+        kernel size of 1d convolution layers.
+    dropout_rate: float
+        Dropout rate of all the dropout layers.
+    **kwargs:
+        Other keyword parameters that will be passed to initialize keras.layers.Layer.
+    """
+    def __init__(
+        self,
+        out_classes=26,
+        num_attn_blocks=2,
+        n_steps=256,
+        dec_input_emb_size=512,
+        kernel2d_size=(5,25),
+        kernel1d_size=5,
+        dropout_rate=0,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+
+        self.n_steps = n_steps
+        self.dec_input_emb_size = dec_input_emb_size
+        self.num_attn_blocks = num_attn_blocks
+        self.out_classes = out_classes
+        self.dropout_rate = dropout_rate
+
+        self.encode = EncodeCQT(
+            n_units=dec_input_emb_size,
+            dropout_rate=dropout_rate,
+            n_steps=n_steps,
+            kernel1d_size=kernel1d_size,
+            activation_func="relu"
+        )
+        self.attn_layers_1 = [
+            MultiHeadAttention(
+                n_units=dec_input_emb_size,
+                n_heads=8,
+                relative_position=True,
+                max_dist=16,
+                self_mask=False,
+                dropout_rate=dropout_rate
+            )
+            for _ in range(num_attn_blocks)
+        ]
+        self.attn_layers_2 = [
+            MultiHeadAttention(
+                n_units=dec_input_emb_size,
+                n_heads=8,
+                relative_position=False,
+                max_dist=16,
+                self_mask=False,
+                dropout_rate=dropout_rate
+            )
+            for _ in range(num_attn_blocks)
+        ]
+        self.ff_layers = [
+            FeedForward(n_units=[dec_input_emb_size * 4, dec_input_emb_size], dropout_rate=dropout_rate)
+        ]
+        self.dropout = tf.keras.layers.Dropout(dropout_rate)
+        self.out_dense = tf.keras.layers.Dense(out_classes)
+
+    def call(self, inp, inp_len, encoder_input_emb, chord_change_pred, training=None):
+        inp_mask = tf.sequence_mask(inp_len, maxlen=self.n_steps, dtype=tf.float32)
+        segment_encodings = self.encode(inp)
+        segment_encodings *= inp_mask[:, :, None]
+        segment_encodings_blocked, block_ids = chord_block_compression(segment_encodings, chord_change_pred)
+        segment_encodings_blocked = chord_block_decompression(segment_encodings_blocked, block_ids)
+        segment_encodings_blocked.set_shape([None, self.n_steps, self.dec_input_emb_size])
+
+        decoder_inputs = segment_encodings + segment_encodings_blocked + encoder_input_emb
+        decoder_inputs += positional_encoding(
+            batch_size=shape_list(decoder_inputs)[0], timesteps=self.n_steps, n_units=self.dec_input_emb_size
+        )
+        decoder_inputs *= inp_mask[:, :, None]
+
+        layer_weights = tf.nn.softmax(tf.zeros((self.num_attn_blocks)))
+        weighted_hiddens_dec = tf.zeros(shape=shape_list(segment_encodings))
+        layer_stack = zip(self.attn_layers_1, self.attn_layers_2, self.ff_layers)
+        for idx, (attn_1, attn_2, feed_forward) in enumerate(layer_stack):
+            decoder_inputs = attn_1(q=decoder_inputs, k=decoder_inputs, v=decoder_inputs, training=training)
+            decoder_inputs = attn_2(q=decoder_inputs, k=encoder_input_emb, v=encoder_input_emb, training=training)
+            decoder_inputs = feed_forward(decoder_inputs, training=training)
+            weighted_hiddens_dec += layer_weights[idx] * decoder_inputs
+
+        weighted_hiddens_dec *= inp_mask[:, :, None]
+        logits = self.out_dense(weighted_hiddens_dec)
+        chord_pred = tf.argmax(input=logits, axis=-1, output_type=tf.int32)
+        return logits, chord_pred
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                "n_steps": self.n_steps,
+                "kernel2d_size": self.kernel2d_size,
+                "kernel1d_size": self.kernel1d_size,
+                "dec_input_emb_size": self.dec_input_emb_size,
+                "num_attn_blocks": self.num_attn_blocks,
+                "out_classes": self.out_classes,
+                "dropout_rate": self.dropout_rate
+            }
+        )
+        return config 
 
 
 class ChordModel(tf.keras.Model):  # pylint: disable=R0901
@@ -608,6 +917,155 @@ class ChordModel(tf.keras.Model):  # pylint: disable=R0901
         return config
 
 
+class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
+    """Chord model written in keras.
+    Keras model of ``chord`` submodule. The original implementation is written in
+    tensorflow 1.11 and can be found `here <https://github.com/Tsung-Ping/Harmony-Transformer>`_.
+    The model also implements the custom training/test step due to the specialized loss
+    computation.
+    
+    This version takes the log-power Constant Q-Transform (CQT) spectrogram  (rather than NNLS chormagram) as input.
+    
+    Parameters
+    ----------
+    num_enc_attn_blocks: int
+        Number of attention blocks in the encoder.
+    num_dec_attn_blocks: int
+        Number of attention blocks in the decoder.
+    out_classes: int
+        Number of output classes. Currently supports 26 types of chords.
+    excluded_class: int
+        Output class which is excluded from the evaluation.
+    n_steps: int
+        Time length of the feature.
+    enc_input_emb_size: int
+        Embedding size of the encoder's input.
+    dec_input_emb_size: int
+        Embedding size of the decoder's input.
+    dropout_rate: float
+        Dropout rate of all the dropout layers.
+    annealing_rate: float
+        Rate of modifying the slope value for each epoch.
+    **kwargs:
+        Other keyword parameters that will be passed to initialize the keras.Model.
+    See Also
+    --------
+    omnizart.chord.app.chord_loss_func:
+        The customized loss computation function.
+    """
+    def __init__(
+        self,
+        num_enc_attn_blocks=2,
+        num_dec_attn_blocks=2,
+        out_classes=26,
+        excluded_class=24,
+        n_steps=256,
+        enc_input_emb_size=512,
+        dec_input_emb_size=512,
+        dropout_rate=0,
+        annealing_rate=1.1,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+
+        self.out_classes = out_classes
+        self.n_steps = n_steps
+        self.enc_input_emb_size = enc_input_emb_size
+        self.dec_input_emb_size = dec_input_emb_size
+        self.dropout_rate = dropout_rate
+        self.annealing_rate = annealing_rate
+        self.excluded_class = excluded_class
+        self.slope = 1.0
+        self.loss_func_name = "chord_loss_func"
+
+        self.input_norm = tf.keras.layers.BatchNormalization()
+        self.encoder = Encoder_2(
+            num_attn_blocks=num_enc_attn_blocks,
+            dropout_rate=dropout_rate,
+            n_steps=n_steps,
+            enc_input_emb_size=enc_input_emb_size,
+        )
+        self.decoder = Decoder_2(
+            num_attn_blocks=num_dec_attn_blocks,
+            out_classes=out_classes,
+            dropout_rate=dropout_rate,
+            n_steps=n_steps,
+            dec_input_emb_size=dec_input_emb_size,
+        )
+        self.loss_tracker = tf.keras.metrics.Mean(name="loss")
+
+    def call(self, features, training=None):
+        if training is None:
+            training = tf.keras.backend.learning_phase()
+        feature, feature_len = features
+        feature = tf.squeeze(self.input_norm(feature[:, :, :, None], training=training), axis=-1)
+        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope, training=training)
+        logits, chord_pred = self.decoder(feature, feature_len, encoder_input_emb, chord_change_pred, training=training)
+        return chord_pred, chord_change_pred, logits, chord_change_logits
+
+    def step_in_slope(self):
+        self.slope *= self.annealing_rate
+
+    def train_step(self, data):
+        # Feature: (n_sequences, 256, 72)
+        # Feature length: (n_sequences)
+        # Chord change: (n_sequences, 256)
+        # Chord: (n_sequences, 256)
+        # Slope: 1.0
+        (feature, feature_len), (gt_chord, gt_chord_change) = data
+        sample_mask = tf.sequence_mask(feature_len, maxlen=self.n_steps, dtype=tf.float32)
+        eval_mask = tf.where(tf.equal(gt_chord, self.excluded_class), tf.zeros_like(sample_mask), sample_mask)
+
+        with tf.GradientTape() as tape:
+            chord_pred, chord_change_pred, logits, chord_change_logits = self((feature, feature_len))
+            cce = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+            bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+            loss_c = cce(gt_chord, logits, sample_weight=sample_mask)
+            loss_cc = bce(gt_chord_change, chord_change_logits)
+            loss = loss_c + loss_cc
+
+        # Compute gradients
+        trainable_vars = self.trainable_variables
+        grads = tape.gradient(loss, trainable_vars)
+
+        # Update weights
+        self.optimizer.apply_gradients(zip(grads, trainable_vars))
+
+        # Update the metrics
+        self.compiled_metrics.update_state(gt_chord, logits, sample_weight=eval_mask)
+        self.loss_tracker.update_state(loss)
+        result = {m.name: m.result() for m in self.metrics}
+        result.update({"loss": self.loss_tracker.result()})
+        return result
+
+    def test_step(self, data):
+        (feature, feature_len), (gt_chord, gt_chord_change) = data
+        sample_mask = tf.sequence_mask(feature_len, maxlen=self.n_steps, dtype=tf.float32)
+        eval_mask = tf.where(tf.equal(gt_chord, self.excluded_class), tf.zeros_like(sample_mask), sample_mask)
+        chord_pred, chord_change_pred, logits, chord_change_logits = self((feature, feature_len))
+
+        cce = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+        loss_c = cce(gt_chord, logits, sample_weight=sample_mask)
+        loss_cc = bce(gt_chord_change, chord_change_logits)
+        loss = loss_c + loss_cc
+
+        # Update the metrics
+        self.compiled_metrics.update_state(gt_chord, logits, sample_weight=eval_mask)
+        self.loss_tracker.update_state(loss)
+        result = {m.name: m.result() for m in self.metrics}
+        result.update({"loss": self.loss_tracker.result()})
+        return result
+
+    def get_config(self):
+        config = {
+            "encoder": self.encoder,
+            "decoder": self.decoder,
+            "loss_tracker": self.loss_tracker
+        }
+        return config
+
+    
 class ReduceSlope(tf.keras.callbacks.Callback):
     """Custom keras callback for reducing slope value after each epoch."""
     def on_epoch_end(self, epoch, logs=None):
