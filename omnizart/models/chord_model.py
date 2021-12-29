@@ -217,7 +217,7 @@ class EncodeCQT(tf.keras.layers.Layer):
         n_units=512,
         n_steps=256,
         dropout_rate=0,
-        kernel2d_size=(5,25),
+        kernel2d_size=(5, 25),
         kernel1d_size=5,
         activation_func="relu",
     ):
@@ -226,17 +226,17 @@ class EncodeCQT(tf.keras.layers.Layer):
         self.n_steps = n_steps
         self.n_units = n_units
         self.dropout_rate = dropout_rate
-        self.kernel2d_size= kernel2d_size
+        self.kernel2d_size = kernel2d_size
         self.kernel1d_size = kernel1d_size
 
         self.conv2d_layer1 = tf.keras.layers.Conv2D(
-            filters=n_units//2,
+            filters=n_units // 2,
             kernel_size=kernel2d_size,
             padding='same',
             activation=activation_func
         )
         self.conv2d_layer2 = tf.keras.layers.Conv2D(
-            filters=n_units//2,
+            filters=n_units // 2,
             kernel_size=kernel2d_size,
             padding='same',
             activation=activation_func
@@ -271,7 +271,7 @@ class EncodeCQT(tf.keras.layers.Layer):
 
         # Pool along frequency axis
         enc_reduce = tf.reduce_mean(enc2d, axis=2)
-        enc_dence = tf.squeeze(self.freq_dense(tf.transpose(enc2d, [0,1,3,2])), axis=-1)
+        enc_dence = tf.squeeze(self.freq_dense(tf.transpose(enc2d, [0, 1, 3, 2])), axis=-1)
         enc_pool = tf.concat([enc_reduce, enc_dence], axis=-1)
 
         # Convolue along time axis
@@ -293,8 +293,8 @@ class EncodeCQT(tf.keras.layers.Layer):
             }
         )
         return config
-    
-    
+
+
 def chord_block_compression(hidden_states, chord_changes):
     block_ids = tf.cumsum(chord_changes, axis=1)
     modify_ids = lambda x: tf.cond(pred=tf.equal(x[0], 0), true_fn=lambda: x, false_fn=lambda: x - 1)
@@ -448,7 +448,7 @@ class Encoder_2(tf.keras.layers.Layer):
         num_attn_blocks=2,
         n_steps=256,
         enc_input_emb_size=512,
-        kernel2d_size=(5,25),
+        kernel2d_size=(5, 25),
         kernel1d_size=5,
         dropout_rate=0,
         **kwargs
@@ -490,7 +490,8 @@ class Encoder_2(tf.keras.layers.Layer):
         weight = tf.nn.softmax(self.layer_weights)
         weighted_hidden_enc = tf.zeros(shape=shape_list(segment_encodings))
         for idx, (attn_layer, feed_forward) in enumerate(zip(self.attn_layers, self.ff_layers)):
-            segment_encodings = attn_layer(q=segment_encodings, k=segment_encodings, v=segment_encodings, training=training)
+            segment_encodings = attn_layer(q=segment_encodings, k=segment_encodings, v=segment_encodings, 
+                                           training=training)
             segment_encodings = feed_forward(segment_encodings, training=training)
             weighted_hidden_enc += weight[idx] * segment_encodings
 
@@ -513,8 +514,8 @@ class Encoder_2(tf.keras.layers.Layer):
                 "dropout_rate": self.dropout_rate
             }
         )
-        return config 
-    
+        return config
+
 
 class Decoder(tf.keras.layers.Layer):
     """Decoder layer of the transformer model.
@@ -636,7 +637,7 @@ class Decoder(tf.keras.layers.Layer):
         )
         return config
 
-    
+
 class Decoder_2(tf.keras.layers.Layer):
     """Decoder layer of the transformer model (ChordModel_2) with CQT as input.
     Parameters
@@ -664,7 +665,7 @@ class Decoder_2(tf.keras.layers.Layer):
         num_attn_blocks=2,
         n_steps=256,
         dec_input_emb_size=512,
-        kernel2d_size=(5,25),
+        kernel2d_size=(5, 25),
         kernel1d_size=5,
         dropout_rate=0,
         **kwargs
@@ -753,7 +754,7 @@ class Decoder_2(tf.keras.layers.Layer):
                 "dropout_rate": self.dropout_rate
             }
         )
-        return config 
+        return config
 
 
 class ChordModel(tf.keras.Model):  # pylint: disable=R0901
@@ -923,9 +924,9 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
     tensorflow 1.11 and can be found `here <https://github.com/Tsung-Ping/Harmony-Transformer>`_.
     The model also implements the custom training/test step due to the specialized loss
     computation.
-    
+
     This version takes the log-power Constant Q-Transform (CQT) spectrogram  (rather than NNLS chormagram) as input.
-    
+
     Parameters
     ----------
     num_enc_attn_blocks: int
@@ -999,7 +1000,8 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
             training = tf.keras.backend.learning_phase()
         feature, feature_len = features
         feature = tf.squeeze(self.input_norm(feature[:, :, :, None], training=training), axis=-1)
-        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope, training=training)
+        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope, 
+                                                                                 training=training)
         logits, chord_pred = self.decoder(feature, feature_len, encoder_input_emb, chord_change_pred, training=training)
         return chord_pred, chord_change_pred, logits, chord_change_logits
 
@@ -1065,7 +1067,7 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
         }
         return config
 
-    
+
 class ReduceSlope(tf.keras.callbacks.Callback):
     """Custom keras callback for reducing slope value after each epoch."""
     def on_epoch_end(self, epoch, logs=None):
