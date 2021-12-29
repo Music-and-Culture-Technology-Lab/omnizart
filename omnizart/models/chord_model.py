@@ -490,7 +490,7 @@ class Encoder_2(tf.keras.layers.Layer):
         weight = tf.nn.softmax(self.layer_weights)
         weighted_hidden_enc = tf.zeros(shape=shape_list(segment_encodings))
         for idx, (attn_layer, feed_forward) in enumerate(zip(self.attn_layers, self.ff_layers)):
-            segment_encodings = attn_layer(q=segment_encodings, k=segment_encodings, v=segment_encodings, 
+            segment_encodings = attn_layer(q=segment_encodings, k=segment_encodings, v=segment_encodings,
                                            training=training)
             segment_encodings = feed_forward(segment_encodings, training=training)
             weighted_hidden_enc += weight[idx] * segment_encodings
@@ -1000,7 +1000,7 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
             training = tf.keras.backend.learning_phase()
         feature, feature_len = features
         feature = tf.squeeze(self.input_norm(feature[:, :, :, None], training=training), axis=-1)
-        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope, 
+        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope,
                                                                                  training=training)
         logits, chord_pred = self.decoder(feature, feature_len, encoder_input_emb, chord_change_pred, training=training)
         return chord_pred, chord_change_pred, logits, chord_change_logits
