@@ -1077,7 +1077,7 @@ class ReduceSlope(tf.keras.callbacks.Callback):
 class WarmupSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     """Custom keras callback for warm-up training."""
     def __init__(self, d_model, warmup_steps=4000):
-        super(CustomSchedule, self).__init__()
+        super(WarmupSchedule, self).__init__()
 
         self.d_model = d_model
         self.d_model = tf.cast(self.d_model, tf.float32)
