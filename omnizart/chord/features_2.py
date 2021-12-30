@@ -60,31 +60,6 @@ def extract_feature_label(feat_path, lab_path, audio_sr=22050, hop_size=1024):
     return data
 
 
-def get_label_dict(dataset_path, label_folder="annotations/chordlab/The Beatles"):
-    """Get dictionary with keys = track ids and values = label paths."""
-    label_dirs = [os.path.normpath(jpath(subdir, file)) for subdir, dirs, files in
-                  os.walk(jpath(dataset_path, label_folder)) for file in files if file.endswith(cls.label_ext)]
-
-    id_fold_mapping = _get_id_fold_mapping()
-    valid_ids = id_fold_mapping.keys()
-    label_dict = {}
-    for _dir in label_dirs:
-        id = _label_dir2id(_dir)
-        if id not in valid_ids:
-            print('Invalid id:', id)
-            exit(1)
-        label_dict[id] = _dir
-    return label_dict
-
-
-def _get_id_fold_mapping():
-    split_path = "https://github.com/superbock/ISMIR2020/blob/master/splits/beatles_8-fold_cv_album_distributed.folds"
-    with open(split_path) as sfile:
-        lines = [(line.split('\t')[0], int(line.split('\t')[1].replace(r'\n', ''))) for line in sfile.readlines()]
-        id_fold_mapping = {line[0]: line[1] for line in lines}
-    return id_fold_mapping
-
-
 def _label_dir2id(_dir):
     """Get label id from label dir"""
     sdir = os.path.normpath(_dir).split(os.path.sep)
