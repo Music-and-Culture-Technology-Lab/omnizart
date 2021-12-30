@@ -38,7 +38,7 @@ from omnizart.io import load_yaml
 from omnizart.base import Label
 from omnizart.utils import ensure_path_exists, get_logger
 from omnizart.remote import download_large_file_from_google_drive
-from omnizart.constant.feature import CHORD_INT_MAPPING_2
+from omnizart.constants.feature import CHORD_INT_MAPPING_2
 
 logger = get_logger("Constant Datasets")
 
