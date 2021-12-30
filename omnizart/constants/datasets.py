@@ -50,7 +50,7 @@ def _get_file_list(dataset_path, dirs, ext):
     return files
 
 
-class BasesStructure:
+class BaseStructure:
     """Defines the necessary attributes and common functions for each sub-dataset structure class.
 
     All sub-dataset structure class should inherit this base class to ensure
