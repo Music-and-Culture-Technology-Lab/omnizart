@@ -458,6 +458,8 @@ class Encoder_2(tf.keras.layers.Layer):
         self.n_steps = n_steps
         self.num_attn_blocks = num_attn_blocks
         self.enc_input_emb_size = enc_input_emb_size
+        self.kernel2d_size = kernel2d_size
+        self.kernel1d_size = kernel1d_size
         self.dropout_rate = dropout_rate
 
         self.layer_weights = tf.Variable(initial_value=tf.zeros(num_attn_blocks), trainable=True)
@@ -465,6 +467,7 @@ class Encoder_2(tf.keras.layers.Layer):
             n_units=enc_input_emb_size,
             dropout_rate=dropout_rate,
             n_steps=n_steps,
+            kernel2d_size=kernel2d_size,
             kernel1d_size=kernel1d_size,
             activation_func="relu",
         )
@@ -676,6 +679,8 @@ class Decoder_2(tf.keras.layers.Layer):
         self.dec_input_emb_size = dec_input_emb_size
         self.num_attn_blocks = num_attn_blocks
         self.out_classes = out_classes
+        self.kernel2d_size = kernel2d_size
+        self.kernel1d_size = kernel1d_size
         self.dropout_rate = dropout_rate
 
         self.encode = EncodeCQT(
