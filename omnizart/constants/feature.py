@@ -53,6 +53,6 @@ CHORD_INT_MAPPING = {
 CHORD_QUALITIES = [':maj', ':min']
 CHORD_ROOTS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 CHORD_INT_MAPPING_2 = {r + q: 12 * CHORD_QUALITIES.index(q) + CHORD_ROOTS.index(r) for q in CHORD_QUALITIES for r in
-                    CHORD_ROOTS}
+                       CHORD_ROOTS}
 CHORD_INT_MAPPING_2['others'] = 24
 CHORD_INT_MAPPING_2['N'] = 25

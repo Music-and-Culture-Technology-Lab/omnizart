@@ -38,7 +38,7 @@ from omnizart.io import load_yaml
 from omnizart.base import Label
 from omnizart.utils import ensure_path_exists, get_logger
 from omnizart.remote import download_large_file_from_google_drive
-from omnizart.constants.feature import CHORD_INT_MAPPING_2
+
 
 logger = get_logger("Constant Datasets")
 
@@ -50,8 +50,7 @@ def _get_file_list(dataset_path, dirs, ext):
     return files
 
 
-
-class BaseStructure:
+class BasesStructure:
     """Defines the necessary attributes and common functions for each sub-dataset structure class.
 
     All sub-dataset structure class should inherit this base class to ensure
@@ -832,9 +831,9 @@ class MedleyDBStructure(BaseStructure):
 class BeatlesStructure(BaseStructure):
     """Constant settings of Beatles dataset."""
     #: Dataset URL
-    url = "" # TODO: upload dataset
+    url = ""  # TODO: upload dataset
 
-    #: The extension of ground-truth files (e.g. .mid, .csv).
+    #: The extension of ground-truth files
     label_ext = ".lab"
 
     #: Path to the label folder relative to dataset
@@ -848,32 +847,6 @@ class BeatlesStructure(BaseStructure):
         "https://github.com/superbock/ISMIR2020/blob/master/splits/beatles_8-fold_cv_album_distributed.folds"
 
     @classmethod
-    def get_labels(cls, dataset_path):
-        """Get chord annotations."""
-
-        label_dirs = [os.path.normpath(jpath(subdir, file)) for subdir, dirs, files in
-                      os.walk(jpath(dataset_path, label_folder)) for file in files if file.endswith(cls.label_ext)]
-
-        id_fold_mapping = cls._get_id_fold_mapping()
-        valid_id = id_fold_mapping.keys()
-        label_dict = {}
-        for _dir in label_dirs:
-            labels = np.genfromtxt(_dir, dtype=[('onset', np.float32), ('end', np.float32), ('chord', '<U24')])
-            chords = np.array([cls._format_chord(c) for c in labels['chord']],
-                              dtype=[('root', '<U3'), ('attribute', '<U24')])
-            chords_renamed = np.array([cls._rename_chord(c) for c in chords], dtype=[('chord', '<U10')])
-            new_labels = rfn.merge_arrays([labels[['onset', 'end']], chords_renamed], flatten=True, usemask=False)
-
-            id = cls._label_dir2id(_dir)
-            if id not in valid_id:
-                print('Invalid id:', id)
-                exit(1)
-
-            label_dict[id] = new_labels
-
-        return label_dict
-
-    @classmethod
     def _label_dir2id(cls, _dir):
         """Get label id from label dir"""
         sdir = os.path.normpath(_dir).split(os.path.sep)
@@ -884,94 +857,65 @@ class BeatlesStructure(BaseStructure):
         return id
 
     @classmethod
-    def _format_chord(cls, chord):
-        """Get root and attribute of chord."""
-        split_idx = 1 if len(chord) == 1 or chord[1] != 'b' else 2
-        root = chord[:split_idx]
-        attribute = chord[split_idx:]
-        return (root, attribute)
-
-    @classmethod
-    def _get_id_fold_mapping(cls, dataset_path):
-        split_file_path = jpath(dataset_path, cls.split_path)
-        with open(split_file_path) as sfile:
+    def _get_id_fold_mapping(cls):
+        with open(cls.split_path) as sfile:
             lines = [(line.split('\t')[0], int(line.split('\t')[1].replace(r'\n', ''))) for line in sfile.readlines()]
             id_fold_mapping = {line[0]: line[1] for line in lines}
         return id_fold_mapping
 
     @classmethod
-    def _rename_chord(cls, chord):
-        """Rename chord. 26 classes are available: 12 maj + 12 min + other + non-chord."""
-        root, attribute = chord['root'], chord['attribute']
-        attribute = attribute.split('/')[0]  # remove inversion
-        if root == 'N': # non-chord
-            return root
-        elif any(s in attribute for s in [':min', ':minmaj']): # minor
-            return root + ':min'
-        elif attribute == '' or any(s in attribute for s in [':maj', ':7', ':9']): # major
-            return root + ':maj'
-        elif any(s in attribute for s in [':(', ':aug', ':dim', ':hdim7', ':sus2', ':sus4']): # others
-            return 'others'
-        else:
-            print('invalid syntax:', chord, root, attribute)
-            exit(1)
+    def get_train_test_ids(cls, testing_fold=0):
+        id_fold_mapping = _get_id_fold_mapping()
+        train_ids = [id for id, fold in id_fold_mapping.items() if fold != testing_fold]
+        test_ids = [id for id, fold in id_fold_mapping.items() if fold == testing_fold]
+        return train_ids, test_ids
 
     @classmethod
-    def get_features(cls, dataset_path):
-        """Get CQT features."""
-        with open(jpath(dataset_path, feature_folder), "rb") as f:
-            feature_dict = joblib.load(f)
-        return feature_dict
+    def get_wavs(cls, dataset_path):
+        return _get_file_list(dataset_path, cls.train_wavs, ".pickle")
 
     @classmethod
-    def get_data_pair(cls, dataset_path, audio_sr=22050, hop_size=1024):
-        feature_dict = cls.get_features(dataset_path)
-        label_dict = cls.get_labels(dataset_path)
-
-        data_dict = {}
-        for feature_id in list(feature_dict.keys()):
-            label_id, pitch_shift = feature_key.split(':pitch_shift=')
-            pitch_shift = int(pitch_shift)
-            cqt = feature_dict[feature_id]['cqt']
-            labels = label_dict[label_id]
-            n_frames = cqt.shape[0]
-
-            # Get frame-wise labels
-            chords = np.zeros(n_frames, dtype=np.int32)
-            for label in labels:
-                onset_idx = int(label['onset'] * audio_sr / hop_size)
-                end_idx = int(math.ceil(label['end'] * audio_sr / hop_size))
-                chord = CHORD_INT_MAPPING_2[label['chord']]
-                chords[onset_idx:end_idx] = chord
-
-            # Chord labels modulation
-            chords_shift = cls.shift_chord_labels(chords, pitch_shift)
-
-            # Chord transition
-            transition = cls.get_chord_transition(chords_shift)
-
-            data_dict[feature_id] = {'cqt': cqt, 'chord': chords_shift, 'transition': transition}
-        return data_dict
+    def get_labels(cls, dataset_path):
+        return [os.path.normpath(jpath(subdir, file)) for subdir, dirs, files in
+                os.walk(jpath(dataset_path, cls.label_folder)) for file in files if file.endswith(cls.label_ext)]
 
     @classmethod
-    def shift_chord_labels(cls, chords, shift):
-        chords_shift = np.where(chords < 12, (chords + shift) % 12, chords)
-        chords_shift = np.where((chords >= 12) & (chords < 24), (chords_shift - 12 + shift) % 12 + 12,
-                                chords_shift)
-        return chords_shift
+    def get_train_wavs(cls, dataset_path):
+        """Get list of complete train wav paths"""
+        train_ids, _ = cls.get_train_test_ids()
+        wavs = cls.get_wavs(dataset_path)
+        return [wav for wav in wavs if wav.split(':pitch_shift=')[0] in train_ids]
 
     @classmethod
-    def get_chord_transition(cls, chords):
-        return np.array([1] + [0 if f2 == f1 else 1 for f1, f2 in zip(chords[:-1], chords[1:])], dtype=np.int32)
+    def get_test_wavs(cls, dataset_path):
+        """Get list of complete test wav paths"""
+        _, test_ids = cls.get_train_test_ids()
+        wavs = cls.get_wavs(dataset_path)
+        return [wav for wav in wavs if (wav.split(':pitch_shift=')[0] in test_ids) and ('pitch_shift=0' in wav)]
 
     @classmethod
-    def get_train_test_data(cls, dataset_path, testing_fold=0):
-        id_fold_mapping = cls._get_id_fold_mapping(dataset_path)
-        data_dict = cls.get_data_pair(dataset_path)
+    def get_train_labels(cls, dataset_path):
+        """Get list of complete train label paths"""
+        train_ids, _ = cls.get_train_test_ids()
+        labels = cls.get_labels(dataset_path)
+        return [label for label in labels if cls._label_dir2id(label) in train_ids]
 
-        train_dict = {k: v for k, v in data_dict.items() if
-                      id_fold_mapping[k.split(':pitch_shift=')[0]] != testing_fold}
-        test_dict = {k: v for k, v in data_dict.items() if
-                     (id_fold_mapping[k.split(':pitch_shift=')[0]] == testing_fold) and ('pitch_shift=0' in k)}
+    @classmethod
+    def get_test_labels(cls, dataset_path):
+        """Get list of complete test label paths"""
+        _, test_ids = cls.get_train_test_ids()
+        labels = cls.get_labels(dataset_path)
+        return [label for label in labels if cls._label_dir2id(label) in test_ids]
 
-        return train_dict, test_dict
+    @classmethod
+    def _get_data_pair(cls, wavs, labels):
+        label_path_mapping = {cls._label_dir2id(label): label for label in labels}
+
+        pair = []
+        for wav in wavs:
+            id = os.path.basename(wav).split(':pitch_shift=')[0]
+            label_path = label_path_mapping[id]
+            assert os.path.exists(label_path)
+            pair.append((wav, label_path))
+
+        return pair
