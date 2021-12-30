@@ -27,7 +27,6 @@ Complete information of supported datasets are as following:
 import os
 import csv
 import glob
-import joblib
 from os.path import join as jpath
 from shutil import copy
 
@@ -865,7 +864,7 @@ class BeatlesStructure(BaseStructure):
 
     @classmethod
     def get_train_test_ids(cls, testing_fold=0):
-        id_fold_mapping = _get_id_fold_mapping()
+        id_fold_mapping = cls._get_id_fold_mapping()
         train_ids = [id for id, fold in id_fold_mapping.items() if fold != testing_fold]
         test_ids = [id for id, fold in id_fold_mapping.items() if fold == testing_fold]
         return train_ids, test_ids

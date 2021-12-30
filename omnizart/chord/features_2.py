@@ -4,7 +4,6 @@ import math
 import numpy as np
 import joblib
 import numpy.lib.recfunctions as rfn
-from scipy.ndimage import gaussian_filter1d
 import os
 from os.path import join as jpath
 
@@ -34,7 +33,7 @@ def extract_feature_label(feat_path, lab_path, audio_sr=22050, hop_size=1024):
     label = load_label(lab_path)
     feature = load_feature(feat_path)
 
-    pitch_shift = feat_path.replace(".pickle", "").split(':pitch_shift=')[1]
+    id, pitch_shift = feat_path.replace(".pickle", "").split(':pitch_shift=')
     pitch_shift = int(pitch_shift)
     cqt = feature['cqt']
     n_frames = cqt.shape[0]
@@ -56,7 +55,7 @@ def extract_feature_label(feat_path, lab_path, audio_sr=22050, hop_size=1024):
     data = {'cqt': cqt, 'chord': chords_shift, 'transition': transition}
 
     # Reshape
-    data = reshape_data(data)
+    data = reshape_data(data, id)
 
     return data
 
@@ -66,7 +65,7 @@ def get_label_dict(dataset_path, label_folder="annotations/chordlab/The Beatles"
     label_dirs = [os.path.normpath(jpath(subdir, file)) for subdir, dirs, files in
                   os.walk(jpath(dataset_path, label_folder)) for file in files if file.endswith(cls.label_ext)]
 
-    id_fold_mapping = _get_id_fold_mapping(dataset_path)
+    id_fold_mapping = _get_id_fold_mapping()
     valid_ids = id_fold_mapping.keys()
     label_dict = {}
     for _dir in label_dirs:
@@ -130,7 +129,7 @@ def _rename_chord(chord):
         exit(1)
 
 
-def load_features(feat_path):
+def load_feature(feat_path):
     """Get CQT features."""
     with open(feat_path, "rb") as f:
         feature = joblib.load(f)
@@ -179,16 +178,16 @@ def get_chord_transition(chords):
 
 
 def log_compression(x, gamma=1):
-    return np.log(1 + gamma*x)
+    return np.log(1 + gamma * x)
 
 
-def reshap_data(data, seq_len=256, seq_hop=128, min_seq_len=128):
+def reshape_data(data, id, seq_len=256, seq_hop=128, min_seq_len=128):
     cqt = data['cqt']
     n_frames = cqt.shape[0]
     cqt = log_compression(cqt, gamma=100)
     y_c = data['chord']
     y_t = data['transition']
-    frame_ids = [k + ':' + str(i) for i in range(n_frames)]
+    frame_ids = [id + ':' + str(i) for i in range(n_frames)]
 
     # Segment
     cqt_reshape = [cqt[i:i+seq_len] for i in range(0, n_frames, seq_hop) if n_frames - i >= min_seq_len]
