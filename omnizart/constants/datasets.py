@@ -1,7 +1,7 @@
 """Information about each dataset.
 
 Supports an easy way to deal with complex folder structure of different
-datasets in a consice interface.
+datasets in a concise interface.
 Partial support for downloading public datasets.
 
 Complete information of supported datasets are as following:
@@ -29,9 +29,11 @@ import csv
 import glob
 from os.path import join as jpath
 from shutil import copy
+from urllib.request import urlopen
 
 import pretty_midi
 import numpy as np
+import numpy.lib.recfunctions as rfn
 
 from omnizart.io import load_yaml
 from omnizart.base import Label
@@ -63,7 +65,7 @@ class BaseStructure:
     label_ext = None
 
     train_wavs = None
-    """Record folders that contain trainig wav files.
+    """Record folders that contain training wav files.
 
     The path to sub-folders should be the relative path to root folder of the dataset.
 
@@ -119,17 +121,17 @@ class BaseStructure:
 
     @classmethod
     def get_train_data_pair(cls, dataset_path):
-        """Get pair of training file and the coressponding label file path."""
+        """Get pair of training file and the corresponding label file path."""
         return cls._get_data_pair(cls.get_train_wavs(dataset_path), cls.get_train_labels(dataset_path))
 
     @classmethod
     def get_test_data_pair(cls, dataset_path):
-        """Get pair of testing file and the coressponding label file path."""
+        """Get pair of testing file and the corresponding label file path."""
         return cls._get_data_pair(cls.get_test_wavs(dataset_path), cls.get_test_labels(dataset_path))
 
     @classmethod
     def _name_transform(cls, basename):
-        # Transform the basename of wav file to the corressponding label file name.
+        # Transform the basename of wav file to the corresponding label file name.
         return basename
 
     @classmethod
@@ -182,7 +184,7 @@ class BaseStructure:
         """Load and parse labels for the given label file path.
 
         Parses different format of label information to shared intermediate format,
-        encapslated with :class:`Label` instances. The default is parsing MIDI
+        encapsulated with :class:`Label` instances. The default is parsing MIDI
         file format.
         """
         midi = pretty_midi.PrettyMIDI(label_path)
@@ -835,43 +837,44 @@ class BeatlesStructure(BaseStructure):
     #: The extension of ground-truth files
     label_ext = ".lab"
 
+    #: The extension of feature files
+    feature_ext = ".npy"
+
     #: Path to the label folder relative to dataset
     label_folder = "annotations/chordlab/The Beatles"
 
-    #: Path to the feature folder relative to dataset
-    feature_folder = "features"
-
     #: Path to the split file
-    split_path = \
-        "https://github.com/superbock/ISMIR2020/blob/master/splits/beatles_8-fold_cv_album_distributed.folds"
+    split_url = \
+        "https://raw.githubusercontent.com/superbock/ISMIR2020/master/splits/beatles_8-fold_cv_album_distributed.folds"
 
     @classmethod
     def _label_dir2id(cls, _dir):
         """Get label id from label dir"""
         sdir = os.path.normpath(_dir).split(os.path.sep)
-        track_id = sdir[-2].replace('_-_', '_').replace('\'', '').replace('!', '').replace('.', '')
-        album_id = sdir[-1].replace('CD1_-_', '').replace('CD2_-_', '').replace('.lab', '').replace('_-_', '_')
-        album_id = album_id.replace('\'', '').replace(',', '').replace('!', '').replace('.', '')
-        id = 'beatles_' + album_id + '_' + track_id
-        return id
+        album_id = sdir[-2].replace('_-_', '_').replace('\'', '').replace('!', '').replace('.', '')
+        track_id = sdir[-1].replace('CD1_-_', '').replace('CD2_-_', '').replace('.lab', '').replace('_-_', '_')
+        track_id = track_id.replace('\'', '').replace(',', '').replace('!', '').replace('.', '')
+        beatles_id = 'beatles_' + album_id + '_' + track_id
+        return beatles_id
 
     @classmethod
     def _get_id_fold_mapping(cls):
-        with open(cls.split_path) as sfile:
-            lines = [(line.split('\t')[0], int(line.split('\t')[1].replace(r'\n', ''))) for line in sfile.readlines()]
-            id_fold_mapping = {line[0]: line[1] for line in lines}
+        # Return a dictionary with track ids as keys and fold ids as values.
+        with urlopen(cls.split_url) as response:
+            lines = [line.decode("utf-8") for line in response]
+            id_fold_mapping = {line.split('\t')[0]: int(line.split('\t')[1].replace(r'\n', '')) for line in lines}
         return id_fold_mapping
 
     @classmethod
     def get_train_test_ids(cls, testing_fold=0):
         id_fold_mapping = cls._get_id_fold_mapping()
-        train_ids = [id for id, fold in id_fold_mapping.items() if fold != testing_fold]
-        test_ids = [id for id, fold in id_fold_mapping.items() if fold == testing_fold]
+        train_ids = [beatles_id for beatles_id, fold in id_fold_mapping.items() if fold != testing_fold]
+        test_ids = [beatles_id for beatles_id, fold in id_fold_mapping.items() if fold == testing_fold]
         return train_ids, test_ids
 
     @classmethod
     def get_wavs(cls, dataset_path):
-        return _get_file_list(dataset_path, cls.train_wavs, ".pickle")
+        return _get_file_list(dataset_path, ["features"], cls.feature_ext)
 
     @classmethod
     def get_labels(cls, dataset_path):
@@ -883,14 +886,17 @@ class BeatlesStructure(BaseStructure):
         """Get list of complete train wav paths"""
         train_ids, _ = cls.get_train_test_ids()
         wavs = cls.get_wavs(dataset_path)
-        return [wav for wav in wavs if wav.split(':pitch_shift=')[0] in train_ids]
+        return [wav for wav in wavs if
+                os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in train_ids]
 
     @classmethod
     def get_test_wavs(cls, dataset_path):
         """Get list of complete test wav paths"""
         _, test_ids = cls.get_train_test_ids()
         wavs = cls.get_wavs(dataset_path)
-        return [wav for wav in wavs if (wav.split(':pitch_shift=')[0] in test_ids) and ('pitch_shift=0' in wav)]
+        return [wav for wav in wavs if
+                (os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and
+                ('pitch_shift=0' in wav)]
 
     @classmethod
     def get_train_labels(cls, dataset_path):
@@ -912,9 +918,15 @@ class BeatlesStructure(BaseStructure):
 
         pair = []
         for wav in wavs:
-            id = os.path.basename(wav).split(':pitch_shift=')[0]
-            label_path = label_path_mapping[id]
+            beatles_id = os.path.basename(wav).split('_pitch_shift=')[0]
+            label_path = label_path_mapping[beatles_id]
             assert os.path.exists(label_path)
             pair.append((wav, label_path))
 
         return pair
+
+    @classmethod
+    def load_label(cls, lab_path):
+        """Load and parse the label into the desired format for later process."""
+        labels = np.genfromtxt(lab_path, dtype=[('onset', np.float32), ('end', np.float32), ('chord', '<U24')])
+        return labels

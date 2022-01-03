@@ -4,24 +4,25 @@ from tensorflow.python.framework import ops
 
 from omnizart.models.t2t import positional_encoding, MultiHeadAttention
 from omnizart.models.utils import shape_list
+from omnizart.constants.feature import CHORD_INT_MAPPING_2
 
 
 class FeedForward(tf.keras.layers.Layer):
-    """Feedfoward layer of the transformer model.
+    """Feedforward layer of the transformer model.
 
-    Paramters
+    Parameters
     ---------
     n_units: list[int, int]
         A two-element integer list. The first integer represents the output embedding size
         of the first convolution layer, and the second integer represents the embedding size
         of the second convolution layer.
     activation_func: str
-        Activation function of the first covolution layer. Available options can be found
+        Activation function of the first convolution layer. Available options can be found
         from the tensorflow.keras official site.
     dropout_rate: float
         Dropout rate of all dropout layers.
     """
-    def __init__(self, n_units=[2048, 512], activation_func="relu", dropout_rate=0):
+    def __init__(self, n_units=(2048, 512), activation_func="relu", dropout_rate=0):
         super().__init__()
 
         self.n_units = n_units
@@ -64,7 +65,7 @@ class EncodeSegmentTime(tf.keras.layers.Layer):
     segment_width: int
         Context width of each frame. Nearby frames will be concatenated to the feature axis.
         Default to 21, which means past 10 frames and future 10 frames will be concatenated
-        to the current frame, resulting a feature dimenstion of *segment_width x freq_size*.
+        to the current frame, resulting a feature dimension of *segment_width x freq_size*.
     freq_size: int
         Feature size of the input representation.
     dropout_rate: float
@@ -139,7 +140,7 @@ class EncodeSegmentFrequency(tf.keras.layers.Layer):
     segment_width: int
         Context width of each frame. Nearby frames will be concatenated to the feature axis.
         Default to 21, which means past 10 frames and future 10 frames will be concatenated
-        to the current frame, resulting a feature dimenstion of *segment_width x freq_size*.
+        to the current frame, resulting a feature dimension of *segment_width x freq_size*.
     freq_size: int
         Feature size of the input representation.
     dropout_rate: float
@@ -263,7 +264,7 @@ class EncodeCQT(tf.keras.layers.Layer):
         # input dim: [batch_size, n_steps, n_bins]
         inp_expand = inp[:, :, :, None]
 
-        # Convolue along frequency & time axes
+        # Convolve along frequency & time axes
         enc2d = self.conv2d_layer1(inp_expand)
         enc2d = self.conv2d_layer2(enc2d)
         enc2d = self.dropout_layer2d(enc2d, training=training)
@@ -271,10 +272,10 @@ class EncodeCQT(tf.keras.layers.Layer):
 
         # Pool along frequency axis
         enc_reduce = tf.reduce_mean(enc2d, axis=2)
-        enc_dence = tf.squeeze(self.freq_dense(tf.transpose(enc2d, [0, 1, 3, 2])), axis=-1)
-        enc_pool = tf.concat([enc_reduce, enc_dence], axis=-1)
+        enc_dense = tf.squeeze(self.freq_dense(tf.transpose(enc2d, [0, 1, 3, 2])), axis=-1)
+        enc_pool = tf.concat([enc_reduce, enc_dense], axis=-1)
 
-        # Convolue along time axis
+        # Convolve along time axis
         enc1d = self.conv1d_layer1(enc_pool)
         enc1d = self.conv1d_layer2(enc1d)
         enc1d = self.dropout_layer1d(enc1d, training=training)
@@ -341,7 +342,7 @@ class Encoder(tf.keras.layers.Layer):
     segment_width: int
         Context width of each frame. Nearby frames will be concatenated to the feature axis.
         Default to 21, which means past 10 frames and future 10 frames will be concatenated
-        to the current frame, resulting a feature dimenstion of *segment_width x freq_size*.
+        to the current frame, resulting a feature dimension of *segment_width x freq_size*.
     freq_size: int
         Feature size of the input representation.
     dropout_rate: float
@@ -536,7 +537,7 @@ class Decoder(tf.keras.layers.Layer):
     segment_width: int
         Context width of each frame. Nearby frames will be concatenated to the feature axis.
         Default to 21, which means past 10 frames and future 10 frames will be concatenated
-        to the current frame, resulting a feature dimenstion of *segment_width x freq_size*.
+        to the current frame, resulting a feature dimention of *segment_width x freq_size*.
     freq_size: int
         Feature size of the input representation.
     dropout_rate: float
@@ -612,7 +613,7 @@ class Decoder(tf.keras.layers.Layer):
         )
 
         decoder_inputs_drop = self.dropout(decoder_inputs)
-        layer_weights = tf.nn.softmax(tf.zeros((self.num_attn_blocks)))
+        layer_weights = tf.nn.softmax(tf.zeros(self.num_attn_blocks))
         weighted_hiddens_dec = tf.zeros(shape=shape_list(segment_encodings))
         layer_stack = zip(self.attn_layers_1, self.attn_layers_2, self.ff_layers)
         for idx, (attn_1, attn_2, feed_forward) in enumerate(layer_stack):
@@ -732,7 +733,7 @@ class Decoder_2(tf.keras.layers.Layer):
         )
         decoder_inputs *= inp_mask[:, :, None]
 
-        layer_weights = tf.nn.softmax(tf.zeros((self.num_attn_blocks)))
+        layer_weights = tf.nn.softmax(tf.zeros(self.num_attn_blocks))
         weighted_hiddens_dec = tf.zeros(shape=shape_list(segment_encodings))
         layer_stack = zip(self.attn_layers_1, self.attn_layers_2, self.ff_layers)
         for idx, (attn_1, attn_2, feed_forward) in enumerate(layer_stack):
@@ -780,7 +781,7 @@ class ChordModel(tf.keras.Model):  # pylint: disable=R0901
     segment_width: int
         Context width of each frame. Nearby frames will be concatenated to the feature axis.
         Default to 21, which means past 10 frames and future 10 frames will be concatenated
-        to the current frame, resulting a feature dimenstion of *segment_width x freq_size*.
+        to the current frame, resulting a feature dimension of *segment_width x freq_size*.
     freq_size: int
         Feature size of the input representation.
     out_classes: int
@@ -930,7 +931,7 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
     The model also implements the custom training/test step due to the specialized loss
     computation.
 
-    This version takes the log-power Constant Q-Transform (CQT) spectrogram  (rather than NNLS chormagram) as input.
+    This version takes the log-power Constant Q-Transform (CQT) spectrogram  (rather than NNLS chromagram) as input.
 
     Parameters
     ----------
@@ -964,7 +965,7 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
         num_enc_attn_blocks=2,
         num_dec_attn_blocks=2,
         out_classes=26,
-        excluded_class=24,
+        excluded_class=CHORD_INT_MAPPING_2['others'],
         n_steps=256,
         enc_input_emb_size=512,
         dec_input_emb_size=512,
