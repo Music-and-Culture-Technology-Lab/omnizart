@@ -166,14 +166,14 @@ class ChordTranscription(BaseTranscription):
             ([settings.feature.num_steps], [settings.feature.num_steps])
         )
         train_dataset = BeatlesDatasetLoader(
-                feature_files=train_feat_files,
-                num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
-            ) \
+            feature_files=train_feat_files,
+            num_samples=settings.training.epoch * settings.training.batch_size * settings.training.steps
+        ) \
             .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
         val_dataset = BeatlesDatasetLoader(
-                feature_files=val_feat_files,
-                num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
-            ) \
+            feature_files=val_feat_files,
+            num_samples=settings.training.epoch * settings.training.val_batch_size * settings.training.val_steps
+        ) \
             .get_dataset(settings.training.batch_size, output_types=output_types, output_shapes=output_shapes)
 
         if input_model_path is None:
@@ -195,7 +195,7 @@ class ChordTranscription(BaseTranscription):
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
         model_save_path = jpath(settings.model.save_path, model_name)
-        model_save_path = os.path.normpath(model_save_path.replace(":","-"))  # Remove later
+        model_save_path = os.path.normpath(model_save_path.replace(":", "-"))  # Remove later
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         logger.info("Model output to: %s", model_save_path)
@@ -314,7 +314,7 @@ def chord_loss_func(
     # loss_c = lambda_loss_c * tf.compat.v1.losses.softmax_cross_entropy(
     #     onehot_labels=one_hot_chord, logits=logits, label_smoothing=0.1
     # )
-    c_loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=smoothing)
-    loss_c = lambda_loss_c * c_loss_fn(y_true=one_hot_chord, y_pred=logits, sample_weight=0.1)
+    c_loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.1)
+    loss_c = lambda_loss_c * c_loss_fn(y_true=one_hot_chord, y_pred=logits)
 
     return loss_ct + loss_c

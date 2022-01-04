@@ -33,7 +33,6 @@ from urllib.request import urlopen
 
 import pretty_midi
 import numpy as np
-import numpy.lib.recfunctions as rfn
 
 from omnizart.io import load_yaml
 from omnizart.base import Label
@@ -895,8 +894,8 @@ class BeatlesStructure(BaseStructure):
         _, test_ids = cls.get_train_test_ids()
         wavs = cls.get_wavs(dataset_path)
         return [wav for wav in wavs if
-                (os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and
-                ('pitch_shift=0' in wav)]
+                (os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and (
+                            'pitch_shift=0' in wav)]
 
     @classmethod
     def get_train_labels(cls, dataset_path):

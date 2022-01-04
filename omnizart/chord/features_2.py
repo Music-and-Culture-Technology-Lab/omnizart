@@ -3,7 +3,6 @@ import math
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
-import os
 
 from omnizart.constants.feature import CHORD_INT_MAPPING_2
 
@@ -149,4 +148,3 @@ def load_feature(feat_path):
     with open(feat_path, "rb") as f:
         feature = np.load(f)
     return feature
-
