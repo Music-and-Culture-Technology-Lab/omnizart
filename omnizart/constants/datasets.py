@@ -895,7 +895,7 @@ class BeatlesStructure(BaseStructure):
         wavs = cls.get_wavs(dataset_path)
         return [wav for wav in wavs if
                 (os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and (
-                            'pitch_shift=0' in wav)]
+                        'pitch_shift=0' in wav)]
 
     @classmethod
     def get_train_labels(cls, dataset_path):

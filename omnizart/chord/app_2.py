@@ -16,7 +16,7 @@ from omnizart.models.t2t import MultiHeadAttention
 from omnizart.chord.features_2 import extract_feature_label
 from omnizart.chord.inference import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
-from omnizart.models.chord_model import ChordModel_2, ReduceSlope, WarmupSchedule
+from omnizart.models.chord_model import ChordModel_2, ReduceSlope # WarmupSchedule
 
 
 logger = get_logger("Chord Application")
