@@ -483,13 +483,11 @@ class Encoder_2(tf.keras.layers.Layer):
         self.logit_dense = tf.keras.layers.Dense(1)
         self.dropout = tf.keras.layers.Dropout(dropout_rate)
 
-    def call(self, inp, inp_len, slope=1, training=None):
-        inp_mask = tf.sequence_mask(inp_len, maxlen=self.n_steps, dtype=tf.float32)
+    def call(self, inp, slope=1, training=None):
         segment_encodings = self.encode(inp, training=training)
         segment_encodings += positional_encoding(
             batch_size=shape_list(segment_encodings)[0], timesteps=self.n_steps, n_units=self.enc_input_emb_size
         )
-        segment_encodings *= inp_mask[:, :, None]
 
         weight = tf.nn.softmax(self.layer_weights)
         weighted_hidden_enc = tf.zeros(shape=shape_list(segment_encodings))
@@ -499,7 +497,6 @@ class Encoder_2(tf.keras.layers.Layer):
             segment_encodings = feed_forward(segment_encodings, training=training)
             weighted_hidden_enc += weight[idx] * segment_encodings
 
-        weighted_hidden_enc *= inp_mask[:, :, None]
         chord_change_logits = tf.squeeze(self.logit_dense(weighted_hidden_enc)) * slope
         chord_change_prob = tf.sigmoid(chord_change_logits)
         chord_change_pred = binary_round(chord_change_prob, cast_to_int=True)
@@ -719,10 +716,8 @@ class Decoder_2(tf.keras.layers.Layer):
         self.dropout = tf.keras.layers.Dropout(dropout_rate)
         self.out_dense = tf.keras.layers.Dense(out_classes)
 
-    def call(self, inp, inp_len, encoder_input_emb, chord_change_pred, training=None):
-        inp_mask = tf.sequence_mask(inp_len, maxlen=self.n_steps, dtype=tf.float32)
+    def call(self, inp, encoder_input_emb, chord_change_pred, training=None):
         segment_encodings = self.encode(inp)
-        segment_encodings *= inp_mask[:, :, None]
         segment_encodings_blocked, block_ids = chord_block_compression(segment_encodings, chord_change_pred)
         segment_encodings_blocked = chord_block_decompression(segment_encodings_blocked, block_ids)
         segment_encodings_blocked.set_shape([None, self.n_steps, self.dec_input_emb_size])
@@ -731,7 +726,6 @@ class Decoder_2(tf.keras.layers.Layer):
         decoder_inputs += positional_encoding(
             batch_size=shape_list(decoder_inputs)[0], timesteps=self.n_steps, n_units=self.dec_input_emb_size
         )
-        decoder_inputs *= inp_mask[:, :, None]
 
         layer_weights = tf.nn.softmax(tf.zeros(self.num_attn_blocks))
         weighted_hiddens_dec = tf.zeros(shape=shape_list(segment_encodings))
@@ -742,7 +736,6 @@ class Decoder_2(tf.keras.layers.Layer):
             decoder_inputs = feed_forward(decoder_inputs, training=training)
             weighted_hiddens_dec += layer_weights[idx] * decoder_inputs
 
-        weighted_hiddens_dec *= inp_mask[:, :, None]
         logits = self.out_dense(weighted_hiddens_dec)
         chord_pred = tf.argmax(input=logits, axis=-1, output_type=tf.int32)
         return logits, chord_pred
@@ -1001,14 +994,13 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
         )
         self.loss_tracker = tf.keras.metrics.Mean(name="loss")
 
-    def call(self, features, training=None):
+    def call(self, feature, training=None):
         if training is None:
             training = tf.keras.backend.learning_phase()
-        feature, feature_len = features
         feature = tf.squeeze(self.input_norm(feature[:, :, :, None], training=training), axis=-1)
-        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, feature_len, slope=self.slope,
+        encoder_input_emb, chord_change_logits, chord_change_pred = self.encoder(feature, slope=self.slope,
                                                                                  training=training)
-        logits, chord_pred = self.decoder(feature, feature_len, encoder_input_emb, chord_change_pred, training=training)
+        logits, chord_pred = self.decoder(feature, encoder_input_emb, chord_change_pred, training=training)
         return chord_pred, chord_change_pred, logits, chord_change_logits
 
     def step_in_slope(self):
@@ -1016,19 +1008,16 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
 
     def train_step(self, data):
         # Feature: (n_sequences, 256, 72)
-        # Feature length: (n_sequences)
         # Chord change: (n_sequences, 256)
         # Chord: (n_sequences, 256)
         # Slope: 1.0
-        (feature, feature_len), (gt_chord, gt_chord_change) = data
-        sample_mask = tf.sequence_mask(feature_len, maxlen=self.n_steps, dtype=tf.float32)
-        eval_mask = tf.where(tf.equal(gt_chord, self.excluded_class), tf.zeros_like(sample_mask), sample_mask)
+        feature, (gt_chord, gt_chord_change) = data
 
         with tf.GradientTape() as tape:
-            chord_pred, chord_change_pred, logits, chord_change_logits = self((feature, feature_len))
+            chord_pred, chord_change_pred, logits, chord_change_logits = self(feature)
             cce = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
             bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-            loss_c = cce(gt_chord, logits, sample_weight=sample_mask)
+            loss_c = cce(gt_chord, logits)
             loss_cc = bce(gt_chord_change, chord_change_logits)
             loss = loss_c + loss_cc
 
@@ -1040,26 +1029,24 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
         self.optimizer.apply_gradients(zip(grads, trainable_vars))
 
         # Update the metrics
-        self.compiled_metrics.update_state(gt_chord, logits, sample_weight=eval_mask)
+        self.compiled_metrics.update_state(gt_chord, logits)
         self.loss_tracker.update_state(loss)
         result = {m.name: m.result() for m in self.metrics}
         result.update({"loss": self.loss_tracker.result()})
         return result
 
     def test_step(self, data):
-        (feature, feature_len), (gt_chord, gt_chord_change) = data
-        sample_mask = tf.sequence_mask(feature_len, maxlen=self.n_steps, dtype=tf.float32)
-        eval_mask = tf.where(tf.equal(gt_chord, self.excluded_class), tf.zeros_like(sample_mask), sample_mask)
-        chord_pred, chord_change_pred, logits, chord_change_logits = self((feature, feature_len))
+        feature, (gt_chord, gt_chord_change) = data
+        chord_pred, chord_change_pred, logits, chord_change_logits = self(feature)
 
         cce = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         bce = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-        loss_c = cce(gt_chord, logits, sample_weight=sample_mask)
+        loss_c = cce(gt_chord, logits)
         loss_cc = bce(gt_chord_change, chord_change_logits)
         loss = loss_c + loss_cc
 
         # Update the metrics
-        self.compiled_metrics.update_state(gt_chord, logits, sample_weight=eval_mask)
+        self.compiled_metrics.update_state(gt_chord, logits)
         self.loss_tracker.update_state(loss)
         result = {m.name: m.result() for m in self.metrics}
         result.update({"loss": self.loss_tracker.result()})

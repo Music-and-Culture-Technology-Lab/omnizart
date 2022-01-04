@@ -30,8 +30,9 @@ def extract_feature_label(feat_path, lab_path, audio_sr=22050, hop_size=1024):
     label = load_label(lab_path)
     feature = load_feature(feat_path)
 
-    beatles_id, pitch_shift = feat_path.replace(".npy", "").split('_pitch_shift=')
-    pitch_shift = int(pitch_shift)
+    pitch_shift = int(feat_path.replace(".npy", "").split('_pitch_shift=')[-1])
+    beatles_id = feat_path.replace(".npy", "")
+
     n_frames = feature.shape[0]
 
     # Get frame-wise labels
@@ -59,10 +60,10 @@ def extract_feature_label(feat_path, lab_path, audio_sr=22050, hop_size=1024):
 def reshape_data(data, beatles_id, seq_len=256, seq_hop=128, min_seq_len=128):
     cqt = data['cqt']
     n_frames = cqt.shape[0]
-    cqt = _log_compression(cqt, gamma=100)
+    # cqt = _log_compression(cqt, gamma=100)
     y_c = data['chord']
     y_t = data['transition']
-    frame_ids = [beatles_id + ':' + str(i) for i in range(n_frames)]
+    frame_ids = [(beatles_id + ':' + str(i)).encode('utf-8') for i in range(n_frames)]
 
     # Segment
     cqt_reshape = [cqt[i:i + seq_len] for i in range(0, n_frames, seq_hop) if n_frames - i >= min_seq_len]
@@ -79,7 +80,7 @@ def reshape_data(data, beatles_id, seq_len=256, seq_hop=128, min_seq_len=128):
     y_t_reshape = np.stack(
         [np.pad(x, pad_width=[(0, seq_len - len(x))], mode='constant', constant_values=0) for x in y_t_reshape]
     )
-    pad_id = beatles_id + ':pad'
+    pad_id = (beatles_id + ':pad').encode('utf-8')
     frame_ids_reshape = np.stack(
         [np.pad(x, pad_width=[(0, seq_len - len(x))], mode='constant', constant_values=pad_id) for x in
          frame_ids_reshape]
