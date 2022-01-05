@@ -27,7 +27,7 @@ Complete information of supported datasets are as following:
 import os
 import csv
 import glob
-from os.path import join as jpath
+from os.path import join as jpath, normpath as npath
 from shutil import copy
 from urllib.request import urlopen
 
@@ -849,7 +849,7 @@ class BeatlesStructure(BaseStructure):
     @classmethod
     def _label_dir2id(cls, _dir):
         """Get label id from label dir"""
-        sdir = os.path.normpath(_dir).split(os.path.sep)
+        sdir = npath(_dir).split(os.path.sep)
         album_id = sdir[-2].replace('_-_', '_').replace('\'', '').replace('!', '').replace('.', '')
         track_id = sdir[-1].replace('CD1_-_', '').replace('CD2_-_', '').replace('.lab', '').replace('_-_', '_')
         track_id = track_id.replace('\'', '').replace(',', '').replace('!', '').replace('.', '')
@@ -877,7 +877,7 @@ class BeatlesStructure(BaseStructure):
 
     @classmethod
     def get_labels(cls, dataset_path):
-        return [os.path.normpath(jpath(subdir, file)) for subdir, dirs, files in
+        return [npath(jpath(subdir, file)) for subdir, dirs, files in
                 os.walk(jpath(dataset_path, cls.label_folder)) for file in files if file.endswith(cls.label_ext)]
 
     @classmethod
@@ -886,7 +886,7 @@ class BeatlesStructure(BaseStructure):
         train_ids, _ = cls.get_train_test_ids()
         wavs = cls.get_wavs(dataset_path)
         return [wav for wav in wavs if
-                os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in train_ids]
+                npath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in train_ids]
 
     @classmethod
     def get_test_wavs(cls, dataset_path):
@@ -894,8 +894,7 @@ class BeatlesStructure(BaseStructure):
         _, test_ids = cls.get_train_test_ids()
         wavs = cls.get_wavs(dataset_path)
         return [wav for wav in wavs if
-                (os.path.normpath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and 
-                ('pitch_shift=0' in wav)]
+                (npath(wav).split(os.path.sep)[-1].split('_pitch_shift=')[0] in test_ids) and ('pitch_shift=0' in wav)]
 
     @classmethod
     def get_train_labels(cls, dataset_path):
