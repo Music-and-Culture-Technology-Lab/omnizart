@@ -831,7 +831,7 @@ class MedleyDBStructure(BaseStructure):
 class BeatlesStructure(BaseStructure):
     """Constant settings of Beatles dataset."""
     #: Dataset URL
-    url = ""  # TODO: upload dataset
+    url = "https://drive.google.com/uc?export=download&id=1c-MPv7rPa24yyqxfS-JxiJ3FeLvmuGdE"
 
     #: The extension of ground-truth files
     label_ext = ".lab"
