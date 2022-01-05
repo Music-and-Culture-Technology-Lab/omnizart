@@ -14,9 +14,9 @@ from omnizart.constants.datasets import BeatlesStructure
 from omnizart.feature.cqt import extract_cqt
 from omnizart.models.t2t import MultiHeadAttention
 from omnizart.chord.features_2 import extract_feature_label
-from omnizart.chord.inference import inference, write_csv
+from omnizart.chord.inference_2 import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
-from omnizart.models.chord_model import ChordModel_2, ReduceSlope # WarmupSchedule
+from omnizart.models.chord_model import ChordModel_2, ReduceSlope  # WarmupSchedule
 
 
 logger = get_logger("Chord Application")
@@ -162,7 +162,7 @@ class ChordTranscription(BaseTranscription):
 
         output_types = (tf.float32, (tf.int32, tf.int32))
         output_shapes = (
-            ([settings.feature.num_steps, settings.feature.num_bins]),
+            [settings.feature.num_steps, settings.feature.num_bins],
             ([settings.feature.num_steps], [settings.feature.num_steps])
         )
         train_dataset = BeatlesDatasetLoader(
@@ -195,7 +195,6 @@ class ChordTranscription(BaseTranscription):
         if not model_name.startswith(settings.model.save_prefix):
             model_name = settings.model.save_prefix + "_" + model_name
         model_save_path = jpath(settings.model.save_path, model_name)
-        model_save_path = os.path.normpath(model_save_path.replace(":", "-"))  # Remove later
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
         logger.info("Model output to: %s", model_save_path)
@@ -248,13 +247,10 @@ def _parallel_feature_extraction(data_pair, out_path, num_threads=4):
         )
     )
     for idx, (feature, feat_idx) in iters:
-        # f_name = os.path.dirname(data_pair[feat_idx][0])
         f_name = data_pair[feat_idx][0].replace(".npy", "")
         # logger.info("Progress: %d/%d - %s", idx + 1, len(data_pair), f_name)
         print(f"Progress: {idx+1}/{len(data_pair)} - {f_name}", end="\r")
         out_hdf = jpath(out_path, os.path.basename(f_name) + ".hdf")
-        # print("frame_id =", feature["frame_id"][0,0])
-        # print("out_hdf =", out_hdf)
         _write_feature(feature, out_path=out_hdf)
 
 
