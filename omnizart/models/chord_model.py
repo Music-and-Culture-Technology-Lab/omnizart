@@ -4,7 +4,7 @@ from tensorflow.python.framework import ops
 
 from omnizart.models.t2t import positional_encoding, MultiHeadAttention
 from omnizart.models.utils import shape_list
-from omnizart.constants.feature import CHORD_INT_MAPPING_2
+from omnizart.constants.feature import CHORD_INT_MAPPING
 
 
 class FeedForward(tf.keras.layers.Layer):
@@ -756,7 +756,7 @@ class Decoder_2(tf.keras.layers.Layer):
         return config
 
 
-class ChordModel(tf.keras.Model):  # pylint: disable=R0901
+class ChordModelVamp(tf.keras.Model):  # pylint: disable=R0901
     """Chord model in written in keras.
 
     Keras model of ``chord`` submodule. The original implementation is written in
@@ -917,7 +917,7 @@ class ChordModel(tf.keras.Model):  # pylint: disable=R0901
         return config
 
 
-class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
+class ChordModel(tf.keras.Model):  # pylint: disable=R0901
     """Chord model written in keras.
     Keras model of ``chord`` submodule. The original implementation is written in
     tensorflow 1.11 and can be found `here <https://github.com/Tsung-Ping/Harmony-Transformer>`_.
@@ -958,7 +958,7 @@ class ChordModel_2(tf.keras.Model):  # pylint: disable=R0901
         num_enc_attn_blocks=2,
         num_dec_attn_blocks=2,
         out_classes=26,
-        excluded_class=CHORD_INT_MAPPING_2['others'],
+        excluded_class=CHORD_INT_MAPPING['others'],
         n_steps=256,
         enc_input_emb_size=512,
         dec_input_emb_size=512,
@@ -1084,6 +1084,6 @@ class WarmupSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 
 if __name__ == "__main__":
-    model = ChordModel()
+    model = ChordModelVamp()
     model.compile(optimizer="adam", loss=tf.keras.losses.BinaryCrossentropy())
     output = model(tf.zeros((16, 60, 100, 504)))

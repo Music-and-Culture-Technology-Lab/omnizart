@@ -3,7 +3,7 @@ import csv
 import pretty_midi
 import numpy as np
 
-from omnizart.constants.feature import CHORD_INT_MAPPING_2
+from omnizart.constants.feature import CHORD_INT_MAPPING_VAMP
 
 
 C_MAJ_TEN_DEGREE = np.array([36, 43, 52], dtype=np.int32)
@@ -37,17 +37,17 @@ CHORD_MIDI_NOTES = {
 
 
 def inference(chord_pred, t_unit, min_dura=0.1):
-    no_chord = CHORD_INT_MAPPING_2["N"]
+    no_chord = CHORD_INT_MAPPING_VAMP["N"]
     chord_pred = np.pad(chord_pred, (1, 1), constant_values=no_chord)
     chord_change = np.where(chord_pred[:-1] != chord_pred[1:])[0]
-    rev_map = {v: k for k, v in CHORD_INT_MAPPING_2.items()}
+    rev_map = {v: k for k, v in CHORD_INT_MAPPING_VAMP.items()}
     info = []
     notes = []
     last_chord_name = "N"
     for idx, ch_idx in enumerate(chord_change[1:], 1):
         chord_num = chord_pred[ch_idx]
         chord_name = rev_map[chord_num]
-        if chord_name in ["others", "N"]:
+        if chord_name in ["X", "N"]:
             continue
 
         start_t = (chord_change[idx-1] + 1) * t_unit  # noqa: E226
@@ -61,7 +61,7 @@ def inference(chord_pred, t_unit, min_dura=0.1):
             })
             for pitch in CHORD_MIDI_NOTES[chord_name]:
                 notes.append(pretty_midi.Note(start=start_t, end=end_t, pitch=pitch, velocity=100))
-        elif last_chord_name not in ["others", "N"]:
+        elif last_chord_name not in ["X", "N"]:
             # Duration of the current chord shorter than expected.
             # Append the activation to the last chord.
             info[-1]["end"] = end_t
