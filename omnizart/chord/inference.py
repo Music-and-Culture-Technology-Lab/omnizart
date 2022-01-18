@@ -47,7 +47,7 @@ def inference(chord_pred, t_unit, min_dura=0.1):
     for idx, ch_idx in enumerate(chord_change[1:], 1):
         chord_num = chord_pred[ch_idx]
         chord_name = rev_map[chord_num]
-        if chord_name in ["X", "N"]:
+        if chord_name in ["others", "N"]:
             continue
 
         start_t = (chord_change[idx-1] + 1) * t_unit  # noqa: E226
@@ -61,7 +61,7 @@ def inference(chord_pred, t_unit, min_dura=0.1):
             })
             for pitch in CHORD_MIDI_NOTES[chord_name]:
                 notes.append(pretty_midi.Note(start=start_t, end=end_t, pitch=pitch, velocity=100))
-        elif last_chord_name not in ["X", "N"]:
+        elif last_chord_name not in ["others", "N"]:
             # Duration of the current chord shorter than expected.
             # Append the activation to the last chord.
             info[-1]["end"] = end_t

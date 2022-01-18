@@ -3,24 +3,28 @@ General:
     TranscriptionMode:
         Description: Mode of transcription by executing the `omnizart chord transcribe` command.
         Type: String
-        Value: ChordV2
+        Value: ChordV1
     CheckpointPath:
         Description: Path to the pre-trained models.
         Type: Map
         SubType: [String, String]
         Value:
-            ChordV2: checkpoints/chord/chord_v2
+            ChordV1: checkpoints/chord/chord_v1
     Feature:
         Description: Default settings of feature extraction for chord transcription.
         Settings:
+            SegmentWidth:
+                Description: Width of segments. Each frame last for 0.046 seconds, and thus each segment would last for around 0.5 seconds.
+                Type: Integer
+                Value: 21
+            SegmentHop:
+                Description: Hop size of the segment.
+                Type: Integer
+                Value: 5
             NumSteps:
-                Description: Number of total steps. Default setting would have around 12 seconds.
+                Description: Number of total steps. Default setting would have around 23 seconds.
                 Type: Integer
-                Value: 256
-            NumBins:
-                Description: Number of frequency bins.
-                Type: Integer
-                Value: 72
+                Value: 100
     Dataset:
         Description: Settings of datasets.
         Settings:
@@ -51,6 +55,10 @@ General:
                 Description: Number of attention blocks for decoder.
                 Type: Integer
                 Value: 2
+            FreqSize:
+                Description: Available size on the frequency axis to be seen.
+                Type: Integer
+                Value: 24
             EncInputEmbSize:
                 Description: Embedding size of the encoder's input.
                 Type: Integer
