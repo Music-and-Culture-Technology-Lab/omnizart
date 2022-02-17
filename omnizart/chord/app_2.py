@@ -16,7 +16,7 @@ from omnizart.models.t2t import MultiHeadAttention
 from omnizart.chord.features_2 import extract_feature_label
 from omnizart.chord.inference_2 import inference, write_csv
 from omnizart.train import get_train_val_feat_file_list
-from omnizart.models.chord_model import ChordModel_2, ReduceSlope  # WarmupSchedule
+from omnizart.models.chord_model import ChordModel_2, ReduceSlope, WarmupSchedule
 
 
 logger = get_logger("Chord Application")
@@ -57,7 +57,6 @@ class ChordTranscription(BaseTranscription):
         """
 
         logger.info("Extracting feature")
-        # t_unit, chroma = extract_chroma(input_audio)
         sampling_rate = 22050
         a_hop = 1024
         cqt = extract_cqt(input_audio,
@@ -180,12 +179,13 @@ class ChordTranscription(BaseTranscription):
             logger.info("Constructing new model")
             model = self.get_model(settings)
 
-        learninig_rate = tf.keras.optimizers.schedules.ExponentialDecay(
-            settings.training.init_learning_rate,
-            decay_steps=settings.training.steps,
-            decay_rate=settings.training.learning_rate_decay,
-            staircase=True
-        )
+        # learninig_rate = tf.keras.optimizers.schedules.ExponentialDecay(
+        #     settings.training.init_learning_rate,
+        #     decay_steps=settings.training.steps,
+        #     decay_rate=settings.training.learning_rate_decay,
+        #     staircase=True
+        # )
+        learninig_rate = WarmupSchedule(settings.model.enc_input_emb_size)
         optimizer = tf.keras.optimizers.Adam(learning_rate=learninig_rate, clipvalue=1)
         model.compile(optimizer=optimizer, loss=chord_loss_func, metrics=["accuracy"])
 
@@ -201,7 +201,7 @@ class ChordTranscription(BaseTranscription):
 
         callbacks = [
             tf.keras.callbacks.EarlyStopping(patience=settings.training.early_stop, monitor="val_loss"),
-            tf.keras.callbacks.ModelCheckpoint(model_save_path, monitor="val_loss"),
+            # tf.keras.callbacks.ModelCheckpoint(model_save_path, monitor="val_loss"),
             ReduceSlope()
         ]
 
@@ -213,6 +213,8 @@ class ChordTranscription(BaseTranscription):
             validation_steps=settings.training.val_steps,
             callbacks=callbacks
         )
+        # # Save model
+        # model.save(model_save_path)
         return history
 
     def get_model(self, settings):

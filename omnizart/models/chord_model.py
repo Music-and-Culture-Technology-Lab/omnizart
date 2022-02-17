@@ -1082,8 +1082,15 @@ class WarmupSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         arg2 = step * (self.warmup_steps ** -1.5)
         return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
 
+    def get_config(self):
+        config = {
+            'd_model': self.d_model,
+            'warmup_steps': self.warmup_steps
+        }
+        return config
+
 
 if __name__ == "__main__":
     model = ChordModel()
     model.compile(optimizer="adam", loss=tf.keras.losses.BinaryCrossentropy())
-    output = model(tf.zeros((16, 60, 100, 504)))
+    output = model(tf.zeros((16, 32, 256, 72)))

@@ -62,7 +62,7 @@ General:
             DropoutRate:
                 Description: Dropout rate of all dropout layers.
                 Type: Float
-                Value: 0.6
+                Value: 0.3
             AnnealingRate:
                 Description: To be added...
                 Type: Float
@@ -92,7 +92,7 @@ General:
             BatchSize:
                 Description: Batch size of each training step.
                 Type: Integer
-                Value: 32
+                Value: 8
             ValBatchSize:
                 Description: Batch size of each validation step.
                 Type: Integer
