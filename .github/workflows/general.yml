@@ -41,7 +41,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Download large files
         run: |
-          ./scripts/gdrive.sh https://drive.google.com/file/d/10i8z1zH60a2coKEst47lELdkvZUmgd1b/view?usp=sharing
+          curl -L https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001/resource.zip -o resource.zip
           unzip resource.zip
           mv resource/* tests/resource
       - name: Install dependencies
