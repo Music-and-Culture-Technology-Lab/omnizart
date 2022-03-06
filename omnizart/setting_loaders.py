@@ -158,7 +158,7 @@ class DrumSettings(Settings):
 
 @json_serializable(key_path="./General", value_path="./Value")
 class ChordSettings(Settings):
-    default_setting_file: str = "chord_2.yaml"
+    default_setting_file: str = "chord.yaml"
 
     def __init__(self, conf_path=None):
         self.transcription_mode: str = None
