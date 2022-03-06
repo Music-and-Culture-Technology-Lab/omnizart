@@ -1,0 +1,119 @@
+
+General:
+    TranscriptionMode:
+        Description: Mode of transcription by executing the `omnizart chord transcribe` command.
+        Type: String
+        Value: ChordV1
+    CheckpointPath:
+        Description: Path to the pre-trained models.
+        Type: Map
+        SubType: [String, String]
+        Value:
+            ChordV1: checkpoints/chord/chord_v1
+    Feature:
+        Description: Default settings of feature extraction for drum transcription.
+        Settings:
+            SegmentWidth:
+                Description: Width of segments. Each frame last for 0.046 seconds, and thus each segment would last for around 0.5 seconds.
+                Type: Integer
+                Value: 21
+            SegmentHop:
+                Description: Hop size of the segment.
+                Type: Integer
+                Value: 5
+            NumSteps:
+                Description: Number of total steps. Default setting would have around 23 seconds.
+                Type: Integer
+                Value: 100
+    Dataset:
+        Description: Settings of datasets.
+        Settings:
+            SavePath:
+                Description: Path for storing the downloaded datasets.
+                Type: String
+                Value: ./
+            FeatureSavePath:
+                Description: Path for storing the extracted feature. Default to the path under the dataset folder.
+                Type: String
+                Value: +
+    Model:
+        Description: Default settings of training / testing the model.
+        Settings:
+            SavePrefix:
+                Description: Prefix of the trained model's name to be saved.
+                Type: String
+                Value: chord
+            SavePath:
+                Description: Path to save the trained model.
+                Type: String
+                Value: ./checkpoints/chord
+            NumEncAttnBlocks:
+                Description: Number of attention blocks for encoder.
+                Type: Integer
+                Value: 2
+            NumDecAttnBlocks:
+                Description: Number of attention blocks for decoder.
+                Type: Integer
+                Value: 2
+            FreqSize:
+                Description: Available size on the frequency axis to be seen.
+                Type: Integer
+                Value: 24
+            EncInputEmbSize:
+                Description: Embedding size of the encoder's input.
+                Type: Integer
+                Value: 512
+            DecInputEmbSize:
+                Description: Embedding size of the decoder's input.
+                Type: Integer
+                Value: 512
+            DropoutRate:
+                Description: Dropout rate of all dropout layers.
+                Type: Float
+                Value: 0.6
+            AnnealingRate:
+                Description: To be added...
+                Type: Float
+                Value: 1.1
+    Inference:
+        Description: Default settings when infering notes.
+        Settings:
+            MinDura:
+                Description: Minimum duration (in seconds) for each chord. If shorter than expected, will append the duration to the previous chord.
+                Type: Float
+                Value: 0.1
+    Training:
+        Description: Hyper parameters for training
+        Settings:
+            Epoch:
+                Description: Maximum number of epochs for training.
+                Type: Integer
+                Value: 10
+            Steps:
+                Description: Number of training steps for each epoch.
+                Type: Integer
+                Value: 1000
+            ValSteps:
+                Description: Number of validation steps after each training epoch.
+                Type: Integer
+                Value: 500
+            BatchSize:
+                Description: Batch size of each training step.
+                Type: Integer
+                Value: 32
+            ValBatchSize:
+                Description: Batch size of each validation step.
+                Type: Integer
+                Value: 32
+            EarlyStop:
+                Description: Terminate the training if the validation performance doesn't imrove after n epochs.
+                Type: Integer
+                Value: 4
+            InitLearningRate:
+                Descriptoin: Initial learning rate.
+                Type: Float
+                Value: 0.0001
+            LearningRateDecay:
+                Description: Decaying rate of learning rate per epoch.
+                Type: Float
+                Value: 0.96
