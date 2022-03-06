@@ -113,6 +113,14 @@ def download_checkpoints(output_path):
             "fid": release_url + "chord_v1@variables.data-00000-of-00001",
             "save_as": "checkpoints/chord/chord_v1/variables/variables.data-00000-of-00001"
         },
+        "chord_v2": {
+            "fid": release_url + "chord_v2@variables.data-00000-of-00001",
+            "save_as": "checkpoints/chord/chord_v2/variables/variables.data-00000-of-00001"
+        },
+        "chord_v2_arch": {
+            "fid": release_url + "chord_v2@saved_model.pb",
+            "save_as": "checkpoints/chord/chord_v2/saved_model.pb"
+        },
         "drum_keras": {
             "fid": release_url + "drum_keras@variables.data-00000-of-00001",
             "save_as": "checkpoints/drum/drum_keras/variables/variables.data-00000-of-00001",
@@ -151,6 +159,8 @@ def download_checkpoints(output_path):
         }
     }
 
+    LEGACY_TO_IGNORE = {"chord_v1"}
+
     if output_path is not None:
         abs_path = os.path.abspath(output_path)
         output_path = os.path.join(abs_path, "omnizart")
@@ -158,6 +168,9 @@ def download_checkpoints(output_path):
         output_path = MODULE_PATH
 
     for checkpoint, info in CHECKPOINTS.items():
+        if checkpoint in LEGACY_TO_IGNORE or checkpoint:
+            print(f"Ignored legacy checkpoint: {checkpoint}")
+            continue
         print(f"Downloading checkpoints: {checkpoint}")
         save_name = os.path.basename(info["save_as"])
         save_path = os.path.dirname(info["save_as"])
