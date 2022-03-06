@@ -567,6 +567,6 @@ class WarmupSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 
 if __name__ == "__main__":
-    model = ChordModel()
+    model = ChordModelVamp()
     model.compile(optimizer="adam", loss=tf.keras.losses.BinaryCrossentropy())
     output = model(tf.zeros((16, 32, 256, 72)))
