@@ -36,9 +36,18 @@ omnizart music transcribe <path/to/audio.wav>
 ```
 
 ## Docker
-```
+``` bash
 docker pull mctlab/omnizart:latest
 docker run -it mctlab/omnizart:latest bash
+```
+
+## Conda
+``` bash
+git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart
+cd omnizart
+conda env create -f environment.yml
+conda activate omnizart
+omnizart download-checkpoints
 ```
 
 # Supported applications
