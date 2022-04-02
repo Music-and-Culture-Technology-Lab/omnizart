@@ -179,7 +179,7 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     cookie_jar.save("./.cookie")
     cookie = resp.getheader("Set-Cookie")
     resp_byte_list = resp.readlines()
-    page = b"".join()
+    page = b"".join(resp_byte_list)
     if (
         cookie is None
         and not b"Virus scan warning" in page
