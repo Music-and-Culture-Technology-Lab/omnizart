@@ -179,14 +179,15 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     cookie_jar.save("./.cookie")
     cookie = resp.getheader("Set-Cookie")
     resp_byte_list = resp.readlines()
-    page = "".join([b.decode("UTF-8") for b in resp_byte_list])
+    page = b"".join()
     if (
         cookie is None
-        and not "Virus scan warning" in page
+        and not b"Virus scan warning" in page
     ):
         # Actually a small file, without download confirmation.
         return download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
 
+    page = page.decode("UTF-8")
     if file_length is None:
         # Parse the file size from the returned page content.
         hack_idx_start = page.find("(") + 1
