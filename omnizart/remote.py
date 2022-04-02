@@ -6,13 +6,12 @@ download *zipped* files from Google Drive.
 """
 # pylint: disable=R0914,R0915,W0612
 import os
+import re
 import sys
 import time
 import zipfile
 import urllib.request
 import http.cookiejar
-
-from omnizart.utils import ensure_path_exists
 
 
 #: Mapping bytes to human-readable size unit.
@@ -70,7 +69,7 @@ def download(url, file_length=None, save_path="./", save_name=None, cookie_file=
     """
     filename = os.path.basename(url) if save_name is None else save_name
     out_path = os.path.join(save_path, filename)
-    ensure_path_exists(os.path.dirname(out_path))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
     print(f"Output path: {out_path}")
 
     total_size = 0
@@ -172,30 +171,24 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     if not (url.startswith("https://") or url.startswith("http://")):
         # The given 'url' is actually a file ID.
         assert len(url) == 33
-        fid = url  # noqa: F841
         url = f"https://drive.google.com/uc?export=download&id={url}"
-    else:
-        id_start = url.find("id=") + 3
-        fid = url[id_start:id_start+33]  # noqa: E226,F841
 
     cookie_jar = http.cookiejar.MozillaCookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
     resp = opener.open(url)
     cookie_jar.save("./.cookie")
     cookie = resp.getheader("Set-Cookie")
-    if cookie is None:
+    resp_byte_list = resp.readlines()
+    page = "".join([b.decode("UTF-8") for b in resp_byte_list])
+    if (
+        cookie is None
+        and not "Virus scan warning" in page
+    ):
         # Actually a small file, without download confirmation.
         return download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
 
     if file_length is None:
         # Parse the file size from the returned page content.
-        page = []
-        while True:
-            data = resp.read(2**15)
-            if not data:
-                break
-            page.append(data.decode("UTF-8"))
-        page = "".join(page)
         hack_idx_start = page.find("(") + 1
         hack_idx_end = page.find(")")
         file_size = page[hack_idx_start:hack_idx_end]
@@ -208,14 +201,16 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
                 file_length = float(file_size[:idx]) * val
                 break
 
-    cols = cookie.split("; ")
-
     try:
-        warn_col = [col for col in cols if "download_warning" in col][0]
+        if cookie:
+            cols = cookie.split("; ")
+            warn_col = [col for col in cols if "download_warning" in col][0]
+            confirm_id = warn_col.split("=")[1]
+        else:
+            confirm_id = re.findall("confirm=([0-9a-zA-Z]+)", page)[0]
     except IndexError:
         raise GDFileAccessLimited("The resource is temporarily unavailable due to file being overly accessed")
 
-    confirm_id = warn_col.split("=")[1]
     url = f"{url}&confirm={confirm_id}"
     return download(
         url, file_length=file_length, save_path=save_path, save_name=save_name, cookie_file="./.cookie", unzip=unzip
