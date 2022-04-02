@@ -182,7 +182,7 @@ def download_large_file_from_google_drive(url, file_length=None, save_path="./",
     page = b"".join(resp_byte_list)
     if (
         cookie is None
-        and b"Virus scan warning" not in page
+        and b"Virus scan warning" not in page  # noqa: W503
     ):
         # Actually a small file, without download confirmation.
         return download(url, file_length=file_length, save_path=save_path, save_name=save_name, unzip=unzip)
