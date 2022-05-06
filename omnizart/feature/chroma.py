@@ -2,7 +2,6 @@ import vamp
 
 from omnizart.io import load_audio
 
-
 AVAILABLE_OUTPUT_TYPES = ["logfreqspec", "tunedlogfreqspec", "semitonespectrum", "chroma", "basschroma", "bothchroma"]
 TUNING_MODE = {"global": 0, "local": 1}
 CHROMA_NORM = {"none": 0, "max": 1, "l1": 2, "l2": 3}

@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.special import expit
 from librosa.core import midi_to_hz
+from scipy.special import expit
 
 from omnizart.constants.midi import LOWEST_MIDI_NOTE
 

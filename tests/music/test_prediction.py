@@ -1,10 +1,9 @@
 import math
 
-import pytest
 import numpy as np
+import pytest
 
 from omnizart.music import prediction as putils
-
 
 
 def test_cut_frame():

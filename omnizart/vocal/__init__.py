@@ -29,5 +29,4 @@ See Also
 """
 from omnizart.vocal.app import VocalTranscription
 
-
 app = VocalTranscription()

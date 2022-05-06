@@ -4,16 +4,12 @@
 
 import tensorflow as tf
 from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import (
-    BatchNormalization,
-    Activation,
-    Dropout,
-    Conv2D,
-    Conv2DTranspose,
-    Add,
-    Concatenate
-)
-from omnizart.models.t2t import local_attention_2d, split_heads_2d, combine_heads_2d
+from tensorflow.keras.layers import (Activation, Add, BatchNormalization,
+                                     Concatenate, Conv2D, Conv2DTranspose,
+                                     Dropout)
+
+from omnizart.models.t2t import (combine_heads_2d, local_attention_2d,
+                                 split_heads_2d)
 
 
 def conv_block(input_tensor, channel, kernel_size, strides=(2, 2), dilation_rate=1, dropout_rate=0.4):

@@ -1,14 +1,14 @@
 # pylint: disable=W0201
-import os
 import abc
+import os
 
-import six
 import numpy as np
+import six
 import tensorflow as tf
 from tensorflow.python.keras.utils import tf_utils
 
 from omnizart.io import write_yaml
-from omnizart.utils import get_logger, ensure_path_exists
+from omnizart.utils import ensure_path_exists, get_logger
 
 logger = get_logger("Callbacks")
 

@@ -3,7 +3,6 @@ import random
 
 import tqdm
 
-
 PROGRESS_BAR_FORMAT = "{desc} - {percentage:3.0f}% |{bar:40}| {n_fmt}/{total_fmt} \
     [{elapsed}<{remaining},{rate_fmt}{postfix}]"
 

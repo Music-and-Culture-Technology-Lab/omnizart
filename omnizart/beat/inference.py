@@ -1,7 +1,6 @@
 import pretty_midi
 from scipy.signal import find_peaks
 
-
 BEAT_NOTE_NUM = 42  # Hihat
 DOWN_BEAT_NOTE_NUM = 36  # Bass drum
 

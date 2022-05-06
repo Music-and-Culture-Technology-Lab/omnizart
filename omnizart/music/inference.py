@@ -2,15 +2,15 @@
 
 import math
 
-import pretty_midi
 import numpy as np
+import pretty_midi
+from librosa import note_to_midi
 from scipy.interpolate import CubicSpline
 from scipy.signal import find_peaks
-from librosa import note_to_midi
 
-from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, MIDI_PROGRAM_NAME_MAPPING
+from omnizart.constants.midi import (MIDI_PROGRAM_NAME_MAPPING,
+                                     MUSICNET_INSTRUMENT_PROGRAMS)
 from omnizart.utils import get_logger
-
 
 logger = get_logger("Music Inference")
 

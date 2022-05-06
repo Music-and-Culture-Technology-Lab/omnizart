@@ -1,10 +1,10 @@
 # pylint: disable=C0303,W1401
 import click
 
+from omnizart.cli.common_options import (COMMON_TRANSCRIBE_OPTIONS,
+                                         add_common_options)
 from omnizart.transcribe_all import process
 from omnizart.utils import get_logger
-from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
-
 
 logger = get_logger("Trancribe CLI")
 

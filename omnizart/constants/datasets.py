@@ -23,21 +23,20 @@ Complete information of supported datasets are as following:
 +-----------+--------------+-----------+--------------+
 
 """
-# pylint: disable=C0112
-import os
 import csv
 import glob
+# pylint: disable=C0112
+import os
 from os.path import join as jpath
 from shutil import copy
 
-import pretty_midi
 import numpy as np
+import pretty_midi
 
-from omnizart.io import load_yaml
 from omnizart.base import Label
-from omnizart.utils import ensure_path_exists, get_logger
+from omnizart.io import load_yaml
 from omnizart.remote import download_large_file_from_google_drive
-
+from omnizart.utils import ensure_path_exists, get_logger
 
 logger = get_logger("Constant Datasets")
 

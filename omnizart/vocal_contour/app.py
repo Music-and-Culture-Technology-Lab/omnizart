@@ -10,29 +10,29 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 
 # pylint: disable=C0103,W0612,E0611,W0613
 import os
-from os.path import join as jpath
 from datetime import datetime
+from os.path import join as jpath
 
-import numpy as np
-from scipy.io.wavfile import write as wavwrite
 import h5py
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras.utils import to_categorical
 from mir_eval import sonify
+from scipy.io.wavfile import write as wavwrite
+from tensorflow.keras.utils import to_categorical
 
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.setting_loaders import VocalContourSettings
-from omnizart.feature.wrapper_func import extract_cfp_feature
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator, resolve_dataset_type, aggregate_f0_info
-from omnizart.io import write_yaml, write_agg_f0_results
-from omnizart.train import train_epochs, get_train_val_feat_file_list
+from omnizart.base import BaseDatasetLoader, BaseTranscription
 from omnizart.callbacks import EarlyStopping, ModelCheckpoint
-from omnizart.vocal_contour.inference import inference
-from omnizart.vocal_contour import labels as lextor
 from omnizart.constants import datasets as d_struct
+from omnizart.feature.wrapper_func import extract_cfp_feature
+from omnizart.io import write_agg_f0_results, write_yaml
 from omnizart.models.u_net import semantic_segmentation
 from omnizart.music.losses import focal_loss
-
+from omnizart.setting_loaders import VocalContourSettings
+from omnizart.train import get_train_val_feat_file_list, train_epochs
+from omnizart.utils import (aggregate_f0_info, ensure_path_exists, get_logger,
+                            parallel_generator, resolve_dataset_type)
+from omnizart.vocal_contour import labels as lextor
+from omnizart.vocal_contour.inference import inference
 
 logger = get_logger("Vocal Contour")
 

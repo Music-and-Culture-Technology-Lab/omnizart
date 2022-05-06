@@ -1,10 +1,10 @@
-import os
 import glob
+import os
 import shutil
 import subprocess
-from os.path import join as jpath
 from collections import OrderedDict
 from datetime import datetime
+from os.path import join as jpath
 
 import h5py
 import numpy as np
@@ -12,20 +12,19 @@ import tensorflow as tf
 from spleeter.separator import Separator
 from spleeter.utils.logging import logger as sp_logger
 
-from omnizart.io import load_audio, write_yaml
-from omnizart.utils import (
-    get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader, get_filename
-)
+from omnizart.base import BaseDatasetLoader, BaseTranscription
 from omnizart.constants import datasets as d_struct
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.feature.cfp import extract_vocal_cfp, _extract_vocal_cfp
-from omnizart.setting_loaders import VocalSettings
-from omnizart.vocal import labels as lextor
-from omnizart.vocal.prediction import predict
-from omnizart.vocal.inference import infer_interval, infer_midi
-from omnizart.train import get_train_val_feat_file_list
+from omnizart.feature.cfp import _extract_vocal_cfp, extract_vocal_cfp
+from omnizart.io import load_audio, write_yaml
 from omnizart.models.pyramid_net import PyramidNet
-
+from omnizart.setting_loaders import VocalSettings
+from omnizart.train import get_train_val_feat_file_list
+from omnizart.utils import (LazyLoader, ensure_path_exists, get_filename,
+                            get_logger, parallel_generator,
+                            resolve_dataset_type)
+from omnizart.vocal import labels as lextor
+from omnizart.vocal.inference import infer_interval, infer_midi
+from omnizart.vocal.prediction import predict
 
 logger = get_logger("Vocal Transcription")
 vcapp = LazyLoader("vcapp", globals(), "omnizart.vocal_contour")

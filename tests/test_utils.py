@@ -1,12 +1,11 @@
 import os
 import shutil
 
-import pytest
 import numpy as np
+import pytest
 from jsonschema import ValidationError
 
-from omnizart import utils
-from omnizart import io
+from omnizart import io, utils
 
 
 def test_logger(caplog):

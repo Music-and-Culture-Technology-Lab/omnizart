@@ -5,7 +5,6 @@ import numpy as np
 from omnizart.feature.cfp import extract_cfp
 from omnizart.utils import get_logger
 
-
 logger = get_logger("HCFP Feature")
 
 

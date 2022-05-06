@@ -4,7 +4,6 @@ import numpy as np
 from omnizart.io import load_audio
 from omnizart.utils import get_logger
 
-
 logger = get_logger("CQT Feature")
 
 

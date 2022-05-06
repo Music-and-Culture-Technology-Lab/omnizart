@@ -1,6 +1,6 @@
 import os
-from os.path import join as jpath
 from datetime import datetime
+from os.path import join as jpath
 
 import h5py
 import numpy as np
@@ -9,16 +9,16 @@ from mir_eval import sonify
 from mir_eval.util import midi_to_hz
 from scipy.io.wavfile import write as wavwrite
 
-from omnizart.io import write_yaml, write_agg_f0_results
-from omnizart.utils import get_logger, parallel_generator, get_filename, ensure_path_exists, aggregate_f0_info
-from omnizart.base import BaseTranscription, BaseDatasetLoader
+from omnizart.base import BaseDatasetLoader, BaseTranscription
 from omnizart.constants import datasets as d_struct
 from omnizart.feature.cfp import extract_patch_cfp
-from omnizart.setting_loaders import PatchCNNSettings
+from omnizart.io import write_agg_f0_results, write_yaml
 from omnizart.models.patch_cnn import patch_cnn_model
 from omnizart.patch_cnn.inference import inference
+from omnizart.setting_loaders import PatchCNNSettings
 from omnizart.train import get_train_val_feat_file_list
-
+from omnizart.utils import (aggregate_f0_info, ensure_path_exists,
+                            get_filename, get_logger, parallel_generator)
 
 logger = get_logger("Patch CNN Transcription")
 

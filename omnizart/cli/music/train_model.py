@@ -3,10 +3,10 @@ from functools import partial
 import click
 
 from omnizart.cli import silence_tensorflow
-from omnizart.cli.common_options import add_common_options, COMMON_TRAIN_MODEL_OPTIONS
+from omnizart.cli.common_options import (COMMON_TRAIN_MODEL_OPTIONS,
+                                         add_common_options)
 from omnizart.setting_loaders import MusicSettings
 from omnizart.utils import LazyLoader
-
 
 music = LazyLoader("music", globals(), "omnizart.music")
 click.option = partial(click.option, show_default=True)

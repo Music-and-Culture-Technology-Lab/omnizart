@@ -7,9 +7,9 @@ concept in MVVC, and instead of access values key by key.
 import os
 
 from omnizart import SETTING_DIR
+from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 from omnizart.io import load_yaml
 from omnizart.utils import json_serializable
-from omnizart.constants.schema.music_settings import MUSIC_SETTINGS_SCHEMA
 
 
 class Settings:

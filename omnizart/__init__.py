@@ -1,6 +1,5 @@
 import os
 
-
 MODULE_PATH = os.path.abspath(__file__ + "/..")
 SETTING_DIR = os.path.join(MODULE_PATH, "defaults")
 

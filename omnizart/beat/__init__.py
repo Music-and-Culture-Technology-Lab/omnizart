@@ -22,5 +22,4 @@ References
 
 from omnizart.beat.app import BeatTranscription
 
-
 app = BeatTranscription()

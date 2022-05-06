@@ -3,15 +3,11 @@
 import concurrent
 from concurrent.futures import ProcessPoolExecutor
 
-import scipy
 import numpy as np
-from madmom.features import (
-    DBNDownBeatTrackingProcessor,
-    RNNDownBeatProcessor,
-    DBNBeatTrackingProcessor,
-    RNNBeatProcessor,
-    BeatTrackingProcessor,
-)
+import scipy
+from madmom.features import (BeatTrackingProcessor, DBNBeatTrackingProcessor,
+                             DBNDownBeatTrackingProcessor, RNNBeatProcessor,
+                             RNNDownBeatProcessor)
 
 from omnizart.io import load_audio
 from omnizart.utils import get_logger

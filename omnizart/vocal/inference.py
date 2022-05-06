@@ -4,7 +4,6 @@ from scipy.stats import norm
 
 from omnizart.utils import get_logger
 
-
 logger = get_logger("Vocal Inference")
 
 

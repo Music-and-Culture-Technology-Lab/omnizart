@@ -1,17 +1,17 @@
 """Various utility functions for this project."""
 # pylint: disable=W0212,R0915,W0621
+import concurrent.futures
+import importlib
+import logging
 import os
 import re
 import types
-import logging
 import uuid
-import concurrent.futures
-import importlib
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import jsonschema
-import pretty_midi
 import numpy as np
+import pretty_midi
 import scipy.io.wavfile as wave
 
 from omnizart.constants.midi import SOUNDFONT_PATH

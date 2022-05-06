@@ -25,5 +25,4 @@ The related publication of this work can be found in [1]_.
 
 from omnizart.vocal_contour.app import VocalContourTranscription
 
-
 app = VocalContourTranscription()

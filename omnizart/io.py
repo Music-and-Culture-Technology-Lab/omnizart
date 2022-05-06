@@ -1,12 +1,11 @@
-import os
 import csv
+import os
 import pickle
 
-import yaml
 import librosa
+import yaml
 
-from omnizart.utils import ensure_path_exists, LazyLoader, get_logger
-
+from omnizart.utils import LazyLoader, ensure_path_exists, get_logger
 
 # Lazy load the Spleeter pacakge for avoiding pulling large dependencies
 # and boosting the import speed.

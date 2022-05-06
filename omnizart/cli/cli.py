@@ -15,18 +15,17 @@ import click
 
 import omnizart.constants.datasets as dset
 from omnizart import MODULE_PATH
-from omnizart.remote import download_large_file_from_google_drive
-from omnizart.utils import ensure_path_exists, synth_midi
-from omnizart.constants.midi import SOUNDFONT_PATH
-from omnizart.cli.music import music
-from omnizart.cli.drum import drum
-from omnizart.cli.chord import chord
-from omnizart.cli.vocal import vocal
-from omnizart.cli.vocal_contour import vocal_contour
 from omnizart.cli.beat import beat
+from omnizart.cli.chord import chord
+from omnizart.cli.drum import drum
+from omnizart.cli.music import music
 from omnizart.cli.patch_cnn import patch_cnn
 from omnizart.cli.transcribe import transcribe
-
+from omnizart.cli.vocal import vocal
+from omnizart.cli.vocal_contour import vocal_contour
+from omnizart.constants.midi import SOUNDFONT_PATH
+from omnizart.remote import download_large_file_from_google_drive
+from omnizart.utils import ensure_path_exists, synth_midi
 
 SUB_COMMAND_GROUP = [
     {

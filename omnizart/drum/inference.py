@@ -1,5 +1,5 @@
-import pretty_midi
 import numpy as np
+import pretty_midi
 from scipy.signal import find_peaks
 
 

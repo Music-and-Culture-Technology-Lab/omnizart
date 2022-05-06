@@ -31,5 +31,4 @@ The related publications and techinical details can be found in [1]_ and [2]_
 
 from omnizart.chord.app import ChordTranscription
 
-
 app = ChordTranscription()

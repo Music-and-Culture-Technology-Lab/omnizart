@@ -4,19 +4,19 @@ Then run cog push. Further documentation can be found at https://replicate.com/d
 """
 
 import os
-import tempfile
-import subprocess
 import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 import cog
 import scipy.io.wavfile as wave
 
-from omnizart.remote import download_large_file_from_google_drive
 from omnizart.beat import app as bapp
 from omnizart.chord import app as capp
 from omnizart.drum import app as dapp
 from omnizart.music import app as mapp
+from omnizart.remote import download_large_file_from_google_drive
 from omnizart.vocal import app as vapp
 from omnizart.vocal_contour import app as vcapp
 

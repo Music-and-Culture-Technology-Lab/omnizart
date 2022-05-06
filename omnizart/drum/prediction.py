@@ -3,7 +3,6 @@ import numpy as np
 
 from omnizart.utils import get_logger
 
-
 logger = get_logger("Drum Prediction")
 
 

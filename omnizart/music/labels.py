@@ -1,13 +1,13 @@
-import os
 import abc
+import os
 
 import numpy as np
 
 from omnizart.constants import datasets as dset
-from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, LOWEST_MIDI_NOTE
+from omnizart.constants.midi import (LOWEST_MIDI_NOTE,
+                                     MUSICNET_INSTRUMENT_PROGRAMS)
 from omnizart.io import dump_pickle
 from omnizart.utils import get_logger
-
 
 logger = get_logger("Music Labels")
 

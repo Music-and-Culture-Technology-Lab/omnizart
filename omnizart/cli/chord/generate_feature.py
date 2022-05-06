@@ -1,9 +1,9 @@
 import click
 
-from omnizart.cli.common_options import add_common_options, COMMON_GEN_FEATURE_OPTIONS
+from omnizart.cli.common_options import (COMMON_GEN_FEATURE_OPTIONS,
+                                         add_common_options)
 from omnizart.setting_loaders import ChordSettings
 from omnizart.utils import LazyLoader
-
 
 chord = LazyLoader("chord", globals(), "omnizart.chord")
 

@@ -2,7 +2,7 @@
 import tensorflow as tf
 from tensorflow.python.framework import ops
 
-from omnizart.models.t2t import positional_encoding, MultiHeadAttention
+from omnizart.models.t2t import MultiHeadAttention, positional_encoding
 from omnizart.models.utils import shape_list
 
 

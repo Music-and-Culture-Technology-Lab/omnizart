@@ -7,7 +7,6 @@ from librosa import note_to_midi
 
 from omnizart import MODULE_PATH
 
-
 LOWEST_MIDI_NOTE = note_to_midi("A0")
 HIGHEST_MIDI_NOTE = note_to_midi("C8")
 

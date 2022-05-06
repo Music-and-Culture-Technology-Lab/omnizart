@@ -5,7 +5,6 @@ from scipy.special import expit
 
 from omnizart.utils import get_logger
 
-
 logger = get_logger("Music Prediction")
 
 

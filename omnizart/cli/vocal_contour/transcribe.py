@@ -1,9 +1,9 @@
 # pylint: disable=C0303,W1401
 import click
 
-from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
+from omnizart.cli.common_options import (COMMON_TRANSCRIBE_OPTIONS,
+                                         add_common_options)
 from omnizart.utils import LazyLoader
-
 
 vocal_contour = LazyLoader("vocal_contour", globals(), "omnizart.vocal_contour")
 

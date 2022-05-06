@@ -1,6 +1,6 @@
 # pylint: disable=E1120,R0901
-import time
 import math
+import time
 
 import tensorflow as tf
 

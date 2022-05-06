@@ -3,7 +3,6 @@ from PIL import Image
 
 from omnizart.utils import LazyLoader
 
-
 cfp = LazyLoader("cfp", globals(), "omnizart.feature.cfp")
 cqt = LazyLoader("cqt", globals(), "omnizart.feature.cqt")
 b4d = LazyLoader("b4d", globals(), "omnizart.feature.beat_for_drum")

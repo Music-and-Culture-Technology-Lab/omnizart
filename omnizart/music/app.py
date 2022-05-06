@@ -11,29 +11,32 @@ omnizart.base.BaseTranscription: The base class of all transcription/application
 # pylint: disable=C0103,W0621,E0611
 import os
 import pickle
-from os.path import join as jpath
 from datetime import datetime
+from os.path import join as jpath
 
 import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.feature.wrapper_func import extract_cfp_feature
-from omnizart.models.u_net import MultiHeadAttention, semantic_segmentation, semantic_segmentation_attn
-from omnizart.music.inference import multi_inst_note_inference
-from omnizart.music.prediction import predict
-from omnizart.music.labels import (
-    LabelType, MaestroLabelExtraction, MapsLabelExtraction, MusicNetLabelExtraction, PopLabelExtraction
-)
-from omnizart.music.losses import focal_loss, smooth_loss
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.utils import get_logger, parallel_generator, ensure_path_exists, resolve_dataset_type
-from omnizart.io import dump_pickle, write_yaml
-from omnizart.train import get_train_val_feat_file_list
-from omnizart.setting_loaders import MusicSettings
-from omnizart.constants.midi import MUSICNET_INSTRUMENT_PROGRAMS, POP_INSTRUMENT_PROGRAMES
-from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
 import omnizart.constants.datasets as d_struct
+from omnizart.base import BaseDatasetLoader, BaseTranscription
+from omnizart.constants.feature import FEATURE_NAME_TO_NUMBER
+from omnizart.constants.midi import (MUSICNET_INSTRUMENT_PROGRAMS,
+                                     POP_INSTRUMENT_PROGRAMES)
+from omnizart.feature.wrapper_func import extract_cfp_feature
+from omnizart.io import dump_pickle, write_yaml
+from omnizart.models.u_net import (MultiHeadAttention, semantic_segmentation,
+                                   semantic_segmentation_attn)
+from omnizart.music.inference import multi_inst_note_inference
+from omnizart.music.labels import (LabelType, MaestroLabelExtraction,
+                                   MapsLabelExtraction,
+                                   MusicNetLabelExtraction, PopLabelExtraction)
+from omnizart.music.losses import focal_loss, smooth_loss
+from omnizart.music.prediction import predict
+from omnizart.setting_loaders import MusicSettings
+from omnizart.train import get_train_val_feat_file_list
+from omnizart.utils import (ensure_path_exists, get_logger, parallel_generator,
+                            resolve_dataset_type)
 
 logger = get_logger("Music Transcription")
 

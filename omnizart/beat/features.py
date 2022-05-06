@@ -4,11 +4,10 @@ import numpy as np
 import pretty_midi
 from scipy.interpolate import interp1d
 
-from omnizart.utils import get_logger
 from omnizart.base import Label
-from omnizart.constants.midi import LOWEST_MIDI_NOTE
 from omnizart.constants.datasets import MusicNetStructure
-
+from omnizart.constants.midi import LOWEST_MIDI_NOTE
+from omnizart.utils import get_logger
 
 logger = get_logger("Beat features")
 

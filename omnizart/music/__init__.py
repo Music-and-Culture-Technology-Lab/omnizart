@@ -35,5 +35,4 @@ Technical details can be found in the publications [1]_, [2]_, and [3]_.
 
 from omnizart.music.app import MusicTranscription
 
-
 app = MusicTranscription()

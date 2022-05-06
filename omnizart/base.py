@@ -3,20 +3,19 @@
 Defines common interfaces, attributes, and utilities for different tasks.
 """
 
-import os
 import glob
+import os
 import random
-from os.path import join as jpath
 from abc import ABCMeta, abstractmethod
+from os.path import join as jpath
 
 import h5py
 import tensorflow as tf
 from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
-from omnizart.utils import get_logger, ensure_path_exists, get_filename
-from omnizart.constants.midi import LOWEST_MIDI_NOTE, HIGHEST_MIDI_NOTE
-
+from omnizart.constants.midi import HIGHEST_MIDI_NOTE, LOWEST_MIDI_NOTE
+from omnizart.utils import ensure_path_exists, get_filename, get_logger
 
 logger = get_logger("Base Class")
 

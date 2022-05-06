@@ -1,5 +1,5 @@
-import pretty_midi
 import numpy as np
+import pretty_midi
 
 
 def extract_label(label_path, m_beat_arr):

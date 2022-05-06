@@ -1,9 +1,9 @@
 import click
 
 from omnizart.cli import silence_tensorflow
-from omnizart.cli.common_options import add_common_options, COMMON_TRANSCRIBE_OPTIONS
+from omnizart.cli.common_options import (COMMON_TRANSCRIBE_OPTIONS,
+                                         add_common_options)
 from omnizart.utils import LazyLoader
-
 
 patch_cnn = LazyLoader("patch_cnn", globals(), "omnizart.patch_cnn")
 

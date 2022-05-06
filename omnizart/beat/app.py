@@ -1,23 +1,24 @@
 import os
-from os.path import join as jpath
 from datetime import datetime
+from os.path import join as jpath
 
 import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.io import write_yaml
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.train import get_train_val_feat_file_list
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
-from omnizart.constants.datasets import MusicNetStructure
-from omnizart.setting_loaders import BeatSettings
-from omnizart.beat.features import extract_musicnet_feature, extract_musicnet_label, extract_feature_from_midi
-from omnizart.beat.prediction import predict
+from omnizart.base import BaseDatasetLoader, BaseTranscription
+from omnizart.beat.features import (extract_feature_from_midi,
+                                    extract_musicnet_feature,
+                                    extract_musicnet_label)
 from omnizart.beat.inference import inference
+from omnizart.beat.prediction import predict
+from omnizart.constants.datasets import MusicNetStructure
+from omnizart.io import write_yaml
 from omnizart.models.rnn import blstm, blstm_attn
 from omnizart.models.t2t import MultiHeadAttention
-
+from omnizart.setting_loaders import BeatSettings
+from omnizart.train import get_train_val_feat_file_list
+from omnizart.utils import ensure_path_exists, get_logger, parallel_generator
 
 logger = get_logger("Beat Transcription")
 

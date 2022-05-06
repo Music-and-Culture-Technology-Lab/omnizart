@@ -11,7 +11,6 @@ import scipy
 from omnizart.io import load_audio
 from omnizart.utils import get_logger, parallel_generator
 
-
 logger = get_logger("CFP Feature")
 
 

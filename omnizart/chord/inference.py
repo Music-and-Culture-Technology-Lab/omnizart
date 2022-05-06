@@ -1,10 +1,9 @@
 import csv
 
-import pretty_midi
 import numpy as np
+import pretty_midi
 
 from omnizart.constants.feature import CHORD_INT_MAPPING
-
 
 C_MAJ_TEN_DEGREE = np.array([36, 43, 52], dtype=np.int32)
 C_MIN_TEN_DEGREE = np.array([36, 43, 51], dtype=np.int32)

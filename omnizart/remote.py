@@ -4,15 +4,14 @@ Containing functions to download files from the internet. Supports
 download *zipped* files from Google Drive.
 
 """
+import http.cookiejar
 # pylint: disable=R0914,R0915,W0612
 import os
 import re
 import sys
 import time
-import zipfile
 import urllib.request
-import http.cookiejar
-
+import zipfile
 
 #: Mapping bytes to human-readable size unit.
 SIZE_MAPPING = [(1, "B"), (2**10, "KB"), (2**20, "MB"), (2**30, "GB"), (2**40, "TB")]

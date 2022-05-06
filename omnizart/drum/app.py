@@ -1,27 +1,26 @@
 # pylint: disable=C0103,W0612,E0611
+import asyncio
 import os
-from os.path import join as jpath
 import time
 from datetime import datetime
-import asyncio
+from os.path import join as jpath
 
 import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.feature.wrapper_func import extract_patch_cqt
-from omnizart.drum.prediction import predict
-from omnizart.drum.labels import extract_label_13_inst
-from omnizart.drum.inference import inference
-from omnizart.models.spectral_norm_net import drum_model, ConvSN2D
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
-from omnizart.io import write_yaml
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.setting_loaders import DrumSettings
-from omnizart.train import get_train_val_feat_file_list
+from omnizart.base import BaseDatasetLoader, BaseTranscription
 from omnizart.constants.datasets import PopStructure
 from omnizart.constants.feature import NOTE_PRIORITY_ARRAY
-
+from omnizart.drum.inference import inference
+from omnizart.drum.labels import extract_label_13_inst
+from omnizart.drum.prediction import predict
+from omnizart.feature.wrapper_func import extract_patch_cqt
+from omnizart.io import write_yaml
+from omnizart.models.spectral_norm_net import ConvSN2D, drum_model
+from omnizart.setting_loaders import DrumSettings
+from omnizart.train import get_train_val_feat_file_list
+from omnizart.utils import ensure_path_exists, get_logger, parallel_generator
 
 logger = get_logger("Drum Transcription")
 

@@ -1,23 +1,22 @@
 import os
-from os.path import join as jpath
 from datetime import datetime
+from os.path import join as jpath
 
 import h5py
 import numpy as np
 import tensorflow as tf
 
-from omnizart.base import BaseTranscription, BaseDatasetLoader
-from omnizart.setting_loaders import ChordSettings
-from omnizart.io import write_yaml
-from omnizart.utils import get_logger, ensure_path_exists, parallel_generator
-from omnizart.constants.datasets import McGillBillBoard
-from omnizart.feature.chroma import extract_chroma
-from omnizart.models.t2t import MultiHeadAttention
+from omnizart.base import BaseDatasetLoader, BaseTranscription
 from omnizart.chord.features import extract_feature_label
 from omnizart.chord.inference import inference, write_csv
-from omnizart.train import get_train_val_feat_file_list
+from omnizart.constants.datasets import McGillBillBoard
+from omnizart.feature.chroma import extract_chroma
+from omnizart.io import write_yaml
 from omnizart.models.chord_model import ChordModel, ReduceSlope
-
+from omnizart.models.t2t import MultiHeadAttention
+from omnizart.setting_loaders import ChordSettings
+from omnizart.train import get_train_val_feat_file_list
+from omnizart.utils import ensure_path_exists, get_logger, parallel_generator
 
 logger = get_logger("Chord Application")
 

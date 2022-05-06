@@ -27,5 +27,4 @@ Publication of this module can be found in [1]_.
 
 from omnizart.patch_cnn.app import PatchCNNTranscription
 
-
 app = PatchCNNTranscription()
