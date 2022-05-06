@@ -1,7 +1,7 @@
 import os
 
 
-MODULE_PATH = os.path.abspath(__file__ + "/..")
+MODULE_PATH = os.path.abspath(f"{__file__}/..")
 SETTING_DIR = os.path.join(MODULE_PATH, "defaults")
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

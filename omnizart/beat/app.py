@@ -195,7 +195,7 @@ class BeatTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -259,11 +259,11 @@ def _parallel_feature_extraction(feat_list, out_path, feat_settings, num_threads
     for idx, ((feature, beat_arr, down_beat_arr), feat_idx) in iters:
         feat = feat_list[feat_idx]
 
-        print(f"Progress: {idx+1}/{len(feat_list)} - {feat}" + " "*6, end="\r")  # noqa: E226
+        print(f"Progress: {idx + 1}/{len(feat_list)} - {feat}{' ' * 6}", end="\r")  # noqa: E226
         # logger.info("Progress: %s/%s - %s", idx+1, len(feat_list), feat)
 
         filename, _ = os.path.splitext(os.path.basename(feat))
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
         with h5py.File(out_hdf, "w") as out_f:
             out_f.create_dataset("feature", data=feature)
             out_f.create_dataset("beat", data=beat_arr)

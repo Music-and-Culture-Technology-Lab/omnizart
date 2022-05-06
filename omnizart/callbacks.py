@@ -227,8 +227,7 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
                     else:
                         if self.monitor_op(current, self.best):
                             if self.verbose > 0:
-                                print('\nEpoch %05d: %s improved from %0.5f to %0.5f, \
-                                    saving model to %s' % (epoch + 1, self.monitor, self.best, current, filepath))
+                                print(f'\nEpoch {int(epoch + 1):05}: {self.monitor} improved from {self.best:0.5f} to {current:0.5f},                                     saving model to {filepath}')
 
                             self.best = current
                             if self.save_weights_only:
@@ -237,11 +236,10 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
                                 self.model.save(filepath, overwrite=True, options=self._options)
                         else:
                             if self.verbose > 0:
-                                print('\nEpoch %05d: %s did not improve from %0.5f' %
-                                    (epoch + 1, self.monitor, self.best))  # noqa: E128
+                                print(f'\nEpoch {int(epoch + 1):05}: {self.monitor} did not improve from {self.best:0.5f}')  # noqa: E128
                 else:
                     if self.verbose > 0:
-                        print('\nEpoch %05d: saving model to %s' % (epoch + 1, filepath))
+                        print(f'\nEpoch {int(epoch + 1):05}: saving model to {filepath}')
                     if self.save_weights_only:
                         self.model.save_weights(filepath, overwrite=True, options=self._options)
                     else:

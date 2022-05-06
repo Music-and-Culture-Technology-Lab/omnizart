@@ -203,7 +203,7 @@ class DrumTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -250,7 +250,7 @@ def _parallel_feature_extraction(wav_paths, label_paths, out_path, feat_settings
 
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
 
         saved = False
         retry_times = 5
@@ -300,7 +300,7 @@ def _parallel_feature_extraction_v2(data_pair, out_path, feat_settings, num_thre
             patch_cqt, m_beat_arr, label_128, label_13, wav_path = result
             basename = os.path.basename(wav_path)
             filename, _ = os.path.splitext(basename)
-            out_hdf = jpath(out_path, filename + ".hdf")
+            out_hdf = jpath(out_path, f"{filename}.hdf")
             with h5py.File(out_hdf, "w") as out_f:
                 out_f.create_dataset("feature", data=patch_cqt, compression="gzip", compression_opts=3)
                 out_f.create_dataset("label", data=label_13, compression="gzip", compression_opts=3)

@@ -314,7 +314,7 @@ class MusicTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -367,11 +367,11 @@ def _parallel_feature_extraction(audio_list, out_path, feat_settings, num_thread
     for idx, (feature, audio_idx) in iters:
         audio = audio_list[audio_idx]
         # logger.info("Progress: %s/%s - %s", idx+1, len(audio_list), audio)
-        print(f"Progress: {idx+1}/{len(audio_list)} - {audio}" + " "*6, end="\r")  # noqa: E226
+        print(f"Progress: {idx + 1}/{len(audio_list)} - {audio}{' ' * 6}", end="\r")  # noqa: E226
 
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
 
         saved = False
         retry_times = 5

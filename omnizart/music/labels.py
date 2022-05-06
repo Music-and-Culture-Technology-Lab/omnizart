@@ -250,12 +250,12 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
             probabilities will be in a 'fade-out' manner until the note offset.
         """
         for idx, label_path in enumerate(label_list):
-            print(f"Progress: {idx+1}/{len(label_list)} - {label_path}" + " "*6, end="\r")  # noqa: E226
+            print(f"Progress: {idx + 1}/{len(label_list)} - {label_path}{' ' * 6}", end="\r")  # noqa: E226
             label_obj = cls.extract_label(label_path, t_unit=t_unit, onset_len_sec=onset_len_sec)
             basename = os.path.basename(label_path)  # File name with extension
             filename, _ = os.path.splitext(basename)  # File name without extension
             output_name = cls.name_transform(filename)  # Output the same name as feature file
-            output_path = os.path.join(out_path, output_name + ".pickle")
+            output_path = os.path.join(out_path, f"{output_name}.pickle")
             dump_pickle(label_obj, output_path)
         print("")
 

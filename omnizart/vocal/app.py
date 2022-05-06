@@ -297,7 +297,7 @@ class VocalTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -377,7 +377,7 @@ def _vocal_separation(wav_list, out_folder):
             fname, _ = os.path.splitext(os.path.basename(wav_path))
             sep_folder = jpath(out_folder, fname)
             vocal_track = jpath(sep_folder, "vocals.wav")
-            shutil.move(vocal_track, jpath(out_folder, fname + ".wav"))
+            shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
             shutil.rmtree(sep_folder)
     return out_list
 
@@ -426,7 +426,7 @@ def _parallel_feature_extraction(
 
         basename = os.path.basename(audio)
         filename, _ = os.path.splitext(basename)
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
         with h5py.File(out_hdf, "w") as out_f:
             out_f.create_dataset("feature", data=feature, compression="gzip", compression_opts=3)
             out_f.create_dataset("label", data=label, compression="gzip", compression_opts=3)

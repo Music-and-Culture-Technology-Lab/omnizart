@@ -327,7 +327,7 @@ def dot_product_attention(
         weights = cast_like(weights, q)
         if save_weights_to is not None:
             save_weights_to[scope.name] = weights
-            save_weights_to[scope.name + "/logits"] = logits
+            save_weights_to[f"{scope.name}/logits"] = logits
         # Drop out attention links for each head.
         weights = dropout_with_broadcast_dims(weights, 1.0 - dropout_rate, broadcast_dims=dropout_broadcast_dims)
         return tf.matmul(weights, v)

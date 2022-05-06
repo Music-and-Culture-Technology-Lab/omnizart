@@ -190,7 +190,7 @@ class ChordTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -250,7 +250,7 @@ def _parallel_feature_extraction(data_pair, out_path, num_threads=4):
 
         # logger.info("Progress: %d/%d - %s", idx + 1, len(data_pair), f_name)
         print(f"Progress: {idx+1}/{len(data_pair)} - {f_name}", end="\r")
-        out_hdf = jpath(out_path, os.path.basename(f_name) + ".hdf")
+        out_hdf = jpath(out_path, f"{os.path.basename(f_name)}.hdf")
         _write_feature(feature, out_path=out_hdf)
 
 
