@@ -80,7 +80,7 @@ class BaseTranscription(metaclass=ABCMeta):
         elif not os.path.exists(model_path):
             raise FileNotFoundError(f"The given path doesn't exist: {model_path}.")
         elif not os.path.basename(model_path).startswith(self.settings.model.save_prefix.lower()) \
-                and not set(["arch.yaml", "weights.h5", "configurations.yaml"]).issubset(os.listdir(model_path)):
+                and not {"arch.yaml", "weights.h5", "configurations.yaml"}.issubset(os.listdir(model_path)):
 
             # Search checkpoint folders under the given path
             dirs = [c_dir for c_dir in os.listdir(model_path) if os.path.isdir(c_dir)]
@@ -98,7 +98,7 @@ class BaseTranscription(metaclass=ABCMeta):
         return model_path, conf_path
 
     def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
-        return model_from_yaml(open(arch_path, "r").read(), custom_objects=custom_objects)
+        return model_from_yaml(open(arch_path).read(), custom_objects=custom_objects)
 
     def _resolve_feature_output_path(self, dataset_path, settings):  # pylint: disable=R0201
         if settings.dataset.feature_save_path == "+":
@@ -341,8 +341,7 @@ class BaseDatasetLoader:
 
     def get_dataset(self, batch_size, output_types=None, output_shapes=None):
         def gen_wrapper():
-            for data in self:
-                yield data
+            yield from self
 
         return tf.data.Dataset.from_generator(
                 gen_wrapper, output_types=output_types, output_shapes=output_shapes

@@ -19,9 +19,9 @@ def transcribe(input_audio, model_path, output):
 
     \b
     Example Usage
-    $ omnizart drum transcribe \ 
-        example.wav \ 
-        --model-path path/to/model \ 
+    $ omnizart drum transcribe \\ 
+        example.wav \\ 
+        --model-path path/to/model \\ 
         --output example.mid
     """
     silence_tensorflow()

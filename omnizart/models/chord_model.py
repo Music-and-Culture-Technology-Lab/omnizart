@@ -418,7 +418,7 @@ class Decoder(tf.keras.layers.Layer):
         )
 
         decoder_inputs_drop = self.dropout(decoder_inputs)
-        layer_weights = tf.nn.softmax(tf.zeros((self.num_attn_blocks)))
+        layer_weights = tf.nn.softmax(tf.zeros(self.num_attn_blocks))
         weighted_hiddens_dec = tf.zeros(shape=shape_list(segment_encodings))
         layer_stack = zip(self.attn_layers_1, self.attn_layers_2, self.ff_layers)
         for idx, (attn_1, attn_2, feed_forward) in enumerate(layer_stack):
