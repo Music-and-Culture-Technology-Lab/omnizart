@@ -227,7 +227,8 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
                     else:
                         if self.monitor_op(current, self.best):
                             if self.verbose > 0:
-                                print(f'\nEpoch {int(epoch + 1):05}: {self.monitor} improved from {self.best:0.5f} to {current:0.5f},                                     saving model to {filepath}')
+                                print(f'\nEpoch {int(epoch + 1):05}: {self.monitor} improved from {self.best:0.5f} to {current:0.5f},'
+                                      f'                                     saving model to {filepath}')
 
                             self.best = current
                             if self.save_weights_only:
