@@ -105,46 +105,46 @@ def download_dataset(dataset, output):
 @click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
 def download_checkpoints(output_path):
     """Download the archived checkpoints of different models."""
-    release_url = "https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001/"
+    release_url = "https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001"
     CHECKPOINTS = {
         "chord_v1": {
-            "fid": f"{release_url}chord_v1@variables.data-00000-of-00001",
+            "fid": f"{release_url}/chord_v1@variables.data-00000-of-00001",
             "save_as": "checkpoints/chord/chord_v1/variables/variables.data-00000-of-00001"
         },
         "drum_keras": {
-            "fid": f"{release_url}drum_keras@variables.data-00000-of-00001",
+            "fid": f"{release_url}/drum_keras@variables.data-00000-of-00001",
             "save_as": "checkpoints/drum/drum_keras/variables/variables.data-00000-of-00001",
         },
         "music_pop": {
-            "fid": f"{release_url}music_pop@variables.data-00000-of-00001",
+            "fid": f"{release_url}/music_pop@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_pop/variables/variables.data-00000-of-00001",
         },
         "music_piano": {
-            "fid": f"{release_url}music_piano@variables.data-00000-of-00001",
+            "fid": f"{release_url}/music_piano@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_piano/variables/variables.data-00000-of-00001",
         },
         "music_piano-v2": {
-            "fid": f"{release_url}music_piano-v2@variables.data-00000-of-00001",
+            "fid": f"{release_url}/music_piano-v2@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_piano-v2/variables/variables.data-00000-of-00001",
         },
         "music_note_stream": {
-            "fid": f"{release_url}music_note_stream@variables.data-00000-of-00001",
+            "fid": f"{release_url}/music_note_stream@variables.data-00000-of-00001",
             "save_as": "checkpoints/music/music_note_stream/variables/variables.data-00000-of-00001",
         },
         "vocal_semi": {
-            "fid": f"{release_url}vocal_semi@variables.data-00000-of-00001",
+            "fid": f"{release_url}/vocal_semi@variables.data-00000-of-00001",
             "save_as": "checkpoints/vocal/vocal_semi/variables/variables.data-00000-of-00001",
         },
         "vocal_contour": {
-            "fid": f"{release_url}contour@variables.data-00000-of-00001",
+            "fid": f"{release_url}/contour@variables.data-00000-of-00001",
             "save_as": "checkpoints/vocal/vocal_contour/variables/variables.data-00000-of-00001",
         },
         "beat": {
-            "fid": f"{release_url}beat_blstm@variables.data-00000-of-00001",
+            "fid": f"{release_url}/beat_blstm@variables.data-00000-of-00001",
             "save_as": "checkpoints/beat/beat_blstm/variables/variables.data-00000-of-00001",
         },
         "patch_cnn_melody": {
-            "fid": f"{release_url}patch_cnn_melody@variables.data-00000-of-00001",
+            "fid": f"{release_url}/patch_cnn_melody@variables.data-00000-of-00001",
             "save_as": "checkpoints/patch_cnn/patch_cnn_melody/variables/variables.data-00000-of-00001",
         }
     }
