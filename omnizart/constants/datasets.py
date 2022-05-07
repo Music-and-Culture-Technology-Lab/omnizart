@@ -165,7 +165,7 @@ class BaseStructure:
         or filter out some files.
         """
         ensure_path_exists(save_path)
-        save_name = f"{cls.__name__.replace('Structure', '')}.zip"
+        save_name = cls.__name__.replace("Structure", "") + ".zip"
         dataset_path, unzip_done = download_large_file_from_google_drive(
             cls.url, save_path=save_path, save_name=save_name, unzip=True
         )
