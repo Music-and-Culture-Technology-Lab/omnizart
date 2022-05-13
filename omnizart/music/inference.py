@@ -464,7 +464,11 @@ def multi_inst_note_inference(
             ent += entropy(cha)
             normed_ch.append(cha)
 
-        confidence = f"std: {std / ch_per_inst:.3f} ent: {ent / ch_per_inst:.3f} mult: {std * ent / ch_per_inst ** 2:.3f}"
+        confidence = (
+            f"std: {std / ch_per_inst:.3f} "
+            f"ent: {ent / ch_per_inst:.3f} "
+            f"mult: {std * ent / ch_per_inst ** 2:.3f}"
+        )
         logger.debug("Instrument confidence: %s", confidence)
         if iters > 1 and (std / ch_per_inst < inst_th):
             # Filter out instruments that the confidence is under the given threshold
