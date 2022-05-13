@@ -57,7 +57,7 @@ class BaseLabelExtraction(metaclass=abc.ABCMeta):
         """
         label_list = cls.load_label(label_path)
 
-        max_sec = max([ll.end_time for ll in label_list])
+        max_sec = max(ll.end_time for ll in label_list)
         num_frm = int(max_sec / t_unit) + 10  # Reserve additional 10 frames
 
         sdt_label = np.zeros((num_frm, 6))

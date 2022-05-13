@@ -233,7 +233,7 @@ def predict_old(feature, model, batch_size=4):
     features.append([np.zeros_like(features[0][0])])
     logger.debug("Total batches: %d", total_batches)
     for i in range(1, total_batches + 1):
-        print("batch: {}/{}".format(i, total_batches), end="\r")
+        print(f"batch: {i}/{total_batches}", end="\r")
         first_half_batch = []
         second_half_batch = []
         b_size = len(features[i])

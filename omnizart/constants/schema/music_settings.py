@@ -1,5 +1,3 @@
-
-
 def simple_unit(value_type, choices=None):
     return {
         "type": "object",

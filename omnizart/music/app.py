@@ -508,7 +508,7 @@ class MusicDatasetLoader(BaseDatasetLoader):
 
 class Entropy(tf.keras.metrics.Metric):
     def __init__(self, name='entropy', **kwargs):
-        super(Entropy, self).__init__(name=name, **kwargs)
+        super().__init__(name=name, **kwargs)
         self.ent = self.add_weight(name='entropy', initializer='zeros')
 
     def update_state(self, y_true, y_pred, sample_weight=None):

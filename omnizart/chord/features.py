@@ -47,7 +47,7 @@ def extract_feature_label(feat_path, lab_path, segment_width=21, segment_hop=5, 
 def load_label(lab_path):
     """Load and parse the label into the desired format for later process."""
     label = []
-    with open(lab_path, "r") as lab_fp:
+    with open(lab_path) as lab_fp:
         for line in lab_fp:
             data = line.strip().split("\t")
             if len(data) == 3:

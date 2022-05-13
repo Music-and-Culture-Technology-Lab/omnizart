@@ -110,7 +110,7 @@ def infer_piece(piece, shortest_sec=0.05, offset_sec=0.12, t_unit=0.02):
 
     notes = []
     for i in range(88):
-        print("Pitch: {}/{}".format(i + 1, 88), end="\r")
+        print(f"Pitch: {i + 1}/{88}", end="\r")
 
         pitch = piece[:, i]
         if np.sum(pitch) <= 0:
@@ -348,7 +348,7 @@ def note_inference(
         elif ch_num == 3:
             mix = (pred[:, :, 1] + pred[:, :, 2]) / 2
         else:
-            raise ValueError("Unknown channel length: {}".format(ch_num))
+            raise ValueError(f"Unknown channel length: {ch_num}")
 
         prob = norm(mix) if normalize else mix
         prob = np.where(prob > frm_th, 1, 0)
@@ -451,7 +451,7 @@ def multi_inst_note_inference(
     frm_th = threshold_type_converter(frm_th, iters)
 
     # Multi-instrument inference loop, iterate through different instrument channels
-    zeros = np.zeros((pred.shape[:-1]))
+    zeros = np.zeros(pred.shape[:-1])
     out_midi = pretty_midi.PrettyMIDI()
     for i in range(iters):
         normed_ch = []

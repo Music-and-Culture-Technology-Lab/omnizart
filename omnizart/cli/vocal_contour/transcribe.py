@@ -18,9 +18,9 @@ def transcribe(input_audio, model_path, output):
 
     \b
     Example Usage
-    $ omnizart vocal-contour transcribe \ 
-        example.wav \ 
-        --model-path path/to/model \ 
+    $ omnizart vocal-contour transcribe \\ 
+        example.wav \\ 
+        --model-path path/to/model \\ 
         --output example.mid
     """
     vocal_contour.app.transcribe(input_audio, model_path, output=output)

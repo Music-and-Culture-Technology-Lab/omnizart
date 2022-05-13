@@ -231,7 +231,7 @@ class MapsStructure(BaseStructure):
 
     @classmethod
     def load_label(cls, label_path):
-        lines = open(label_path, "r").readlines()[1:]  # Discard the first line which contains column names
+        lines = open(label_path).readlines()[1:]  # Discard the first line which contains column names
         labels = []
         for line in lines:
             if line.strip() == "":
@@ -267,7 +267,7 @@ class MusicNetStructure(BaseStructure):
     def load_label(cls, label_path):
         labels = []
         sample_rate = 44100
-        with open(label_path, "r") as label_file:
+        with open(label_path) as label_file:
             reader = csv.DictReader(label_file, delimiter=",")
             for row in reader:
                 onset = float(row["start_time"]) / sample_rate
@@ -425,7 +425,7 @@ class McGillBillBoard(BaseStructure):
             Folder ids of testing set
         """
         index_file_path = jpath(dataset_path, cls.index_file_path)
-        reader = csv.DictReader(open(index_file_path, "r"), delimiter=",")
+        reader = csv.DictReader(open(index_file_path), delimiter=",")
         name_id_mapping = {}
         for data in reader:
             pid = int(data["id"])
@@ -549,7 +549,7 @@ class MIR1KStructure(BaseStructure):
 
     @classmethod
     def load_label(cls, label_path):
-        with open(label_path, "r") as lin:
+        with open(label_path) as lin:
             lines = lin.readlines()
 
         notes = np.array([round(float(note)) for note in lines])
@@ -600,7 +600,7 @@ class CMediaStructure(BaseStructure):
     @classmethod
     def load_label(cls, label_path):
         labels = []
-        with open(label_path, "r") as label_file:
+        with open(label_path) as label_file:
             reader = csv.DictReader(label_file, delimiter=",")
             for row in reader:
                 labels.append(Label(
@@ -638,7 +638,7 @@ class TonasStructure(BaseStructure):
 
     @classmethod
     def load_label(cls, label_path):
-        with open(label_path, "r") as lin:
+        with open(label_path) as lin:
             lines = lin.readlines()
 
         labels = []
@@ -810,7 +810,7 @@ class MedleyDBStructure(BaseStructure):
 
     @classmethod
     def load_label(cls, label_path):
-        with open(label_path, "r") as fin:
+        with open(label_path) as fin:
             lines = fin.readlines()
 
         labels = []
