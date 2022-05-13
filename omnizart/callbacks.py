@@ -248,8 +248,8 @@ class TFModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
                         self.model.save(filepath, overwrite=True, options=self._options)
 
                 self._maybe_remove_file()
-            except IOError as e:
+            except OSError as e:
                 # `e.errno` appears to be `None` so checking the content of `e.args[0]`.
                 if 'is a directory' in six.ensure_str(e.args[0]).lower():
-                    raise IOError(f'Please specify a non-directory filepath for ModelCheckpoint. \
+                    raise OSError(f'Please specify a non-directory filepath for ModelCheckpoint. \
                         Filepath used is an existing directory: {filepath}')

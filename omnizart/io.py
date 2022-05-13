@@ -112,7 +112,7 @@ def load_audio_with_librosa(audio_path, sampling_rate=44100, mono=True):
 
 
 def load_yaml(yaml_path):
-    return yaml.load(open(yaml_path, "r"), Loader=yaml.Loader)
+    return yaml.load(open(yaml_path), Loader=yaml.Loader)
 
 
 def write_yaml(json_obj, output_path, dump=True):
