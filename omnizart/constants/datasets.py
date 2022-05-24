@@ -45,7 +45,7 @@ logger = get_logger("Constant Datasets")
 def _get_file_list(dataset_path, dirs, ext):
     files = []
     for _dir in dirs:
-        files += glob.glob(os.path.join(dataset_path, _dir, "*" + ext))
+        files += glob.glob(os.path.join(dataset_path, _dir, f"*{ext}"))
     return files
 
 
@@ -430,7 +430,7 @@ class McGillBillBoard(BaseStructure):
         for data in reader:
             pid = int(data["id"])
             if data["title"] != "" and pid not in cls.ignore_ids:
-                name = data["artist"] + ": " + data["title"]
+                name = f"{data['artist']}: {data['title']}"
                 if name not in name_id_mapping:
                     name_id_mapping[name] = []
                 name_id_mapping[name].append(pid)  # Repetition count: 1->613, 2->110, 3->19
