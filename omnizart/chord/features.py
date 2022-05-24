@@ -72,7 +72,7 @@ def load_feature(feat_path, label):
         root = chord.split(":")[0]
         if "b" in root:
             root, quality = chord.split(':')
-            chord = ENHARMONIC_TABLE[root] + ':' + quality
+            chord = f"{ENHARMONIC_TABLE[root]}:{quality}"
         chord_int = CHORD_INT_MAPPING[chord]
         chord_change = 0 if chord_int == pre_chord else 1
         pre_chord = chord_int

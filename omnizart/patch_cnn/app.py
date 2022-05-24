@@ -246,7 +246,7 @@ class PatchCNNTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
         write_yaml(settings.to_json(), jpath(model_save_path, "configurations.yaml"))
@@ -363,7 +363,7 @@ def _parallel_feature_extraction(data_pair_list, out_path, feat_settings, num_th
         print(f"Progress: {idx + 1}/{len(data_pair_list)} - {audio}", end="\r")
 
         filename = get_filename(audio)
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
         with h5py.File(out_hdf, "w") as out_f:
             out_f.create_dataset("feature", data=feat)
             out_f.create_dataset("mapping", data=mapping)

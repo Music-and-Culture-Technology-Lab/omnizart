@@ -231,7 +231,7 @@ class VocalContourTranscription(BaseTranscription):
         if model_name is None:
             model_name = str(datetime.now()).replace(" ", "_")
         if not model_name.startswith(settings.model.save_prefix):
-            model_name = settings.model.save_prefix + "_" + model_name
+            model_name = f"{settings.model.save_prefix}_{model_name}"
 
         model_save_path = jpath(settings.model.save_path, model_name)
         ensure_path_exists(model_save_path)
@@ -296,10 +296,10 @@ def _parallel_feature_extraction(data_pair, out_path, label_extractor, feat_sett
     for idx, ((feature, label), audio_idx) in iters:
         audio = data_pair[audio_idx][0]
 
-        print(f"Progress: {idx+1}/{len(data_pair)} - {audio}" + " "*6, end="\r")  # noqa: E226
+        print(f"Progress: {idx + 1}/{len(data_pair)} - {audio}{' ' * 6}", end="\r")  # noqa: E226
 
         filename, _ = os.path.splitext(os.path.basename(audio))
-        out_hdf = jpath(out_path, filename + ".hdf")
+        out_hdf = jpath(out_path, f"{filename}.hdf")
         saved = False
         retry_times = 5
         for retry in range(retry_times):
