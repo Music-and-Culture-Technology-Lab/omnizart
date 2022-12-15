@@ -202,8 +202,8 @@ def synth(input_midi, output_path, sf2_path):
             # Download the default soundfont file.
             click.echo("Downloading default sondfont file...")
             download_large_file_from_google_drive(
-                url="16RM-dWKcNtjpBoo7DFSONpplPEg5ruvO",
-                file_length=31277462,
+                url="https://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf2",
+                file_length=215614036,
                 save_path=os.path.dirname(SOUNDFONT_PATH),
                 save_name=os.path.basename(SOUNDFONT_PATH)
             )
