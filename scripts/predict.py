@@ -27,7 +27,9 @@ class Predictor(cog.Predictor):
         if not os.path.exists(self.SF2_FILE):
             print("Downloading soundfont...")
             download_large_file_from_google_drive(
-                "16RM-dWKcNtjpBoo7DFSONpplPEg5ruvO", file_length=31277462, save_name=self.SF2_FILE
+                "https://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf2",
+                file_length=215614036,
+                save_name=self.SF2_FILE,
             )
         self.app = {"music": mapp, "chord": capp, "drum": dapp, "vocal": vapp, "vocal-contour": vcapp, "beat": bapp}
         self.model_path = {"piano": "Piano", "piano-v2": "PianoV2", "assemble": "Stream", "pop-song": "Pop", "": None}
