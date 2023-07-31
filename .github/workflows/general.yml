@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.8]
+        python-version: [3.7, 3.8]
 
     steps:
       - uses: actions/checkout@v2
@@ -48,9 +48,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsndfile1 ffmpeg
-          if [ ${{ matrix.python-version }} = "3.6" ]; then
-            export DEFAULT_INSTALL_APPROACH=pip
-          fi
+          export DEFAULT_INSTALL_APPROACH=pip
           ./scripts/install.sh
           omnizart download-checkpoints --output-path ./
           pip install flake8 pylint pytest pytest-cov pytest-mock
