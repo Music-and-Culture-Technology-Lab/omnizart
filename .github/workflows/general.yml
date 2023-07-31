@@ -50,7 +50,6 @@ jobs:
           sudo apt-get install libsndfile1 ffmpeg
           export DEFAULT_INSTALL_APPROACH=pip
           ./scripts/install.sh
-          pip install -U numpy
           omnizart download-checkpoints --output-path ./
           pip install flake8 pylint pytest pytest-cov pytest-mock
       - name: Check with linters
