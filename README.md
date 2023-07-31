@@ -49,7 +49,7 @@ cd omnizart
 conda env create -f environment.yml
 conda activate omnizart
 # Install omnizart
-pip install -e .
+pip install .
 omnizart download-checkpoints
 ```
 
