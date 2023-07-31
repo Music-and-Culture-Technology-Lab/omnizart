@@ -63,8 +63,8 @@ install_with_pip() {
     pip install madmom
 
     # pip install -r requirements.txt
-    # python3 setup.py install 
-    pip install -e .
+    python3 setup.py install 
+    # pip install -e .
 }
 
 
