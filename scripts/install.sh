@@ -62,7 +62,7 @@ install_with_pip() {
     pip install Cython numpy
     pip install madmom
 
-    pip install -r requirements.txt
+    # pip install -r requirements.txt
     # python3 setup.py install 
     pip install .
 }
