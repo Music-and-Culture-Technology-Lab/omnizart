@@ -41,12 +41,15 @@ docker pull mctlab/omnizart:latest
 docker run -it mctlab/omnizart:latest bash
 ```
 
-## Conda
+## Conda (install from source)
 ``` bash
 git clone https://github.com/Music-and-Culture-Technology-Lab/omnizart
 cd omnizart
+# Create a new conda environment
 conda env create -f environment.yml
 conda activate omnizart
+# Install omnizart
+pip install -e .
 omnizart download-checkpoints
 ```
 
