@@ -9,8 +9,6 @@ from datetime import datetime
 import h5py
 import numpy as np
 import tensorflow as tf
-from spleeter.separator import Separator
-from spleeter.utils.logging import logger as sp_logger
 
 from omnizart.io import load_audio, write_yaml
 from omnizart.utils import (
@@ -45,7 +43,11 @@ class VocalTranscription(BaseTranscription):
         super().__init__(VocalSettings, conf_path=conf_path)
 
         # Disable logging information of Spleeter
-        sp_logger.setLevel(40)  # logging.ERROR
+        try:
+            from spleeter.utils.logging import logger as sp_logger
+            sp_logger.setLevel(40)  # logging.ERROR
+        except ImportError:
+            pass
 
     def transcribe(self, input_audio, model_path=None, output="./"):
         """Transcribe vocal notes in the audio.
@@ -82,19 +84,52 @@ class VocalTranscription(BaseTranscription):
         omnizart.vocal_contour.transcribe: Pitch estimation function.
         """
         logger.info("Separating vocal track from the audio...")
-        command = ["spleeter", "separate", input_audio, "-o", "./"]
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        _, error = process.communicate()
-        if process.returncode != 0:
-            raise SpleeterError(error.decode("utf-8"))
+        use_demucs = shutil.which("demucs") is not None
+        use_spleeter = shutil.which("spleeter") is not None
 
-        # Resolve the path of separated output files
-        folder_path = jpath("./", get_filename(input_audio))
-        vocal_wav_path = jpath(folder_path, "vocals.wav")
-        wav, fs = load_audio(vocal_wav_path)
+        if not use_demucs and not use_spleeter:
+            raise SpleeterError(
+                "Neither Spleeter CLI nor Demucs CLI was found on PATH. "
+                "Vocal separation requires either Spleeter or Demucs to be installed.\n"
+                "Under Python 3.14, we recommend installing Demucs:\n"
+                "  pip install demucs"
+            )
 
-        # Clean out the output files
-        shutil.rmtree(folder_path)
+        if use_demucs:
+            logger.info("Demucs CLI found. Separating vocals using Demucs...")
+            command = ["demucs", "--two-stems=vocals", input_audio, "-o", "./"]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            _, error = process.communicate()
+            if process.returncode != 0:
+                raise SpleeterError(f"Demucs separation failed: {error.decode('utf-8')}")
+
+            # Resolve Demucs output path: ./htdemucs/{song_name}/vocals.wav
+            song_name = get_filename(input_audio)
+            folder_path = jpath("./htdemucs", song_name)
+            vocal_wav_path = jpath(folder_path, "vocals.wav")
+            wav, fs = load_audio(vocal_wav_path)
+
+            # Clean out the output files
+            shutil.rmtree(folder_path)
+            try:
+                os.rmdir("./htdemucs")
+            except OSError:
+                pass
+        else:
+            logger.info("Spleeter CLI found. Separating vocals using Spleeter...")
+            command = ["spleeter", "separate", input_audio, "-o", "./"]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            _, error = process.communicate()
+            if process.returncode != 0:
+                raise SpleeterError(error.decode("utf-8"))
+
+            # Resolve Spleeter output path: ./{song_name}/vocals.wav
+            folder_path = jpath("./", get_filename(input_audio))
+            vocal_wav_path = jpath(folder_path, "vocals.wav")
+            wav, fs = load_audio(vocal_wav_path)
+
+            # Clean out the output files
+            shutil.rmtree(folder_path)
 
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path)
@@ -366,19 +401,56 @@ def _vocal_separation(wav_list, out_folder):
 
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
-        separator = Separator('spleeter:2stems')
-        separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
-        for idx, wav_path in enumerate(wav_list, 1):
-            logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
-            separator.separate_to_file(wav_path, out_folder)
+        use_demucs = shutil.which("demucs") is not None
+        use_spleeter = shutil.which("spleeter") is not None
 
-            # The separated tracks are stored in sub-folders.
-            # Move the vocal track to the desired folder and rename them.
-            fname, _ = os.path.splitext(os.path.basename(wav_path))
-            sep_folder = jpath(out_folder, fname)
-            vocal_track = jpath(sep_folder, "vocals.wav")
-            shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
-            shutil.rmtree(sep_folder)
+        if not use_demucs and not use_spleeter:
+            raise SpleeterError(
+                "Neither Spleeter CLI nor Demucs CLI was found on PATH. "
+                "Vocal separation requires either Spleeter or Demucs to be installed."
+            )
+
+        if use_demucs:
+            logger.info("Demucs CLI found. Starting batch vocal separation using Demucs...")
+            for idx, wav_path in enumerate(wav_list, 1):
+                logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
+                fname, _ = os.path.splitext(os.path.basename(wav_path))
+                command = ["demucs", "--two-stems=vocals", wav_path, "-o", out_folder]
+                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                _, error = process.communicate()
+                if process.returncode != 0:
+                    raise SpleeterError(f"Demucs separation failed: {error.decode('utf-8')}")
+
+                # Move vocal file: out_folder/htdemucs/{fname}/vocals.wav -> out_folder/{fname}.wav
+                sep_folder = jpath(out_folder, "htdemucs", fname)
+                vocal_track = jpath(sep_folder, "vocals.wav")
+                shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
+
+            try:
+                shutil.rmtree(jpath(out_folder, "htdemucs"))
+            except OSError:
+                pass
+        else:
+            logger.info("Spleeter CLI found. Starting batch vocal separation using Spleeter...")
+            try:
+                from spleeter.separator import Separator
+            except ImportError:
+                raise SpleeterError(
+                    "Spleeter is not installed. Vocal separation is not supported on Python 3.14 "
+                    "because Spleeter's dependencies do not support Python 3.14."
+                )
+            separator = Separator('spleeter:2stems')
+            separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
+            for idx, wav_path in enumerate(wav_list, 1):
+                logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
+                separator.separate_to_file(wav_path, out_folder)
+
+                # Move the vocal track to the desired folder and rename them
+                fname, _ = os.path.splitext(os.path.basename(wav_path))
+                sep_folder = jpath(out_folder, fname)
+                vocal_track = jpath(sep_folder, "vocals.wav")
+                shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
+                shutil.rmtree(sep_folder)
     return out_list
 
 
