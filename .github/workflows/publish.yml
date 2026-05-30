@@ -18,6 +18,7 @@ jobs:
           python-version: '3.14'
       - name: Publish to pypi
         run: |
+          sudo apt-get install -y portaudio19-dev
           python -m pip install --upgrade pip setuptools build twine
           python -m build
           TWINE_USERNAME=__token__ TWINE_PASSWORD=${{ secrets.PYPI_TOKEN }} python -m twine upload dist/*
