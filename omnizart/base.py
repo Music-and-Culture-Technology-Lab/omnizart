@@ -11,7 +11,6 @@ from abc import ABCMeta, abstractmethod
 
 import h5py
 import tensorflow as tf
-from tensorflow.keras.models import model_from_yaml
 
 from omnizart import MODULE_PATH
 from omnizart.utils import get_logger, ensure_path_exists, get_filename
@@ -96,9 +95,6 @@ class BaseTranscription(metaclass=ABCMeta):
         # There should be one configuration file of this checkpoint.
         conf_path = os.path.join(model_path, "configurations.yaml")
         return model_path, conf_path
-
-    def _get_model_from_yaml(self, arch_path, custom_objects=None):  # pylint: disable=R0201
-        return model_from_yaml(open(arch_path).read(), custom_objects=custom_objects)
 
     def _resolve_feature_output_path(self, dataset_path, settings):  # pylint: disable=R0201
         if settings.dataset.feature_save_path == "+":

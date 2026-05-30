@@ -1,11 +1,27 @@
 import glob
 import random
+import sys
 
-import tqdm
 
+class SimpleProgressBar:
+    def __init__(self, iterable, total=None, desc="", **kwargs):
+        self.iterable = iterable
+        self.total = total
+        self.desc = desc
+        self.postfix = ""
 
-PROGRESS_BAR_FORMAT = "{desc} - {percentage:3.0f}% |{bar:40}| {n_fmt}/{total_fmt} \
-    [{elapsed}<{remaining},{rate_fmt}{postfix}]"
+    def __iter__(self):
+        total_steps = self.total if self.total else "?"
+        for i, item in enumerate(self.iterable):
+            yield item
+            step = i + 1
+            sys.stdout.write(f"\r{self.desc} - {step}/{total_steps} {self.postfix}")
+            sys.stdout.flush()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
+    def set_postfix_str(self, postfix_str):
+        self.postfix = f"- {postfix_str}"
 
 
 def format_num(num, digit=4):
@@ -79,7 +95,7 @@ def train_steps(model, dataset, steps=None, bar_title=None, validate=False):
     history: dict
         The history of scores for each metric during each epoch.
     """
-    iter_bar = tqdm.tqdm(dataset, total=steps, desc=bar_title, bar_format=PROGRESS_BAR_FORMAT)
+    iter_bar = SimpleProgressBar(dataset, total=steps, desc=bar_title)
 
     for iters, data in enumerate(iter_bar):
         feat, label = data[:2]  # Assumed the first two elements are feature and label, respectively.

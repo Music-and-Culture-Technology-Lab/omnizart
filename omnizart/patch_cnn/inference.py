@@ -49,6 +49,8 @@ def inference(pred, mapping, zzz, cenf, threshold=0.5, max_method="posterior"):
                 freq_idx = zzz[candidate[:, 0].astype('int'), tidx].argmax(axis=0)
             else:
                 raise ValueError(f"Invalid maximum method: {max_method}")
+            if isinstance(freq_idx, np.ndarray) and freq_idx.ndim > 0:
+                freq_idx = freq_idx[0]
             freq_idx = int(freq_idx)
             contour[int(candidate[freq_idx, 1])] = candidate[freq_idx, 0]
 
