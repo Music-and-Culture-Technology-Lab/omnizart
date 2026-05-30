@@ -66,9 +66,9 @@ Currently supports two workflows:
 * Publish PyPI package and docker image
 
 ### General Check
-Everytime you push to the master branch, file a pull request, and merge into master branch, will trigger
+Everytime you push to the main branch, file a pull request, and merge into main branch, will trigger
 this action. This will do checks like code format, and unittests by leveraging the above mentioned
-tools. If the check fails, you will not be able to merge the feature branch into master branch.
+tools. If the check fails, you will not be able to merge the feature branch into main branch.
 
 ### Documentation Page Publishing
 We use [github page](https://pages.github.com/) to host our documentation, and is separated as an [independent
@@ -83,7 +83,7 @@ Steps to update the documentation page:
 * Clone **this** repo
 * Create a new branch. **DO NOT UPDATE THE `build_doc` BRANCH DIRECTLY!!**
 * File a pull request
-* Merge into master (by admin)
+* Merge into main (by admin)
 * Merge into `build_doc` branch (by admin)
 * Push to this repo (by admin)
 
