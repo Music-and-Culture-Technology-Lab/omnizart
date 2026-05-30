@@ -2,7 +2,7 @@
 
 ## 0.6.0 - 2026-05-30
 
-Various compatibility improvements, dependency modernization, CLI-based separation upgrades, and transition to a modern PEP 517 setuptools build backend.
+**Major compatibility upgrade supporting Python versions up to 3.14.** Includes various environment compatibility improvements, dependency modernization, CLI-based vocal separation upgrades, and transition to a modern PEP 517 setuptools build backend.
 
 ### Features
 - Added CLI-based vocal separation with fallback sequence: uses `demucs` CLI if available (recommended for Python 3.10+ where Spleeter is incompatible), falls back to `spleeter` CLI, and outputs clear guidance if neither is installed.
