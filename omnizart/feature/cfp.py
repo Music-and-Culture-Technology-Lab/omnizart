@@ -6,6 +6,10 @@ Mantainer: BreezeWhite
 # pylint: disable=C0103,W0102,R0914
 import numpy as np
 import scipy
+try:
+    from scipy.signal.windows import blackmanharris
+except ImportError:
+    from scipy.signal import blackmanharris
 
 from omnizart.io import load_audio
 from omnizart.utils import get_logger, parallel_generator
@@ -20,7 +24,7 @@ def STFT(x, fr, fs, Hop, h):
     window_size = len(h)
     f = fs * np.linspace(0, 0.5, np.round(N / 2).astype("int"), endpoint=True)
     Lh = int(np.floor(float(window_size - 1) / 2))
-    tfr = np.zeros((int(N), len(t)), dtype=np.float)
+    tfr = np.zeros((int(N), len(t)), dtype=float)
 
     for icol, ti in enumerate(t):
         ti = int(ti)
@@ -60,7 +64,7 @@ def freq_to_log_freq_mapping(tfr, f, fr, fc, tc, NumPerOct):
             break
 
     Nest = len(central_freq)
-    freq_band_transformation = np.zeros((Nest - 1, len(f)), dtype=np.float)
+    freq_band_transformation = np.zeros((Nest - 1, len(f)), dtype=float)
     for i in range(1, Nest - 1):
         left = int(round(central_freq[i - 1] / fr))
         right = int(round(central_freq[i + 1] / fr) + 1)
@@ -92,7 +96,7 @@ def quef_to_log_freq_mapping(ceps, q, fs, fc, tc, NumPerOct):
             break
     f = 1 / (q+1e-9)
     Nest = len(central_freq)
-    freq_band_transformation = np.zeros((Nest - 1, len(f)), dtype=np.float)
+    freq_band_transformation = np.zeros((Nest - 1, len(f)), dtype=float)
     for i in range(1, Nest - 1):
         for j in range(int(round(fs / central_freq[i + 1])), int(round(fs / central_freq[i - 1]) + 1)):
             if f[j] > central_freq[i - 1] and f[j] < central_freq[i]:
@@ -222,7 +226,7 @@ def _extract_cfp(
 
     Hop = round(down_fs * hop)
     x = x.astype("float32")
-    h = scipy.signal.blackmanharris(win_size)  # window size
+    h = blackmanharris(win_size)  # window size
     g = np.array(g)
 
     samples = np.floor(len(x) / Hop).astype("int")
