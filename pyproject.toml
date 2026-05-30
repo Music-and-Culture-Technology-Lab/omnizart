@@ -1,6 +1,6 @@
 [project]
 name = "omnizart"
-version = "0.6.0"
+version = "0.6.1"
 dynamic = [
     "dependencies",
     "optional-dependencies",
