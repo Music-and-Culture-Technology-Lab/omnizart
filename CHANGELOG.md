@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.6.0 - 2026-05-30
+
+Various compatibility improvements, dependency modernization, CLI-based separation upgrades, and transition to a modern PEP 517 setuptools build backend.
+
+### Features
+- Added CLI-based vocal separation with fallback sequence: uses `demucs` CLI if available (recommended for Python 3.10+ where Spleeter is incompatible), falls back to `spleeter` CLI, and outputs clear guidance if neither is installed.
+
+### Compatibility
+- Added compatibility patches for Python 3.10+ collections legacy aliases, NumPy 2.0+ removed float/int/bool aliases, and madmom inhomogeneous arrays.
+- Added support for modern Keras 2.6+ model loading by removing deprecated YAML serialization helpers.
+- Replaced `tqdm` inside the core training loop with a clean custom `SimpleProgressBar` to prevent pipeline log pollution.
+- Broadened audio loading exception catching for robust fallback behavior.
+
+### Build & Dependencies
+- Modernized dependencies to support up to Python 3.14.
+- Transitioned build-system backend in `pyproject.toml` to PEP 517 standard `setuptools` and `wheel`.
+- Added PEP 517 build-time dependency pre-installation checks in `setup.py` (Cython, NumPy, madmom, vamp) and `pyaudio` dynamic installation compilation guides (checking for system portaudio).
+- Removed redundant `tqdm` from `environment.yml` and deleted obsolete locked `requirements.txt`.
+- Modernized GitHub Actions workflow pipelines (`general-check`, `docs`, `Publish`) to support matrix tests up to Python 3.14, upgrading checkout/setup-python/caching actions and dynamically installing `portaudio19-dev`.
+
+---
+
 ## 0.5.0 - 2021-12-09
 
 Official Open JOSS reviewed version.

@@ -87,4 +87,4 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_USE_LEGACY_KERAS'] = '1'
 os.environ['VAMP_PATH'] = os.path.join(MODULE_PATH, "resource", "vamp")
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
