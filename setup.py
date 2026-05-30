@@ -175,7 +175,7 @@ LONG_DESCRIPTION = open("README.md", "r", encoding="utf-8").read()
 
 setup_kwargs = {
     'name': 'omnizart',
-    'version': '0.6.1',
+    'version': '0.6.2',
     'description': 'Omniscient Mozart, being able to transcribe everything in the music.',
     'long_description': LONG_DESCRIPTION,
     'author': 'BreezeWhite',
@@ -208,7 +208,8 @@ def is_target_installed(pkg_name):
             [sys.executable, "-c", f"import importlib.metadata; importlib.metadata.version('{pkg_name}')"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            env=clean_env
+            env=clean_env,
+            cwd="/"
         )
         return True
     except Exception:
@@ -217,7 +218,8 @@ def is_target_installed(pkg_name):
                 [sys.executable, "-c", f"import pkg_resources; pkg_resources.get_distribution('{pkg_name}')"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                env=clean_env
+                env=clean_env,
+                cwd="/"
             )
             return True
         except Exception:
