@@ -20,7 +20,7 @@ if [ ! -z "$1" ] && [ "$1" = "venv"  ]; then
     USE_VENV=true
 fi
 
-INSTALL_APPROACH="${DEFAULT_INSTALL_APPROACH:=poetry}"
+INSTALL_APPROACH="${DEFAULT_INSTALL_APPROACH:=pip}"
 if [ "$USE_VENV" = "true" ]; then echo "Using $INSTALL_APPROACH to create virtual environment"; fi
 
 
@@ -57,9 +57,8 @@ install_with_poetry() {
 }
 
 install_with_pip() {
-    # Install some tricky packages that cannot be resolved by setup.py
-    # and requirements.txt.
-    pip install Cython numpy==1.19.2
+    # Install using setuptools build backend. setup.py will handle
+    # build-time pre-installation of Cython, numpy, madmom, and vamp.
     pip install .
 }
 

@@ -16,33 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
-    env:
-        DEFAULT_VENV_APPROACH: poetry
+        python-version: ["3.14"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Cache site packages
-        uses: actions/cache@v2
-        env:
-          cache-name: python-packages
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          sudo apt-get install libsndfile1
+          sudo apt-get update
+          sudo apt-get install -y libsndfile1 portaudio19-dev
           ./scripts/install.sh
           pip install sphinx sphinx-press-theme sphinx-click 
           pip install sphinxcontrib-bibtex numpydoc

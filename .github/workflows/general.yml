@@ -17,44 +17,35 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: ["3.8", "3.10", "3.12", "3.14"]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache site packages
-        uses: actions/cache@v2
-        env:
-          cache-name: python-packages
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+      - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
       - name: Download large files
         run: |
           curl -L https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001/resource.zip -o resource.zip
           unzip resource.zip
           mv resource/* tests/resource
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libsndfile1 ffmpeg
-          export DEFAULT_INSTALL_APPROACH=pip
+          sudo apt-get install -y libsndfile1 ffmpeg portaudio19-dev
           ./scripts/install.sh
           omnizart download-checkpoints --output-path ./
           pip install flake8 pylint pytest pytest-cov pytest-mock
+
       - name: Check with linters
         run: |
           make lint
+
       - name: Test with pytest
         run: |
           make test
