@@ -1,14 +1,14 @@
-FROM tensorflow/tensorflow:2.5.0-gpu
+FROM tensorflow/tensorflow:2.21.0-gpu
 
 WORKDIR /tmp
 
 RUN apt-get update
-RUN apt-get install --assume-yes libsndfile1 libgl1-mesa-glx ffmpeg vim fluidsynth
+RUN apt-get install --assume-yes libsndfile1 libgl1-mesa-glx ffmpeg vim fluidsynth portaudio19-dev
 
 COPY omnizart ./omnizart
 COPY scripts ./scripts
 COPY pyproject.toml ./
-COPY poetry.lock ./
+COPY setup.py ./
 COPY README.md ./
 COPY Makefile ./
 
@@ -19,8 +19,8 @@ RUN scripts/install.sh
 RUN pip install --upgrade keyrings.alt
 
 WORKDIR /home
-RUN mv /tmp/omnizart /usr/local/lib/python3.6/dist-packages
-RUN rm -rf /tmp
+# RUN mv -t /tmp/omnizart /usr/local/lib/python3.11/dist-packages
+# RUN rm -rf /tmp
 COPY README.md ./
 
 CMD ["omnizart"]
