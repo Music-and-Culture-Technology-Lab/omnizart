@@ -2,6 +2,8 @@ import os
 import glob
 import shutil
 import subprocess
+import tarfile
+import urllib.request
 from os.path import join as jpath
 from collections import OrderedDict
 from datetime import datetime
@@ -10,6 +12,7 @@ import h5py
 import numpy as np
 import tensorflow as tf
 
+from omnizart import MODULE_PATH
 from omnizart.io import load_audio, write_yaml
 from omnizart.utils import (
     get_logger, resolve_dataset_type, parallel_generator, ensure_path_exists, LazyLoader, get_filename
@@ -27,6 +30,70 @@ from omnizart.models.pyramid_net import PyramidNet
 
 logger = get_logger("Vocal Transcription")
 vcapp = LazyLoader("vcapp", globals(), "omnizart.vocal_contour")
+
+
+def _ensure_sherpa_spleeter_model():
+    checkpoint_dir = os.path.join(MODULE_PATH, "checkpoints", "vocal", "sherpa-onnx-spleeter-2stems-fp16")
+    vocals_onnx = os.path.join(checkpoint_dir, "vocals.fp16.onnx")
+    accompaniment_onnx = os.path.join(checkpoint_dir, "accompaniment.fp16.onnx")
+    
+    if os.path.exists(vocals_onnx) and os.path.exists(accompaniment_onnx):
+        return vocals_onnx, accompaniment_onnx
+        
+    logger.info("Spleeter ONNX models not found. Downloading...")
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    tar_url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/source-separation-models/sherpa-onnx-spleeter-2stems-fp16.tar.bz2"
+    tar_path = os.path.join(checkpoint_dir, "model.tar.bz2")
+    
+    # Download the archive
+    urllib.request.urlretrieve(tar_url, tar_path)
+    
+    # Extract using tarfile
+    logger.info("Extracting Spleeter ONNX models...")
+    with tarfile.open(tar_path, "r:bz2") as tar_ref:
+        tar_ref.extractall(path=os.path.dirname(checkpoint_dir)) # Extracts into checkpoints/vocal/
+        
+    if os.path.exists(tar_path):
+        os.remove(tar_path)
+        
+    return vocals_onnx, accompaniment_onnx
+
+
+def _vocal_separation_sherpa(input_audio):
+    vocals_onnx, accompaniment_onnx = _ensure_sherpa_spleeter_model()
+
+    import sherpa_onnx
+    import soundfile as sf
+
+    # Configure and instantiate the separator
+    model_config = sherpa_onnx.OfflineSourceSeparationModelConfig(
+        spleeter=sherpa_onnx.OfflineSourceSeparationSpleeterModelConfig(
+            vocals=vocals_onnx,
+            accompaniment=accompaniment_onnx
+        )
+    )
+    config = sherpa_onnx.OfflineSourceSeparationConfig(model=model_config)
+    separator = sherpa_onnx.OfflineSourceSeparation(config)
+    
+    # Read audio using soundfile (compatible with float32)
+    samples, sample_rate = sf.read(input_audio, dtype="float32")
+    
+    # Ensure stereo audio representation (Spleeter model expects stereo shape (num_channels, num_samples))
+    if len(samples.shape) == 1:
+        samples = np.stack([samples, samples], axis=0)
+    else:
+        samples = samples.T
+        if samples.shape[0] > 2:
+            samples = samples[:2, :]
+    samples = np.ascontiguousarray(samples)
+        
+    # Separate
+    separated = separator.process(sample_rate, samples)
+    
+    # Spleeter 2stems returns [vocals, accompaniment] in stems field
+    vocals = separated.stems[0].data[0].T
+
+    return vocals, sample_rate
 
 
 class SpleeterError(Exception):
@@ -83,53 +150,8 @@ class VocalTranscription(BaseTranscription):
         omnizart.cli.vocal.transcribe: CLI entry point of this function.
         omnizart.vocal_contour.transcribe: Pitch estimation function.
         """
-        logger.info("Separating vocal track from the audio...")
-        use_demucs = shutil.which("demucs") is not None
-        use_spleeter = shutil.which("spleeter") is not None
-
-        if not use_demucs and not use_spleeter:
-            raise SpleeterError(
-                "Neither Spleeter CLI nor Demucs CLI was found on PATH. "
-                "Vocal separation requires either Spleeter or Demucs to be installed.\n"
-                "Under Python 3.14, we recommend installing Demucs:\n"
-                "  pip install demucs"
-            )
-
-        if use_demucs:
-            logger.info("Demucs CLI found. Separating vocals using Demucs...")
-            command = ["demucs", "--two-stems=vocals", input_audio, "-o", "./"]
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            _, error = process.communicate()
-            if process.returncode != 0:
-                raise SpleeterError(f"Demucs separation failed: {error.decode('utf-8')}")
-
-            # Resolve Demucs output path: ./htdemucs/{song_name}/vocals.wav
-            song_name = get_filename(input_audio)
-            folder_path = jpath("./htdemucs", song_name)
-            vocal_wav_path = jpath(folder_path, "vocals.wav")
-            wav, fs = load_audio(vocal_wav_path)
-
-            # Clean out the output files
-            shutil.rmtree(folder_path)
-            try:
-                os.rmdir("./htdemucs")
-            except OSError:
-                pass
-        else:
-            logger.info("Spleeter CLI found. Separating vocals using Spleeter...")
-            command = ["spleeter", "separate", input_audio, "-o", "./"]
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            _, error = process.communicate()
-            if process.returncode != 0:
-                raise SpleeterError(error.decode("utf-8"))
-
-            # Resolve Spleeter output path: ./{song_name}/vocals.wav
-            folder_path = jpath("./", get_filename(input_audio))
-            vocal_wav_path = jpath(folder_path, "vocals.wav")
-            wav, fs = load_audio(vocal_wav_path)
-
-            # Clean out the output files
-            shutil.rmtree(folder_path)
+        logger.info("Load and separate vocal track from the audio...")
+        wav, fs = _vocal_separation_sherpa(input_audio)
 
         logger.info("Loading model...")
         model, model_settings = self._load_model(model_path)
@@ -401,56 +423,12 @@ def _vocal_separation(wav_list, out_folder):
 
     out_list = [jpath(out_folder, wav) for wav in wavs]
     if len(wav_list) > 0:
-        use_demucs = shutil.which("demucs") is not None
-        use_spleeter = shutil.which("spleeter") is not None
-
-        if not use_demucs and not use_spleeter:
-            raise SpleeterError(
-                "Neither Spleeter CLI nor Demucs CLI was found on PATH. "
-                "Vocal separation requires either Spleeter or Demucs to be installed."
-            )
-
-        if use_demucs:
-            logger.info("Demucs CLI found. Starting batch vocal separation using Demucs...")
-            for idx, wav_path in enumerate(wav_list, 1):
-                logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
-                fname, _ = os.path.splitext(os.path.basename(wav_path))
-                command = ["demucs", "--two-stems=vocals", wav_path, "-o", out_folder]
-                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                _, error = process.communicate()
-                if process.returncode != 0:
-                    raise SpleeterError(f"Demucs separation failed: {error.decode('utf-8')}")
-
-                # Move vocal file: out_folder/htdemucs/{fname}/vocals.wav -> out_folder/{fname}.wav
-                sep_folder = jpath(out_folder, "htdemucs", fname)
-                vocal_track = jpath(sep_folder, "vocals.wav")
-                shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
-
-            try:
-                shutil.rmtree(jpath(out_folder, "htdemucs"))
-            except OSError:
-                pass
-        else:
-            logger.info("Spleeter CLI found. Starting batch vocal separation using Spleeter...")
-            try:
-                from spleeter.separator import Separator
-            except ImportError:
-                raise SpleeterError(
-                    "Spleeter is not installed. Vocal separation is not supported on Python 3.14 "
-                    "because Spleeter's dependencies do not support Python 3.14."
-                )
-            separator = Separator('spleeter:2stems')
-            separator._params["stft_backend"] = "librosa"  # pylint: disable=protected-access
-            for idx, wav_path in enumerate(wav_list, 1):
-                logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
-                separator.separate_to_file(wav_path, out_folder)
-
-                # Move the vocal track to the desired folder and rename them
-                fname, _ = os.path.splitext(os.path.basename(wav_path))
-                sep_folder = jpath(out_folder, fname)
-                vocal_track = jpath(sep_folder, "vocals.wav")
-                shutil.move(vocal_track, jpath(out_folder, f"{fname}.wav"))
-                shutil.rmtree(sep_folder)
+        logger.info("Starting batch vocal separation using Sherpa-ONNX...")
+        for idx, wav_path in enumerate(wav_list, 1):
+            logger.info("Separation Progress: %d/%d - %s", idx, len(wav_list), wav_path)
+            fname, _ = os.path.splitext(os.path.basename(wav_path))
+            out_path = jpath(out_folder, f"{fname}.wav")
+            _vocal_separation_sherpa(wav_path, out_path)
     return out_list
 
 

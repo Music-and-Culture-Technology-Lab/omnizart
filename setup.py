@@ -157,6 +157,8 @@ install_requires = \
  'pretty_midi>=0.2.9',
  'pyfluidsynth>=1.2.5',
  'pyyaml>=5.3.1',
+ 'sherpa-onnx>=1.10.0',
+ 'soundfile>=0.12.1',
  'tensorflow>=2.5.0; python_version < "3.14"',
  'tf-nightly; python_version >= "3.14"',
  'tf-keras; python_version >= "3.9" and python_version < "3.14"',
@@ -165,8 +167,7 @@ install_requires = \
  'urllib3>=1.26.4',
  'vamp>=1.1.0']
 
-extras_require = \
-{'vocal': ['spleeter>=2.3.0']}
+extras_require = {}
 
 entry_points = \
 {'console_scripts': ['omnizart = omnizart.cli.cli:entry']}

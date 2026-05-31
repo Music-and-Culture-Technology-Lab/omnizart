@@ -49,16 +49,13 @@ jsonschema = ">=3.2.0"
 pyfluidsynth = ">=1.2.5"
 vamp = ">=1.1.0"
 urllib3 = ">=1.26.4"
-spleeter = { version = ">=2.3.0", optional = true }
+sherpa-onnx = ">=1.10.0"
+soundfile = ">=0.12.1"
 mir_eval = ">=0.6"
 tensorflow = { version = ">=2.5.0", markers = "python_version < '3.14'" }
 tf-nightly = { version = "*", markers = "python_version >= '3.14'" }
 tf-keras = { version = "*", markers = "python_version >= '3.10'" }
 setuptools = "<82"
-
-[tool.poetry.extras]
-vocal = ["spleeter"]
-
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
