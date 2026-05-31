@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.3 - 2026-05-31
+
+**Source separation and CLI speed optimization release.** Includes native in-code `sherpa-onnx` source separation backend integration and CLI startup optimization.
+
+### Features
+- Replaced the heavy PyTorch-based external CLI dependencies on Spleeter/Demucs with a lightweight, in-code `sherpa-onnx` backend.
+- Added automated downloading and extraction of Spleeter ONNX models from `sherpa-onnx` releases.
+
+### Optimization
+- Optimized CLI loading speed by lazy loading sub-commands and lazy monkeypatching `madmom` to prevent slow library imports at CLI startup.
+
+---
+
 ## 0.6.0 - 2026-05-30
 
 **Major compatibility upgrade supporting Python versions up to 3.14.** Includes various environment compatibility improvements, dependency modernization, CLI-based vocal separation upgrades, and transition to a modern PEP 517 setuptools build backend.
