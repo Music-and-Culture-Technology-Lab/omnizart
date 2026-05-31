@@ -13,19 +13,17 @@ import os
 
 import click
 
-import omnizart.constants.datasets as dset
-from omnizart import MODULE_PATH
-from omnizart.remote import download_large_file_from_google_drive
-from omnizart.utils import ensure_path_exists, synth_midi
-from omnizart.constants.midi import SOUNDFONT_PATH
-from omnizart.cli.music import music
-from omnizart.cli.drum import drum
-from omnizart.cli.chord import chord
-from omnizart.cli.vocal import vocal
-from omnizart.cli.vocal_contour import vocal_contour
-from omnizart.cli.beat import beat
-from omnizart.cli.patch_cnn import patch_cnn
-from omnizart.cli.transcribe import transcribe
+
+LAZY_COMMANDS = {
+    "music": ("omnizart.cli.music", "music", "Transcribe instruments and corresponding pitch in the audio."),
+    "drum": ("omnizart.cli.drum", "drum", "Transcribe drum percussions."),
+    "chord": ("omnizart.cli.chord", "chord", "Transcribe chord progression"),
+    "vocal": ("omnizart.cli.vocal", "vocal", "Transcribe vocal notes in the audio."),
+    "vocal-contour": ("omnizart.cli.vocal_contour", "vocal_contour", "Transcribe vocal melody (frame-based) in the audio."),
+    "beat": ("omnizart.cli.beat", "beat", "Beat tracking on symbolic domain."),
+    "patch-cnn": ("omnizart.cli.patch_cnn", "patch_cnn", "Trancribes vocal melody (frame-based) in the audio."),
+    "transcribe": ("omnizart.cli.transcribe", "transcribe", "Transcribe a single audio."),
+}
 
 
 SUB_COMMAND_GROUP = [
@@ -40,6 +38,7 @@ SUB_COMMAND_GROUP = [
 
 class GroupSubCommandHelpMsg(click.Group):
     """Group different types of sub-commands when showing help message."""
+
     def format_commands(self, ctx, formatter):
         all_commands = self.list_commands(ctx)
         limit = formatter.width - 6 - max(len(cmd) for cmd in all_commands)
@@ -49,28 +48,52 @@ class GroupSubCommandHelpMsg(click.Group):
             subcommands = list(group.values())[0]
             rows = []
             for subcommand in subcommands:
-                cmd = self.get_command(ctx, subcommand)
-                help_msg = cmd.get_short_help_str(limit)
+                if subcommand in LAZY_COMMANDS:
+                    help_msg = LAZY_COMMANDS[subcommand][2]
+                else:
+                    cmd = self.get_command(ctx, subcommand)
+                    help_msg = cmd.get_short_help_str(limit) if cmd else ""
                 rows.append((subcommand, help_msg))
-                all_commands.remove(subcommand)
+                if subcommand in all_commands:
+                    all_commands.remove(subcommand)
 
             with formatter.section(grp_name):
                 formatter.write_dl(rows)
 
         other_cmd = []
         for subcommand in all_commands:
-            cmd = self.get_command(ctx, subcommand)
-            if cmd is None:
-                continue
-            if cmd.hidden:
-                continue
-
-            help_msg = cmd.get_short_help_str(limit)
+            if subcommand in LAZY_COMMANDS:
+                help_msg = LAZY_COMMANDS[subcommand][2]
+            else:
+                cmd = self.get_command(ctx, subcommand)
+                if cmd is None:
+                    continue
+                if cmd.hidden:
+                    continue
+                help_msg = cmd.get_short_help_str(limit)
             other_cmd.append((subcommand, help_msg))
 
         if len(other_cmd) > 0:
             with formatter.section("Others"):
                 formatter.write_dl(other_cmd)
+
+    def get_command(self, ctx, name):
+        cmd = self.commands.get(name)
+        if cmd is not None:
+            return cmd
+
+        if name in LAZY_COMMANDS:
+            import importlib
+            mod_path, var_name, _ = LAZY_COMMANDS[name]
+            mod = importlib.import_module(mod_path)
+            cmd = getattr(mod, var_name)
+            self.add_command(cmd, name)
+            return cmd
+
+        return None
+
+    def list_commands(self, ctx):
+        return sorted(list(set(LAZY_COMMANDS.keys()).union(self.commands.keys())))
 
 
 @click.group(cls=GroupSubCommandHelpMsg)
@@ -88,6 +111,7 @@ def entry():
 )
 def download_dataset(dataset, output):
     """A quick command for downloading datasets."""
+    import omnizart.constants.datasets as dset
     struct = {
         "maestro": dset.MaestroStructure,
         "musicnet": dset.MusicNetStructure,
@@ -105,6 +129,9 @@ def download_dataset(dataset, output):
 @click.option("--output-path", help="Explicitly specify the path to the omnizart project for storing checkpoints.")
 def download_checkpoints(output_path):
     """Download the archived checkpoints of different models."""
+    from omnizart import MODULE_PATH
+    from omnizart.remote import download_large_file_from_google_drive
+
     release_url = "https://github.com/Music-and-Culture-Technology-Lab/omnizart/releases/download/checkpoints-20211001"
     CHECKPOINTS = {
         "chord_v1": {
@@ -183,6 +210,10 @@ def synth(input_midi, output_path, sf2_path):
 
     If --sf2-path is not specified, will use the default soundfont file same as used by MuseScore."
     """
+    from omnizart.constants.midi import SOUNDFONT_PATH
+    from omnizart.remote import download_large_file_from_google_drive
+    from omnizart.utils import ensure_path_exists, synth_midi
+
     f_name, _ = os.path.splitext(os.path.basename(input_midi))
     out_name = f"{f_name}_synth.wav"
     if os.path.isdir(output_path):
@@ -214,14 +245,6 @@ def synth(input_midi, output_path, sf2_path):
     click.echo("Synthesize finished")
 
 
-entry.add_command(music)
-entry.add_command(drum)
-entry.add_command(chord)
-entry.add_command(vocal)
-entry.add_command(vocal_contour)
-entry.add_command(beat)
-entry.add_command(patch_cnn)
-entry.add_command(transcribe)
 entry.add_command(download_dataset)
 entry.add_command(download_checkpoints)
 entry.add_command(synth)
