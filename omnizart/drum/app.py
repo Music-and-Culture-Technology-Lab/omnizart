@@ -32,7 +32,7 @@ class DrumTranscription(BaseTranscription):
         super().__init__(DrumSettings)
         self.custom_objects = {"ConvSN2D": ConvSN2D}
 
-    def transcribe(self, input_audio, model_path=None, output="./"):
+    def transcribe(self, input_audio, model_path=None, output="./", beat_tracker_num_threads=3, beat_tracker_parallel_workers=3):
         """Transcribe drum in the audio.
 
         This function transcribes drum activations in the music. Currently the model
@@ -62,7 +62,11 @@ class DrumTranscription(BaseTranscription):
 
         # Extract feature according to model configuration
         logger.info("Extracting feature...")
-        patch_cqt_feature, mini_beat_arr = extract_patch_cqt(input_audio)
+        patch_cqt_feature, mini_beat_arr = extract_patch_cqt(
+            input_audio, 
+            num_threads=beat_tracker_num_threads, 
+            num_workers=beat_tracker_parallel_workers
+        )
 
         # Load model configurations
         logger.info("Loading model...")

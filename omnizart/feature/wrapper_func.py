@@ -28,7 +28,7 @@ def get_frame_by_time(time_sec, sampling_rate=44100, hop_size=256):
     return int(round(time_sec * sampling_rate / hop_size))
 
 
-def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
+def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256, beat_tracker_num_threads=3, beat_tracker_parallel_workers=3):
     """Extract patched CQT feature.
 
     Leverages mini-beat information to determine the bound of each
@@ -51,7 +51,12 @@ def extract_patch_cqt(audio_path, sampling_rate=44100, hop_size=256):
     omnizart.feature.beat_for_drum.extract_mini_beat_from_audio_path: Function for extracting mini-beat.
     """
     cqt_ext = cqt.extract_cqt(audio_path, sampling_rate=sampling_rate, a_hop=hop_size)
-    mini_beat_arr = b4d.extract_mini_beat_from_audio_path(audio_path, sampling_rate=sampling_rate)
+    mini_beat_arr = b4d.extract_mini_beat_from_audio_path(
+        audio_path, 
+        sampling_rate=sampling_rate,
+        num_threads=beat_tracker_num_threads,
+        parallel_workers=beat_tracker_parallel_workers
+    )
 
     m_beat_cqt_patch_list = []
     for m_beat_t_cur in mini_beat_arr:
