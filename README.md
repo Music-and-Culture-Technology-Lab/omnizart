@@ -67,9 +67,16 @@ omnizart download-checkpoints
 The current implementation for the drum model has unknown bugs, preventing loss convergence when training from scratch.
 Fortunately, you can still enjoy drum transcription with the provided checkpoints.
 
-## Compatibility Issue
-Currently, Omnizart is **incompatible for ARM-based MacOS** system due to the underlying dependencies.
-More details can be found in the [issue #38](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/38).
+## Platform notes
+**Apple Silicon (macOS arm64) is supported.** The bundled NNLS Chroma Vamp plugin used by
+`omnizart chord` now ships an arm64 slice next to the existing x86_64 one. Earlier releases
+shipped an x86_64-only plugin, which made chord transcription fail on these machines with
+`TypeError: Failed to load plugin: nnls-chroma:nnls-chroma`. See
+[issue #38](https://github.com/Music-and-Culture-Technology-Lab/omnizart/issues/38) for the history.
+
+**Linux on arm64 is not supported yet.** The bundled `nnls-chroma.so` is x86-64 only, so chord
+transcription fails there for the same reason. Running `scripts/build_vamp_plugin.sh` on an
+arm64 Linux host rebuilds the plugin natively as a workaround.
 
 ## Citation
 If you use this software in your work, please cite:
