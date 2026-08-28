@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Bugs
+- Fixed chord transcription on Apple Silicon by adding an arm64 slice to the bundled NNLS Chroma Vamp plugin. The x86_64 and i386 slices are unchanged, so Intel machines are unaffected.
+
+### Build & Dependencies
+- Added `scripts/build_vamp_plugin.sh` to rebuild the bundled Vamp plugin from its pinned upstream source, on macOS and Linux.
+
+---
+
 ## 0.6.3 - 2026-05-31
 
 **Source separation and CLI speed optimization release.** Includes native in-code `sherpa-onnx` source separation backend integration and CLI startup optimization.
