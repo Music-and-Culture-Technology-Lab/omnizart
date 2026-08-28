@@ -1,3 +1,6 @@
+import os
+import platform
+
 import vamp
 
 from omnizart.io import load_audio
@@ -74,7 +77,16 @@ def extract_chroma(
     }
 
     data, rate = load_audio(audio_path)
-    step_size, chroma = vamp.collect(
-        data, rate, "nnls-chroma:nnls-chroma", output=output_type, parameters=params
-    )["matrix"]
+    try:
+        step_size, chroma = vamp.collect(
+            data, rate, "nnls-chroma:nnls-chroma", output=output_type, parameters=params
+        )["matrix"]
+    except TypeError as exc:
+        # vampyhost reports every load failure as a bare TypeError, which hides the usual
+        # cause: the bundled binary has no slice for the current architecture.
+        raise RuntimeError(
+            f"Could not load the NNLS Chroma Vamp plugin from {os.environ.get('VAMP_PATH', '<unset>')}. "
+            f"The bundled binary may not provide a build for this machine ({platform.system()} "
+            f"{platform.machine()}). Rebuild it by running scripts/build_vamp_plugin.sh."
+        ) from exc
     return step_size.to_float(), chroma
